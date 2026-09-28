@@ -86,13 +86,18 @@ def install_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(RequestValidationError)
     async def _validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
+        # pydantic's error dicts carry the raw exception under ctx; keep the useful parts only
+        errors = [
+            {"loc": list(e.get("loc", ())), "msg": e.get("msg"), "type": e.get("type")}
+            for e in exc.errors()
+        ]
         return JSONResponse(
             status_code=422,
             content={
                 "error": {
                     "type": "validation_error",
                     "message": "request did not match the expected shape",
-                    "details": {"errors": exc.errors()},
+                    "details": {"errors": errors},
                 }
             },
         )

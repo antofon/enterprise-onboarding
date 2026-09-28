@@ -58,11 +58,36 @@ Planned: written on Day 2 once profiling exists.
 
 ## Database
 
-Planned: entity list and relationships land with the domain model.
+Schema `onboarding` (implemented so far):
+
+| table | what it holds |
+|---|---|
+| `projects` | one row per customer onboarding: customer, project, source systems, target environment, notes, `stage` |
+| `source_datasets` | one row per source file or feed attached to a project (csv, json, api), row/column counts, quality summary once profiled |
+| `source_fields` | one row per column per dataset: inferred type, null and unique percentages, sample values, stats |
+
+`stage` is a plain varchar validated by a Python enum rather than a native PostgreSQL enum, because the stage list moves during the build and native enums cannot be altered by `create_all`.
+
+Coming with later milestones: `field_mappings`, `clarification_questions`, `migration_runs`, `validation_issues`, `reconciliation_results`, `readiness_reports`, `llm_calls`. Schema `target` (the fictional platform) gets `organizations`, `contacts`, `subscriptions` on Day 4.
 
 ## API
 
-Planned: the endpoint table lands as endpoints are added.
+| method | path | status |
+|---|---|---|
+| GET | `/health` | implemented |
+| POST | `/api/v1/projects` | implemented |
+| GET | `/api/v1/projects` | implemented |
+| GET | `/api/v1/projects/{id}` | implemented |
+| POST | `/api/v1/projects/{id}/sources/profile` | Day 2 |
+| POST | `/api/v1/projects/{id}/mappings/suggest` | Day 3 |
+| GET / PATCH | `/api/v1/projects/{id}/mappings[/{mapping_id}]` | Day 3 |
+| POST | `/api/v1/projects/{id}/validate` | Day 4 |
+| POST | `/api/v1/projects/{id}/migrations/dry-run` | Day 4 |
+| GET | `/api/v1/projects/{id}/migrations/{run_id}` | Day 4 |
+| GET | `/api/v1/projects/{id}/reports/readiness` | Day 5 |
+| POST / GET | `/target/v1/organizations`, `/contacts`, `/subscriptions` | Day 4 |
+
+Every non-2xx response is `{"error": {"type", "message", "details"}}`, including the framework's own 404/405/422.
 
 ## AI boundaries
 

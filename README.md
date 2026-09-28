@@ -15,7 +15,7 @@ Day 1 of a 7-day build. What is in place today:
 - [x] Docker Compose brings up PostgreSQL, the FastAPI service, and the Streamlit workbench
 - [x] structured JSON logging with request ids
 - [x] one error envelope for every non-2xx response
-- [ ] onboarding project + source dataset model and API
+- [x] onboarding project + source dataset model and API
 - [ ] documented target platform schema (organizations, contacts, subscriptions)
 - [ ] reproducible synthetic customer data generator with realistic defects
 - [ ] source data profiling and quality summary

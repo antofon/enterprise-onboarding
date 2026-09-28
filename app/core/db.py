@@ -8,7 +8,9 @@ one postgres, two schemas:
 from __future__ import annotations
 
 from collections.abc import Iterator
+from typing import Annotated
 
+from fastapi import Depends
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
@@ -57,6 +59,10 @@ def get_db() -> Iterator[Session]:
         yield session
     finally:
         session.close()
+
+
+# the type to use on route signatures: `session: DbSession`
+DbSession = Annotated[Session, Depends(get_db)]
 
 
 def check_db() -> bool:
