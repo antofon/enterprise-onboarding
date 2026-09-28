@@ -1,0 +1,24 @@
+# python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# secrets and local config
+.env
+.streamlit/secrets.toml
+
+# generated data (regenerate with `make seed` or the CLI)
+generated/
+
+# private notes that never belong in the repo
+docs/private/
+
+# editors / os
+.vscode/
+.idea/
+.DS_Store
