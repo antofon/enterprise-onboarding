@@ -1,0 +1,164 @@
+{
+  "$defs": {
+    "AccountPriority": {
+      "enum": [
+        "standard",
+        "priority",
+        "strategic"
+      ],
+      "title": "AccountPriority",
+      "type": "string"
+    },
+    "Industry": {
+      "enum": [
+        "manufacturing",
+        "construction",
+        "energy",
+        "logistics",
+        "healthcare",
+        "technology",
+        "professional_services",
+        "other"
+      ],
+      "title": "Industry",
+      "type": "string"
+    },
+    "LifecycleStatus": {
+      "enum": [
+        "prospect",
+        "active",
+        "inactive",
+        "churned"
+      ],
+      "title": "LifecycleStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "a customer account on the platform. everything else hangs off one of these.",
+  "properties": {
+    "account_priority": {
+      "$ref": "#/$defs/AccountPriority",
+      "default": "standard",
+      "description": "how the account is treated operationally; not the same thing as the plan"
+    },
+    "annual_revenue_usd": {
+      "anyOf": [
+        {
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,13}|(?=[\\d.]{1,16}0*$)\\d{0,13}\\.\\d{0,2}0*$)",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Annual Revenue Usd"
+    },
+    "billing_country": {
+      "description": "ISO 3166-1 alpha-2",
+      "maxLength": 2,
+      "minLength": 2,
+      "pattern": "^[A-Z]{2}$",
+      "title": "Billing Country",
+      "type": "string"
+    },
+    "billing_region": {
+      "anyOf": [
+        {
+          "maxLength": 10,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "state or province code, e.g. CA, TX, ON",
+      "title": "Billing Region"
+    },
+    "customer_since": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "when the relationship started, per the customer's records",
+      "title": "Customer Since"
+    },
+    "employee_count": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Employee Count"
+    },
+    "industry": {
+      "$ref": "#/$defs/Industry",
+      "default": "other"
+    },
+    "lifecycle_status": {
+      "$ref": "#/$defs/LifecycleStatus"
+    },
+    "name": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "organization_id": {
+      "description": "the customer's legacy account number usually lands here",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "title": "Organization Id",
+      "type": "string"
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10,
+      "title": "Tags",
+      "type": "array"
+    },
+    "website": {
+      "anyOf": [
+        {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Website"
+    }
+  },
+  "required": [
+    "organization_id",
+    "name",
+    "lifecycle_status",
+    "billing_country"
+  ],
+  "title": "Organization",
+  "type": "object"
+}

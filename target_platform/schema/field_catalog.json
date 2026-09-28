@@ -1,0 +1,540 @@
+[
+  {
+    "constraints": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "default": null,
+    "description": "the customer's legacy account number usually lands here",
+    "entity": "organization",
+    "enum_values": null,
+    "name": "organization_id",
+    "nullable": false,
+    "path": "organization.organization_id",
+    "required": true,
+    "type": "string"
+  },
+  {
+    "constraints": {
+      "maxLength": 200,
+      "minLength": 1
+    },
+    "default": null,
+    "description": "",
+    "entity": "organization",
+    "enum_values": null,
+    "name": "name",
+    "nullable": false,
+    "path": "organization.name",
+    "required": true,
+    "type": "string"
+  },
+  {
+    "constraints": {},
+    "default": null,
+    "description": "",
+    "entity": "organization",
+    "enum_values": [
+      "prospect",
+      "active",
+      "inactive",
+      "churned"
+    ],
+    "name": "lifecycle_status",
+    "nullable": false,
+    "path": "organization.lifecycle_status",
+    "required": true,
+    "type": "enum"
+  },
+  {
+    "constraints": {},
+    "default": "other",
+    "description": "",
+    "entity": "organization",
+    "enum_values": [
+      "manufacturing",
+      "construction",
+      "energy",
+      "logistics",
+      "healthcare",
+      "technology",
+      "professional_services",
+      "other"
+    ],
+    "name": "industry",
+    "nullable": false,
+    "path": "organization.industry",
+    "required": false,
+    "type": "enum"
+  },
+  {
+    "constraints": {},
+    "default": "standard",
+    "description": "how the account is treated operationally; not the same thing as the plan",
+    "entity": "organization",
+    "enum_values": [
+      "standard",
+      "priority",
+      "strategic"
+    ],
+    "name": "account_priority",
+    "nullable": false,
+    "path": "organization.account_priority",
+    "required": false,
+    "type": "enum"
+  },
+  {
+    "constraints": {
+      "maxLength": 2,
+      "minLength": 2,
+      "pattern": "^[A-Z]{2}$"
+    },
+    "default": null,
+    "description": "ISO 3166-1 alpha-2",
+    "entity": "organization",
+    "enum_values": null,
+    "name": "billing_country",
+    "nullable": false,
+    "path": "organization.billing_country",
+    "required": true,
+    "type": "string"
+  },
+  {
+    "constraints": {
+      "maxLength": 10
+    },
+    "default": null,
+    "description": "state or province code, e.g. CA, TX, ON",
+    "entity": "organization",
+    "enum_values": null,
+    "name": "billing_region",
+    "nullable": true,
+    "path": "organization.billing_region",
+    "required": false,
+    "type": "string"
+  },
+  {
+    "constraints": {
+      "format": "uri",
+      "maxLength": 2083,
+      "minLength": 1
+    },
+    "default": null,
+    "description": "",
+    "entity": "organization",
+    "enum_values": null,
+    "name": "website",
+    "nullable": true,
+    "path": "organization.website",
+    "required": false,
+    "type": "url"
+  },
+  {
+    "constraints": {
+      "minimum": 0.0,
+      "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,13}|(?=[\\d.]{1,16}0*$)\\d{0,13}\\.\\d{0,2}0*$)"
+    },
+    "default": null,
+    "description": "",
+    "entity": "organization",
+    "enum_values": null,
+    "name": "annual_revenue_usd",
+    "nullable": true,
+    "path": "organization.annual_revenue_usd",
+    "required": false,
+    "type": "decimal"
+  },
+  {
+    "constraints": {
+      "minimum": 0
+    },
+    "default": null,
+    "description": "",
+    "entity": "organization",
+    "enum_values": null,
+    "name": "employee_count",
+    "nullable": true,
+    "path": "organization.employee_count",
+    "required": false,
+    "type": "integer"
+  },
+  {
+    "constraints": {
+      "format": "date"
+    },
+    "default": null,
+    "description": "when the relationship started, per the customer's records",
+    "entity": "organization",
+    "enum_values": null,
+    "name": "customer_since",
+    "nullable": true,
+    "path": "organization.customer_since",
+    "required": false,
+    "type": "date"
+  },
+  {
+    "constraints": {
+      "maxItems": 10
+    },
+    "default": null,
+    "description": "",
+    "entity": "organization",
+    "enum_values": null,
+    "name": "tags",
+    "nullable": false,
+    "path": "organization.tags",
+    "required": false,
+    "type": "list[string]"
+  },
+  {
+    "constraints": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "default": null,
+    "description": "stable id chosen by the integrator; writes with the same id are idempotent",
+    "entity": "contact",
+    "enum_values": null,
+    "name": "contact_id",
+    "nullable": false,
+    "path": "contact.contact_id",
+    "required": true,
+    "type": "string"
+  },
+  {
+    "constraints": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "default": null,
+    "description": "must reference an existing organization",
+    "entity": "contact",
+    "enum_values": null,
+    "name": "organization_id",
+    "nullable": false,
+    "path": "contact.organization_id",
+    "required": true,
+    "type": "string"
+  },
+  {
+    "constraints": {
+      "format": "email"
+    },
+    "default": null,
+    "description": "unique within the organization",
+    "entity": "contact",
+    "enum_values": null,
+    "name": "email",
+    "nullable": false,
+    "path": "contact.email",
+    "required": true,
+    "type": "email"
+  },
+  {
+    "constraints": {
+      "maxLength": 100,
+      "minLength": 1
+    },
+    "default": null,
+    "description": "",
+    "entity": "contact",
+    "enum_values": null,
+    "name": "first_name",
+    "nullable": false,
+    "path": "contact.first_name",
+    "required": true,
+    "type": "string"
+  },
+  {
+    "constraints": {
+      "maxLength": 100,
+      "minLength": 1
+    },
+    "default": null,
+    "description": "",
+    "entity": "contact",
+    "enum_values": null,
+    "name": "last_name",
+    "nullable": false,
+    "path": "contact.last_name",
+    "required": true,
+    "type": "string"
+  },
+  {
+    "constraints": {
+      "pattern": "^\\+[1-9]\\d{6,14}$"
+    },
+    "default": null,
+    "description": "",
+    "entity": "contact",
+    "enum_values": null,
+    "name": "phone",
+    "nullable": true,
+    "path": "contact.phone",
+    "required": false,
+    "type": "string"
+  },
+  {
+    "constraints": {},
+    "default": "other",
+    "description": "",
+    "entity": "contact",
+    "enum_values": [
+      "primary",
+      "billing",
+      "technical",
+      "executive",
+      "other"
+    ],
+    "name": "role",
+    "nullable": false,
+    "path": "contact.role",
+    "required": false,
+    "type": "enum"
+  },
+  {
+    "constraints": {},
+    "default": false,
+    "description": "at most one per organization",
+    "entity": "contact",
+    "enum_values": null,
+    "name": "is_primary",
+    "nullable": false,
+    "path": "contact.is_primary",
+    "required": false,
+    "type": "boolean"
+  },
+  {
+    "constraints": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "default": null,
+    "description": "stable id chosen by the integrator; writes with the same id are idempotent",
+    "entity": "subscription",
+    "enum_values": null,
+    "name": "subscription_id",
+    "nullable": false,
+    "path": "subscription.subscription_id",
+    "required": true,
+    "type": "string"
+  },
+  {
+    "constraints": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "default": null,
+    "description": "must reference an existing organization",
+    "entity": "subscription",
+    "enum_values": null,
+    "name": "organization_id",
+    "nullable": false,
+    "path": "subscription.organization_id",
+    "required": true,
+    "type": "string"
+  },
+  {
+    "constraints": {},
+    "default": null,
+    "description": "",
+    "entity": "subscription",
+    "enum_values": [
+      "starter",
+      "professional",
+      "enterprise"
+    ],
+    "name": "plan",
+    "nullable": false,
+    "path": "subscription.plan",
+    "required": true,
+    "type": "enum"
+  },
+  {
+    "constraints": {},
+    "default": null,
+    "description": "",
+    "entity": "subscription",
+    "enum_values": [
+      "monthly",
+      "annual"
+    ],
+    "name": "billing_cycle",
+    "nullable": false,
+    "path": "subscription.billing_cycle",
+    "required": true,
+    "type": "enum"
+  },
+  {
+    "constraints": {},
+    "default": null,
+    "description": "",
+    "entity": "subscription",
+    "enum_values": [
+      "trial",
+      "active",
+      "past_due",
+      "cancelled"
+    ],
+    "name": "status",
+    "nullable": false,
+    "path": "subscription.status",
+    "required": true,
+    "type": "enum"
+  },
+  {
+    "constraints": {
+      "minimum": 1
+    },
+    "default": null,
+    "description": "",
+    "entity": "subscription",
+    "enum_values": null,
+    "name": "seats",
+    "nullable": false,
+    "path": "subscription.seats",
+    "required": true,
+    "type": "integer"
+  },
+  {
+    "constraints": {
+      "format": "date"
+    },
+    "default": null,
+    "description": "",
+    "entity": "subscription",
+    "enum_values": null,
+    "name": "start_date",
+    "nullable": false,
+    "path": "subscription.start_date",
+    "required": true,
+    "type": "date"
+  },
+  {
+    "constraints": {
+      "format": "date"
+    },
+    "default": null,
+    "description": "must be after start_date",
+    "entity": "subscription",
+    "enum_values": null,
+    "name": "renewal_date",
+    "nullable": false,
+    "path": "subscription.renewal_date",
+    "required": true,
+    "type": "date"
+  },
+  {
+    "constraints": {
+      "minimum": 0.0,
+      "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,13}|(?=[\\d.]{1,16}0*$)\\d{0,13}\\.\\d{0,2}0*$)"
+    },
+    "default": null,
+    "description": "monthly recurring revenue in USD",
+    "entity": "subscription",
+    "enum_values": null,
+    "name": "mrr_usd",
+    "nullable": false,
+    "path": "subscription.mrr_usd",
+    "required": true,
+    "type": "decimal"
+  },
+  {
+    "constraints": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "default": null,
+    "description": "stable id chosen by the integrator; writes with the same id are idempotent",
+    "entity": "activity",
+    "enum_values": null,
+    "name": "activity_id",
+    "nullable": false,
+    "path": "activity.activity_id",
+    "required": true,
+    "type": "string"
+  },
+  {
+    "constraints": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "default": null,
+    "description": "must reference an existing organization",
+    "entity": "activity",
+    "enum_values": null,
+    "name": "organization_id",
+    "nullable": false,
+    "path": "activity.organization_id",
+    "required": true,
+    "type": "string"
+  },
+  {
+    "constraints": {},
+    "default": null,
+    "description": "",
+    "entity": "activity",
+    "enum_values": [
+      "invoice",
+      "payment",
+      "support_ticket",
+      "login",
+      "note"
+    ],
+    "name": "kind",
+    "nullable": false,
+    "path": "activity.kind",
+    "required": true,
+    "type": "enum"
+  },
+  {
+    "constraints": {
+      "format": "date-time"
+    },
+    "default": null,
+    "description": "",
+    "entity": "activity",
+    "enum_values": null,
+    "name": "occurred_at",
+    "nullable": false,
+    "path": "activity.occurred_at",
+    "required": true,
+    "type": "datetime"
+  },
+  {
+    "constraints": {
+      "minimum": 0.0,
+      "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,13}|(?=[\\d.]{1,16}0*$)\\d{0,13}\\.\\d{0,2}0*$)"
+    },
+    "default": null,
+    "description": "",
+    "entity": "activity",
+    "enum_values": null,
+    "name": "amount_usd",
+    "nullable": true,
+    "path": "activity.amount_usd",
+    "required": false,
+    "type": "decimal"
+  },
+  {
+    "constraints": {
+      "maxLength": 1000
+    },
+    "default": null,
+    "description": "",
+    "entity": "activity",
+    "enum_values": null,
+    "name": "description",
+    "nullable": true,
+    "path": "activity.description",
+    "required": false,
+    "type": "string"
+  }
+]

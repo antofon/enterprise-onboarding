@@ -1,0 +1,103 @@
+{
+  "$defs": {
+    "BillingCycle": {
+      "enum": [
+        "monthly",
+        "annual"
+      ],
+      "title": "BillingCycle",
+      "type": "string"
+    },
+    "Plan": {
+      "enum": [
+        "starter",
+        "professional",
+        "enterprise"
+      ],
+      "title": "Plan",
+      "type": "string"
+    },
+    "SubscriptionStatus": {
+      "enum": [
+        "trial",
+        "active",
+        "past_due",
+        "cancelled"
+      ],
+      "title": "SubscriptionStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "what the organization pays for.",
+  "properties": {
+    "billing_cycle": {
+      "$ref": "#/$defs/BillingCycle"
+    },
+    "mrr_usd": {
+      "anyOf": [
+        {
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,13}|(?=[\\d.]{1,16}0*$)\\d{0,13}\\.\\d{0,2}0*$)",
+          "type": "string"
+        }
+      ],
+      "description": "monthly recurring revenue in USD",
+      "title": "Mrr Usd"
+    },
+    "organization_id": {
+      "description": "must reference an existing organization",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "title": "Organization Id",
+      "type": "string"
+    },
+    "plan": {
+      "$ref": "#/$defs/Plan"
+    },
+    "renewal_date": {
+      "description": "must be after start_date",
+      "format": "date",
+      "title": "Renewal Date",
+      "type": "string"
+    },
+    "seats": {
+      "minimum": 1,
+      "title": "Seats",
+      "type": "integer"
+    },
+    "start_date": {
+      "format": "date",
+      "title": "Start Date",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/SubscriptionStatus"
+    },
+    "subscription_id": {
+      "description": "stable id chosen by the integrator; writes with the same id are idempotent",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "title": "Subscription Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "subscription_id",
+    "organization_id",
+    "plan",
+    "billing_cycle",
+    "status",
+    "seats",
+    "start_date",
+    "renewal_date",
+    "mrr_usd"
+  ],
+  "title": "Subscription",
+  "type": "object"
+}

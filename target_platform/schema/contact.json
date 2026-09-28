@@ -1,0 +1,86 @@
+{
+  "$defs": {
+    "ContactRole": {
+      "enum": [
+        "primary",
+        "billing",
+        "technical",
+        "executive",
+        "other"
+      ],
+      "title": "ContactRole",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "a person at an organization.",
+  "properties": {
+    "contact_id": {
+      "description": "stable id chosen by the integrator; writes with the same id are idempotent",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "title": "Contact Id",
+      "type": "string"
+    },
+    "email": {
+      "description": "unique within the organization",
+      "format": "email",
+      "title": "Email",
+      "type": "string"
+    },
+    "first_name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "First Name",
+      "type": "string"
+    },
+    "is_primary": {
+      "default": false,
+      "description": "at most one per organization",
+      "title": "Is Primary",
+      "type": "boolean"
+    },
+    "last_name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Last Name",
+      "type": "string"
+    },
+    "organization_id": {
+      "description": "must reference an existing organization",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "title": "Organization Id",
+      "type": "string"
+    },
+    "phone": {
+      "anyOf": [
+        {
+          "description": "E.164, e.g. +14155552671",
+          "pattern": "^\\+[1-9]\\d{6,14}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Phone"
+    },
+    "role": {
+      "$ref": "#/$defs/ContactRole",
+      "default": "other"
+    }
+  },
+  "required": [
+    "contact_id",
+    "organization_id",
+    "email",
+    "first_name",
+    "last_name"
+  ],
+  "title": "Contact",
+  "type": "object"
+}

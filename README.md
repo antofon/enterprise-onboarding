@@ -16,7 +16,7 @@ Day 1 of a 7-day build. What is in place today:
 - [x] structured JSON logging with request ids
 - [x] one error envelope for every non-2xx response
 - [x] onboarding project + source dataset model and API
-- [ ] documented target platform schema (organizations, contacts, subscriptions)
+- [x] documented target platform schema (organizations, contacts, subscriptions, activities): [target_platform/documentation](target_platform/documentation/README.md)
 - [ ] reproducible synthetic customer data generator with realistic defects
 - [ ] source data profiling and quality summary
 - [ ] source vs target schema comparison

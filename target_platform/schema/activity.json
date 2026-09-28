@@ -1,0 +1,81 @@
+{
+  "$defs": {
+    "ActivityKind": {
+      "enum": [
+        "invoice",
+        "payment",
+        "support_ticket",
+        "login",
+        "note"
+      ],
+      "title": "ActivityKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "optional history: invoices, payments, tickets, logins, notes.",
+  "properties": {
+    "activity_id": {
+      "description": "stable id chosen by the integrator; writes with the same id are idempotent",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "title": "Activity Id",
+      "type": "string"
+    },
+    "amount_usd": {
+      "anyOf": [
+        {
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,13}|(?=[\\d.]{1,16}0*$)\\d{0,13}\\.\\d{0,2}0*$)",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Amount Usd"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "maxLength": 1000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "kind": {
+      "$ref": "#/$defs/ActivityKind"
+    },
+    "occurred_at": {
+      "format": "date-time",
+      "title": "Occurred At",
+      "type": "string"
+    },
+    "organization_id": {
+      "description": "must reference an existing organization",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "title": "Organization Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "activity_id",
+    "organization_id",
+    "kind",
+    "occurred_at"
+  ],
+  "title": "Activity",
+  "type": "object"
+}
