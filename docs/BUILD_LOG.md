@@ -60,3 +60,23 @@ Chronological engineering decisions. Each entry: problem, decision, why, alterna
 
 - **Decision:** structlog with JSON output in containers, console output locally, request id bound per request, stage context bound per pipeline step.
 - **Why:** the logs must let someone diagnose an onboarding failure by project id and run id without grepping free text.
+
+### Synthetic data: commit a 1,000-org sample, generate 10,000 on demand
+
+- **Problem:** the prompt is clear that a tiny perfect CSV is not acceptable, but a 10,000-organization customer is ~8 MB of CSV and does not belong in git.
+- **Decision:** `sample_customer/data/` holds a 1,000-organization sample (seed 42) so the repo works out of the box; `make seed` or the CLI generates 10,000 (or any size) into an ignored `generated/` directory. Same generator, same seed handling, byte-identical output for a given seed.
+- **Why:** reviewers get a real, messy dataset immediately and the repo stays small.
+
+### Defects are counted, not assumed
+
+- **Problem:** the docs will say things like "4% of emails are malformed"; that number must be true.
+- **Decision:** every injected defect increments a counter and the counts are written to `manifest.json` next to the data. A test asserts every planned defect kind actually occurs at a 400-row size.
+- **Why:** measured numbers only, including for the synthetic input. The same discipline applies to the mapping eval later.
+
+### Where the ambiguity is planted
+
+- `customer_tier` (Gold/Silver/Bronze/Strategic/Platinum) has two plausible targets, `account_priority` and `subscription.plan`; the rules doc says it is neither a plan nor exactly a priority.
+- `CA` in the country column is Canada in billing and sometimes California in old CRM rows; the rules doc says to use the state column.
+- `primary_contact_email` sits on the organization row but belongs to a contact.
+- `company_status` has `On Hold` and `Closed`, which the rules doc resolves, and `Actve`, which nothing resolves.
+- Strategic accounts on Starter plans, and Active accounts with no activity for 18+ months, are conflicts between the data and rules 2 and 4.

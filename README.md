@@ -17,7 +17,7 @@ Day 1 of a 7-day build. What is in place today:
 - [x] one error envelope for every non-2xx response
 - [x] onboarding project + source dataset model and API
 - [x] documented target platform schema (organizations, contacts, subscriptions, activities): [target_platform/documentation](target_platform/documentation/README.md)
-- [ ] reproducible synthetic customer data generator with realistic defects
+- [x] reproducible synthetic customer data generator with realistic defects (`enterprise-onboarding generate-data --rows 10000`)
 - [ ] source data profiling and quality summary
 - [ ] source vs target schema comparison
 - [ ] AI-assisted semantic field mapping with confidence and rationale (Anthropic default, OpenAI behind the same interface)
@@ -45,6 +45,14 @@ docker compose up --build
 - API docs: http://localhost:8000/docs
 - Workbench UI: http://localhost:8501
 - PostgreSQL: internal to compose, also on 127.0.0.1:5433 for local tools
+
+Generate a bigger customer than the committed sample (10,000 organizations, ~25,000 contacts):
+
+```bash
+make seed        # inside the api container, lands in the `generated` volume
+# or locally
+uv run enterprise-onboarding generate-data --rows 10000 --out generated/apex
+```
 
 Local development without containers (needs [uv](https://docs.astral.sh/uv/) and the compose postgres running):
 

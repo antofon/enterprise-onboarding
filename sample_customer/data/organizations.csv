@@ -1,0 +1,1031 @@
+acct_num,company_name,company_status,industry_code,hq_state,country,website,created_on,customer_tier,annual_revenue,employee_count,primary_contact_email,account_owner,last_activity_date,notes
+10103,"Rivera, Garcia and Kirk",Active,ENR,AB,Canada,https://www.rivera.com,2020/03/28,Gold,"$7,050,000",unknown,CORY.LOZANO@RIVERA.COM,Charles Pitts,09-Feb-2022,
+10256,Lewis and Sons,Active,ENR,Colorado,US,https://www.lewis.com,06/20/22,Silver,"$38,600,000",,suzanne.wilson@lewis.com,Mrs. Dana Munoz MD,09/27/2022,moved HQ 2024
+10136,Brooks-Hernandez,Churned,MFG,GA,US,https://www.brooks-hernandez.com,11/26/2025,Strategic,33450000,,SANDRA.JONES@BROOKS-HERNANDEZ.COM,Anna Davis,17-Feb-2026,do not contact billing before 9am
+10233,Boyle-Smith,Active,MFG,CA,USA,https://www.boyle-smith.com,2023-07-26,Gold,27.75M,899.0,patrick.griffin@boyle-smith.com,Gary Aguilar,01/18/25,
+10420,Clark Inc,Active,,NY,U.S.,https://www.clark.com,26-Jun-2022,Bronze,,2155,brittany.jackson@clark.com,Matthew Johnson,2023/04/07,
+10926,Holmes-Matthews,Active,CONST,WA,United States,,,Bronze,"$18,100,000",3961,daniel.smith@holmes-matthews.com,Leslie Randall,06/17/2023,
+10460,Mckinney-Moore,On Hold,TECH,Michigan,US,https://www.mckinney-moore.com,02/19/2026,Gold,"$43,400,000",1821.0,eric.morris@mckinney-moore.com,Timothy Gilbert,07/25/26,
+10109,Little-Stevens,Active,MFG,IN,USA,https://www.little-stevens.com,12/28/2017,Gold,"$22,850,000",2854,elizabeth.nolan@little-stevens.com,Dwayne Payne,08/13/2020,renewal call scheduled
+10273,"Miller, Mcgee and Reed",,23,NC,United States,N/A,10/21/18,,1150000,3712.0,connor.hall@miller.com,Larry Austin,07/26/21,
+10617,Roberts-White,Inactive,TECH,British Columbia,Canada,www.roberts-white.com,06/17/2026,,32200000,2738,rachel.horne@roberts-white.com,Preston Smith,"August 10, 2026",
+10300,"Thomas, Price and Carlson",Active,LOG,Ont.,Canada,,03-Sep-2018,Gold,"$5,700,000",2346,bailey.henderson@thomas.com,Mr. Thomas Arias,20-Jan-2021,
+10283,"Harris, Edwards and Oconnell",active,LOG,NC,,www.harris.com,02/22/17,Silver,"$23,250,000",unknown,tanya.carter@harris.com,Katherine Johnston,2025-01-29,renewal call scheduled
+10465,"Campbell, Pruitt and Short",active,ENR,CA,U.S.,https://www.campbell.com,11/05/22,,"$18,400,000",1917,nicholas.lang@campbell.com,Andrew Villanueva,29-Dec-2023,renewal call scheduled
+10039,Estrada LLC,Active,MFG,FL,US,,04-Dec-2024,Bronze,16.80M,724,kimberly.henson@estrada.com,Marc Moore,12/09/23,acquired by parent co
+10401,"Smith, Buck and Holland",Active,MFG,Ohio,US,https://www.smith.com,09/20/17,Silver,"$3,450,000",2469,carolyn.smith@smith.com,Robert Torres,02-Apr-2024,
+10422,Wallace-Martinez,On Hold,CONST,NY,USA,https://www.wallace-martinez.com,07/05/24,Strategic,43.45M,,johnny.miles@wallace-martinez.com,Michael Smith,07/20/2026,
+10301,Peters Group,Active,MFG,FL,US,https://www.peters.com,2018/03/02,Silver,17.35M,,keith.lopez@peters.com,Lisa Glenn,"August 25, 2023",do not contact billing before 9am
+10540,Anderson and Sons,Inactive,CONST,Calif.,US,https://www.anderson.com,29-Dec-2024,Gold,"$34,500,000",1541,anthony.alvarado@anderson.com,Erika Alvarez,2025-01-08,renewal call scheduled
+10046,"Frost, Ryan and Ball",Active,HC,TX,US,https://www.frost.com,12/15/22,Silver,"$22,200,000",3031,judy.lambert@frost.com,Benjamin Beck,05/07/25,
+10425,Warner-Phillips,Active,23,FL,US,https://www.warner-phillips.com,09-Sep-2024,Bronze,,2392,BENJAMIN.CRAWFORD@WARNER-PHILLIPS.COM,Timothy Rivera,30-Jun-2025,acquired by parent co
+10229,"Hayden, Howe and Mcdowell",Inactive,CONST,Alberta,CA,https://www.hayden.com,2017/01/25,Silver,29.65M,1418,albert.bradley@hayden.com,William Mitchell,08/18/22,renewal call scheduled
+10755,Watson-Washington,Inactive,MFG,GA,USA,www.watson-washington.com,2024-07-03,Silver,"$33,700,000",264,matthew.bartlett@watson-washington.com,Christopher Walker,08/17/25,
+10972,"Marshall, Murray and Miller",Active,HC,MI,U.S.,www.marshall.com,12/01/2021,Silver,"$14,150,000",916,diane.reeves@marshall.com,John Ramirez,2025-02-09,
+10588,Rodriguez Inc,active,MFG,North Carolina,US,https://www.rodriguez.com,2018/04/04,Gold,"$2,350,000",3910,john.oliver@rodriguez.com,Ronnie Roberts,,
+10392,Vaughn-Williams,Closed,CONST,Tennessee,US,https://www.vaughn-williams.com,2022-09-11,Silver,,2825.0,thomas.adams@vaughn-williams.com,George Leon,2023/05/01,
+10911,"Howard, Davis and Austin",Active,CONST,GA,USA,https://www.howard.com,14-Mar-2022,Strategic,"$600,000",3542.0,kevin.robbins@howard.com,Johnny Cox,,
+10380,Clark Ltd,Active,HC,IN,US,,"February 07, 2023",Silver,1700000,715,kelly.miller@clark.com,Elizabeth Sanders,09/26/2025,
+10741,Gonzalez-Miller,Inactive,TECH,Alberta,CA,https://www.gonzalez-miller.com,2019/04/16,,"$11,350,000",,melissa.rhodes@gonzalez-miller.com,Vanessa Foster,"December 24, 2021",
+10868,Mullins PLC  ,Inactive,PS,TN,,https://www.mullins.com,"August 31, 2017",Silver,22.45M,1962,robert.perez@mullins.com,Jennifer Ortiz,10-Sep-2021,do not contact billing before 9am
+10758,Montoya PLC,Inactive,,North Carolina,,https://www.montoya.com,02/24/19,Gold,24400000,1726,alexandra.cordova@montoya.com,Eric Garner,07-Jul-2023,
+10908,"Woodard, Warner and Farmer",active,LOG,New York,US,https://www.woodard.com,"April 10, 2019",Silver,2300000,680,amanda.cobb@woodard.com,Angela Johnson,"April 03, 2020",renewal call scheduled
+10261,"May, Henry and Jackson",Active,MFG,WA,United States,www.may.com,2023/11/28,,28.60M,341,laura.jackson@may.com,Katherine Stark,2025/01/18,do not contact billing before 9am
+10367,"Valencia, Yu and Brooks",Active,CONST,AZ,US,www.valencia.com,05/01/25,,"$44,200,000",1481.0,SHERI.FOSTER@VALENCIA.COM,Eric Taylor,"December 07, 2025",
+10223,Williams-Moses,Active,MFG,Ohio,US,N/A,"May 19, 2021",Bronze,"$34,850,000",unknown,christian.bradshaw@williams-moses.com,Nicole Lewis,"May 11, 2024",
+10806,Pennington-Hardin,Churned,MFG,MI,,https://www.pennington-hardin.com,01/10/18,Gold,"$27,650,000",unknown,kevin.mayer@pennington-hardin.com,Elizabeth Villarreal,2022-11-24,renewal call scheduled
+10541,"Donovan, Dunn and Taylor",On Hold,OTH,ON,Canada,N/A,06/05/17,,"$12,500,000",1534  ,stacy.ryan@donovan.com,Joyce Curry,2024/11/23,do not contact billing before 9am
+10161,Rangel LLC  ,active,CONST,Tennessee,US,https://www.rangel.com,10/08/18,Silver,"$11,350,000",,tammy.hale@rangel.com,Kurt Hurley,,acquired by parent co
+10196,Fox-Hammond,Inactive,LOG,QC,CAN,https://www.fox-hammond.com,"January 03, 2022",,n/a,,madeline.jones@fox-hammond.com,Maria Cole,2022/01/03,
+10611,Murray-Henderson,Active,MFG,PA,US,https://www.murray-henderson.com,2022/02/04,Bronze,250000,654,christie.brown@murray-henderson.com,Brenda Gallegos,2024/01/28,acquired by parent co
+10105,"James, Stewart and Higgins",Active,OTH,Ontario,Canada,www.james.com,10/06/17,Bronze,"$40,250,000",,katherine.brennan@james.com,Barry Welch,06/02/20,acquired by parent co
+10970,Martin-Clark,Active,HC,Illinois,U.S.,https://www.martin-clark.com,"May 01, 2017",,"$32,500,000",1997.0,bradley.johnson@martin-clark.com,Megan Murray,"March 11, 2021",moved HQ 2024
+10967,Bartlett-White,Active,MFG,Pennsylvania,U.S.,https://www.bartlett-white.com,2025-08-16,Silver,"$27,900,000",332,ashley.long@bartlett-white.com,Cynthia Harrell,2026-03-21,
+10914,Anderson PLC,Active,ENR,Colorado,,,2020-03-09,,35600000,,melissa.ibarra@anderson.com,Denise Abbott,05/06/2025,
+10350,Baker-Wilson,Churned,ENR,AZ,US,www.baker-wilson.com,,Bronze,,864,eric.parks@baker-wilson.com,Melissa Williams,2018/01/14,do not contact billing before 9am
+10224,"Nelson, Hoffman and Nelson",Active,HC,WA,US,https://www.nelson.com,2017/04/04,Silver,19600000,870.0,daniel.yang@nelson.com,Anthony Stein,2023-12-18,
+10001,Johnson and Sons,Active,LOG,Tennessee,United States,https://www.johnson.com,2022-09-08,Gold,"$19,450,000",,jesse.guzman@johnson.com,Michelle Miles,2023-04-05,renewal call scheduled
+10907,"Murphy, Sloan and Anderson  ",Active,MFG,NY,US,https://www.murphy.com,2026-06-06,Gold,41700000,1841,sandra.lynch@murphy.com,Adam Thompson,2026-07-22,
+10201,Bryan Inc,Active,LOG,TN,USA,https://www.bryan.com,19-Mar-2025,Gold,24800000,583.0,christopher.fry@bryan.com,Deborah Clark,01/25/26,
+10097,Jimenez Ltd,Active,,FL,United States,https://www.jimenez.com,2017/08/25,,37300000,2906,kelly.thornton@jimenez.com,John Kennedy,2022/01/20,acquired by parent co
+10246,Moore-Lopez,Active,LOG,Arizona,US,https://www.moore-lopez.com,01/01/2026,Bronze,"$27,700,000",1964.0,nancy.cannon@moore-lopez.com,Matthew Mendez,07-Jul-2026,
+10115,Kramer-Johnson,Active,MFG,TX,US,https://www.kramer-johnson.com,01/10/20,Silver,"$44,000,000",unknown,michael.anderson@kramer-johnson.com,Erin Perry,2025-02-20,
+10653,Nguyen-Davis,active,OTH,Colorado,US,https://www.nguyen-davis.com,04/15/21,Silver,"$43,350,000",3421,SEAN.PARKER@NGUYEN-DAVIS.COM,Kyle Jennings,01/23/2024,
+10769,Roberts-Wyatt,Active,LOG,TN,US,https://www.roberts-wyatt.com,2022/09/07,Gold,20600000,446,jacob.jones@roberts-wyatt.com,Karen Shelton,30-Jul-2023,acquired by parent co
+10073,White-Lewis,Prospect,HC,,Mexico,https://www.white-lewis.com,12/01/19,Bronze,33.65M,3184,lauren.peterson@white-lewis.com,Meredith Hill,05/14/23,
+10542,"Graham, Bowman and Ferguson",Active,31,ON,CA,https://www.graham.com,08/04/2019,Gold,22.25M,959,regina.olson@graham.com,Brandon Parker,"December 15, 2020",acquired by parent co
+10099,Morgan-French,Active,HC,CA,US,https://www.morgan-french.com,2025-05-10,Bronze,34850000,2054,joseph.smith@morgan-french.com,Sara Carpenter,09/19/2025,moved HQ 2024
+10522,"Kelly, Maxwell and Wilson",ACTIVE,MFG,Illinois,US,https://www.kelly.com,02/24/2026,Platinum,"$17,750,000",unknown,christian.sosa@kelly.com,Aaron Vincent DVM,2026-07-19,acquired by parent co
+10275,"Willis, James and Barton",Prospect,ENR,NY,USA,N/A,04/06/2017,Bronze,"$37,850,000",  2852 ,kenneth.wright@willis.com,Derrick James,05/22/18,acquired by parent co
+10958,"Mcintyre, Berry and Myers",Active,MFG,N.Y.,US,https://www.mcintyre.com,2022/02/01,Gold,24.30M,1518,patrick.fry@mcintyre.com,James Wells,12/20/22,
+10226,"Spence, Moore and Delgado",Active,CONST,Washington,,https://www.spence.com,2019-12-31,Gold,37.45M,unknown,nicole.alvarez@spence.com,Nicole Mitchell,"February 11, 2024",acquired by parent co
+10498,Gray and Sons,Active,MFG,NC,U.S.,www.gray.com,12/25/2021,Silver,"$6,300,000",863,daniel.harris@gray.com,Kathy Barnes,2023/02/04,
+10320,Smith LLC,ACTIVE,LOG,NC,U.S.,https://www.smith.com,2021-02-23,Bronze,"$12,100,000",1258,lisa.mcneil@smith.com,Carlos Jones,2022/08/26,moved HQ 2024
+10700,"Gardner, Morris and Oconnell",Active,MFG,Indiana,U.S.,https://www.gardner.com,2021/11/17,Gold,"$27,150,000",,jason.williams@gardner.com,Arthur Hill,04/28/26,
+10334,Martin LLC,Active,,NC,U.S.,https://www.martin.com,02/19/2023,Gold,16350000,3119,alexandra.logan@martin.com,Carol Martinez,07/01/23,
+10997,Henry-Frost,ACTIVE,TECH,Indiana,United States,www.henry-frost.com,"April 05, 2019",Gold,"$14,700,000",284,shelby.waller@henry-frost.com,John Davidson,2019-12-06,
+10824,Thomas-Wilson,On Hold,HC,WA,USA,,"August 30, 2021",,550000,1107,bradley.anderson@thomas-wilson.com,Sandy Adkins,"February 05, 2026",
+10230,"Daniels, Snyder and Mays",Active,HC,,USA,https://www.daniels.com,2020-07-06,,27300000,,melissa.mcdonald@daniels.com,Brian Martin,05/21/2025,do not contact billing before 9am
+10508,Garcia PLC,Active,MFG,AB,Canada,,27-Jan-2022,Silver,,510.0,richard.morgan@,Melissa Mann,06/25/26,moved HQ 2024
+10883,Colon-Thomas,Active,MFG,British Columbia,Canada,,08/12/19,Bronze,n/a,  361.0 ,david.dawson@colon-thomas.com,Michael Boyer,2022/07/21,moved HQ 2024
+10371,"Walker, Cunningham and Zuniga",active,HC,CO,United States,https://www.walker.com,25-Jul-2022,Silver,"$31,400,000",239.0,donald.mcgee@walker.com,William Jackson,2026-02-09,do not contact billing before 9am
+10054,Grant Inc,Prospect,MFG,CO,USA,https://www.grant.com,04-Oct-2019,Bronze,,unknown,stephen.solis@grant.com,Victoria Larson,2020-05-05,
+10568,Bauer-Brown,Active,LOG,NY,USA,N/A,2025/02/27,Gold,"$22,100,000",unknown,CHRISTINA.RICE@BAUER-BROWN.COM,Sandra Miller,10-Jun-2025,renewal call scheduled
+10640,"Reese, Johnson and Blake",On Hold,OTH,CO,USA,www.reese.com,01/12/2019,Bronze,,,danielle.clark@reese.com,Dustin Patel,10/14/2025,renewal call scheduled
+10608,"Holloway, Cortez and Long",active,HC,CO,,,01/30/2020,Gold,"$26,150,000",1675,sheila.armstrong@holloway.com,Margaret Padilla,"March 30, 2021",
+10976,"Smith, Barton and Wang",Prospect,31,Ariz.,US,https://www.smith.com,09/23/22,Silver,21.05M,1183.0,SARAH.BROOKS@SMITH.COM,Brandon Fisher,"June 08, 2023",do not contact billing before 9am
+10296,Cole Group,Inactive,MFG,IL,United States,www.cole.com,17-Jul-2020,Silver,"$35,800,000",,paul.bush@cole.com,Paul Stokes,"March 10, 2022",
+10999,"Bailey, Fletcher and Reid",Active,CONST,,USA,https://www.bailey.com,01/13/21,Gold,4450000,,micheal.brown@bailey.com,Jeff Wright,10-Mar-2022,acquired by parent co
+10043,Rasmussen LLC,Active,LOG,,MX,https://www.rasmussen.com,08/20/2017,Strategic,"$39,700,000",3693,michael.hicks@rasmussen.com,Sarah Rivera,"December 19, 2023",
+10049,"Bass, Torres and Clark",Active,CONST,GA,USA,www.bass.com,01/05/2021,Gold,27050000,191,kristi.lawson@bass.com,Jeremy Lowe,12/20/2025,renewal call scheduled
+10362,"Brown, Davies and Robinson",Active,MFG,QC,Canada,www.brown.com,2019/07/14,Gold,"$20,650,000",420  ,meghan.salinas@brown.com,Ryan Bruce,01/02/2025,moved HQ 2024
+10965,Johnston-Mclaughlin,Churned,HC,TX,US,https://www.johnston-mclaughlin.com,22-Apr-2023,Silver,22300000,891,keith.ibarra@johnston-mclaughlin.com,Michael Dawson,24-Jul-2023,do not contact billing before 9am
+10189,Reyes-Bradley,Active,HC,IN,US,www.reyes-bradley.com,10/25/17,,2.25M,2256,cassie.shelton@reyes-bradley.com,Jacqueline Hines,13-Nov-2018,moved HQ 2024
+10888,"Collins, Chavez and Morgan",Active,,CA,USA,,"October 08, 2023",Bronze,"$14,450,000",,nicholas.davenport@collins.com,Brandi Taylor,2024-06-09,do not contact billing before 9am
+10204,"Flores, Travis and Reed",Active,CONST,PA,USA,www.flores.com,01/14/2020,Silver,,3538,raymond.hodges@flores.com,Ashley Allen,09/30/21,
+10670,Mitchell Inc,active,LOG,IL,US,N/A,"October 24, 2023",Strategic,n/a,3576.0,david.jones@mitchell.com,Darlene Gilbert,2025-12-26,
+10052,Gibson Ltd,Churned,MFG,CO,US,https://www.gibson.com,2020-02-17,Bronze,14150000,1446,BARBARA.HIGGINS@GIBSON.COM,James Hernandez,"October 02, 2023",moved HQ 2024
+10319,Rios-Padilla,Active,OTH,Washington,,,03/01/23,Gold,10.80M,3218,aaron.woods@rios-padilla.com,Darrell Frazier,"December 30, 2023",do not contact billing before 9am
+10335,Quinn-Wilson Inc,active,CONST,IN,U.S.,https://www.quinn-wilson.com,05/23/2018,Silver,"$9,950,000",unknown,rachel.rogers@quinn-wilson.com,Joseph Baker,11/19/2020,renewal call scheduled
+10701,Jackson-Wood,Active,TECH,IL,U.S.,https://www.jackson-wood.com,09/11/20,Gold,n/a,1104,frederick.sanchez@jackson-wood.com,Brandi Moody,08/28/2022,
+10166,"Lamb, Martin and Kim",Active,OTH,WA,United States,,20-Nov-2024,Bronze,"$2,150,000",2002,robert.rhodes@lamb.com,Jeremy Mitchell,2026-02-19,do not contact billing before 9am
+10983,"Anderson, Thompson and Gill",Inactive,MFG,,Mexico,https://www.anderson.com,"April 09, 2017",,"$2,400,000",unknown  ,grace.spence@anderson.com,Andrea Smith,2021/04/01,
+10735,Young Inc,,LOG,Ontario,CA,www.young.com,09/20/2025,,37750000,58,victoria.andrews@young.com,Jacob Harris,04/23/2026,do not contact billing before 9am
+94055,"SPENCER, FROST AND FERNANDEZ",Active,MFG,TX,US,https://www.spencer.com,12/12/2019,Strategic,"$43,650,000",2292,donna.evans@spencer.com,James Dunn,09/03/2024,
+10447,"Thompson, Ochoa and Garcia",Active,MFG,MI,USA,https://www.thompson.com,2023-07-12,Strategic,,1268,diane.obrien@thompson.com,Stanley Barnes,04/22/25,
+10984,"Cole, Dixon and Harmon",Active,MFG,CA,United States,https://www.cole.com,10/22/25,Bronze,36850000,2872,wesley.bush@cole.com,Alex Blake,04/09/27,acquired by parent co
+10774,Dixon-Hernandez,Active,HC,Michigan,U.S.,https://www.dixon-hernandez.com,2018-09-28,,,1990,shawn.martinez@dixon-hernandez.com,David Dunlap Jr.,12/09/24,acquired by parent co
+10714,"Moore, Norton and Cisneros",Active,MFG,TX,United States,www.moore.com,"December 08, 2018",Silver,"$7,500,000",2497.0,rebecca.lane@moore.com,Crystal Jenkins,25-Jun-2020,do not contact billing before 9am
+10083,Hayes-Ramos,Active,MFG,,CA,N/A,18-Feb-2019,,15350000,2950,michelle.branch@hayes-ramos.com,Marc Lynch,"January 12, 2023",acquired by parent co
+10618,Foley-Stephens,Active,PS,IN,USA,N/A,2018-05-05,Strategic,8200000,36,adam.andrade@foley-stephens.com,Kevin Alvarez,08/18/2020,
+10354,"Pace, Miller and Willis",Active,MFG,OH,,https://www.pace.com,06/23/2025,Strategic,"$33,750,000",1236,samantha.jones@pace.com,Christina Brewer PhD,"April 06, 2026",moved HQ 2024
+10873,Graves Group,Active,MFG,Calif.,United States,https://www.graves.com,2019/04/02,Bronze,,1183,dawn.clay@graves.com,Lisa Ramos,03/04/26,
+10028,Shaw-Farrell,Active,PS,IL,USA,https://www.shaw-farrell.com,07/04/2025,Strategic,"$22,750,000",unknown,ERIC.YU@SHAW-FARRELL.COM,Cody Larson,11/08/2025,
+10578,Thompson-Petersen,Active,MFG,TX,US,https://www.thompson-petersen.com,09/13/23,Silver,15850000,3531,hannah.johnston@thompson-petersen.com,Linda Evans,2025-12-23,moved HQ 2024
+10125,"Winters, Newman and Brown",,23,FL,US,https://www.winters.com,"July 23, 2020",Silver,n/a,unknown,joshua.donaldson@winters.com,Samantha Davis,08/25/2024,renewal call scheduled
+10499,Jacobs and Sons,,CONST,TN,US,,01-Oct-2021,Gold,"$33,450,000",2877,THOMAS.MENDEZ@JACOBS.COM,Richard Gordon,2023-12-29,
+,"Murray, Cole and Cole",Active,MFG,Tennessee,USA,,01/14/19,Gold,n/a,1883  ,michelle.nguyen@murray.com,Mary Ortiz,05/31/2026,renewal call scheduled
+10549,Campbell and Sons,Active,LOG,NY,USA,www.campbell.com,2026-03-30,Gold,"$37,350,000",1846,JENNIFER.ACOSTA@CAMPBELL.COM,Chris Snyder,"June 18, 2026",
+10686,"Long, Brewer and Rodriguez",Active,ENR,Ohio,USA,https://www.long.com,2017/12/17,,"$26,050,000",3824,amber.reynolds@long.com,Ashley Alexander,"April 23, 2019",
+10365,Guzman Inc,Active,,IN,United States,https://www.guzman.com,09/22/20,Strategic,36.25M,427.0,alisha.smith@guzman.com,Christina Anderson,10/27/2022,renewal call scheduled
+10689,Mendoza-Powell,Inactive,LOG,CA,US,https://www.mendoza-powell.com,2019-09-05,Silver,31400000,1093,jessica.burnett@mendoza-powell.com,Darrell Cruz,05/28/24,renewal call scheduled
+10891,Mann PLC,Active,MFG,IL,US,https://www.mann.com,2018/06/22,,39800000,2171,crystal.ingram@mann.com,Matthew Schneider,16-Dec-2022,
+92050,"Gibson, Chavez and Graves  ",Active,CONST,NC,U.S.,https://www.gibson.com,10/02/25,Silver,24.45M,2278,travis.flores@gibson.com,Wayne Johnson,10/11/2025,renewal call scheduled
+10502,Chapman-Figueroa,Active,MFG,AZ,USA,,05/20/2017,Silver,34.30M,1962,KATHLEEN.HORTON@CHAPMAN-FIGUEROA.COM,Cesar Woods,2024-07-10,
+10732,"Wade, Moreno and Kelley",Prospect,MFG,OH,U.S.,N/A,"May 08, 2025",Bronze,26800000,2007.0,stephen.bradley@wade.com,Elizabeth Mccormick,04-Apr-2026,moved HQ 2024
+10772,Morgan PLC,active,MFG,TX,United States,www.morgan.com,02/18/2017,Bronze,"$44,200,000",1085,megan.powell@morgan.com,Jeff Porter,06/22/2022,
+10450,Weber LLC,Active,PS,Washington,United States,https://www.weber.com,2019/09/05,Bronze,"$38,150,000",1127,glenda.morse@weber.com,Michael Hester,"May 18, 2021",moved HQ 2024
+10168,"  Joyce, Murray and Campbell ",Active,MFG,Ohio,United States,https://www.joyce.com,05/13/24,Bronze,24600000,2424,patrick.rose@joyce.com,Ruth Solis,"October 21, 2024",renewal call scheduled
+10523,Watson-Stewart,Inactive,MFG,BC,Canada,https://www.watson-stewart.com,04/02/25,Bronze,,3846,rachael.ibarra@watson-stewart.com,Denise White,03/25/2026,acquired by parent co
+10227,Brewer-Velez,Active,31,Arizona,US,https://www.brewer-velez.com,2025-11-13,Gold,"$40,950,000",691,christopher.andrews@brewer-velez.com,Miranda Zuniga,05/07/26,moved HQ 2024
+10704,Allen-Thompson,Inactive,TECH,FL,USA,https://www.allen-thompson.com,11-Aug-2018,Silver,,unknown,heather.carlson@allen-thompson.com,Lisa Miller,2025-09-21,renewal call scheduled
+10917,"Holmes, Simpson and Holmes",Churned,MFG,NC,U.S.,https://www.holmes.com,2022-09-29,Silver,"$22,750,000",2333.0,bradley.griffith@holmes.com,Thomas Patel,07/17/2024,acquired by parent co
+10974,"Gallagher, Byrd and Hernandez",Active,MFG,OH,US,N/A,24-Jul-2020,Bronze,13800000,3292,michael.robinson@gallagher.com,Michael Robinson,2022/09/20,
+10702,"Salazar, Strickland and Smith",Prospect,TECH,,USA,www.salazar.com,06/11/21,Bronze,n/a,1851,tony.smith@salazar.com,Brandon Pearson,"January 16, 2023",renewal call scheduled
+10943,"Potter, Brooks and Stone",Inactive,PS,GA,US,www.potter.com,2020-03-09,Gold,15650000,3370,harold.marquez@potter.com,Karen Sosa,2022/07/10,
+10615,"Cruz, Moody and Hunt",Active,MFG,PA,US,https://www.cruz.com,08/18/2021,Gold,n/a,302,stephanie.gray@cruz.com,Randy Barr,12-Oct-2024,do not contact billing before 9am
+10187,Hill-Whitney,Active,MFG,Washington,USA,https://www.hill-whitney.com,23-May-2017,Platinum,31950000,1318,STACY.JONES@HILL-WHITNEY.COM,Heidi Owen,05/28/2020,
+10928,Collins Group,Actve,MFG,Texas,United States,https://www.collins.com,05/21/21,Silver,10950000,1689,william.pearson@collins.com.,Kevin Weaver,06/30/21,moved HQ 2024
+10961,Brown-Stone,On Hold,MFG,ON,Canada,https://www.brown-stone.com,2025-04-28,Silver,"$41,350,000",540,george.heath@brown-stone.com,Christopher Rodriguez,2025-11-15,moved HQ 2024
+10590,"Christensen, Dunn and Dean",Active,OTH,FL,US,https://www.christensen.com,04-Jun-2018,Silver,n/a,1236,victoria.neal@christensen.com,Jamie Escobar,01/13/2025,renewal call scheduled
+91900,Fowler Ltd  ,Inactive,MFG,Florida,USA,www.fowler.com,"June 27, 2021",Silver,"$34,950,000",unknown,jerry.hanson@fowler.com,Nicholas Cisneros,"July 26, 2022",
+10756,Pope PLC  ,Active,LOG,AZ,,www.pope.com,11/12/2017,Silver,23150000,,christina.guerra@pope.com,Kim Arnold,,moved HQ 2024
+10681,Brown PLC  ,Active,LOG,Illinois,United States,https://www.brown.com,"December 10, 2021",Silver,30200000,1919,diane.houston@brown.com,Margaret Erickson,07-Apr-2024,moved HQ 2024
+10092,"Garcia, Martin and Jenkins",Active,OTH,Arizona,US,,02/16/2021,Gold,"$16,200,000",853,tyler.bates@garcia.com,Philip Johnson,2022/08/25,acquired by parent co
+10120,Rodriguez-Hall,Prospect,MFG,North Carolina,US,https://www.rodriguez-hall.com,2025-04-26,Gold,"$20,600,000",unknown,angel.henson@rodriguez-hall.com,Suzanne Walker,11-Jun-2026,
+10777,Wagner-Daniels,Active,23,Arizona,US,https://www.wagner-daniels.com,2018/08/03,Bronze,9550000,2044,lisa.fernandez@wagner-daniels.com,Phillip Ewing,2020-08-16,do not contact billing before 9am
+10203,"Sullivan, Chavez and Barker",Active,,CA,United States,www.sullivan.com,2022/07/28,Bronze,,unknown,eric.perry@sullivan.com,Gerald Thomas,05/29/26,do not contact billing before 9am
+10518,Olson LLC,Inactive,LOG,Florida,,https://www.olson.com,"September 08, 2019",Bronze,,1890.0,carlos.schultz@olson.com,Megan Hall MD,2022-03-29,do not contact billing before 9am
+10257,Arnold LLC,Active,MFG,TN,US,,2021/01/08,,31500000,3906,oscar.ferguson@arnold.com,Dennis Hunt,,
+10946,Taylor Inc,,MFG,GA,,www.taylor.com,2023/03/23,Strategic,"$38,450,000",2978.0,kenneth.stone@taylor.com,Andrew Hunt,2024/07/29,
+10631,  Nielsen-Mendoza ,active,CONST,TX,USA,https://www.nielsen-mendoza.com,2025-07-09,Silver,20.90M,,thomas.johnson@nielsen-mendoza.com,Christopher Murray,"July 28, 2026",moved HQ 2024
+10478,Lambert and Sons,Active,MFG,B.C.,Canada,,"October 29, 2020",Silver,"$20,550,000",,craig.harvey@lambert.com,Emily Hayes,"March 23, 2025",
+10316,"Farmer, Williams and Sims",,CONST,FL,USA,N/A,12/22/19,Bronze,2250000,3773,mary.smith@farmer.com,Brooke Bryant,2026-04-27,
+10834,"Meadows, Robles and Anderson",,MFG,GA,US,,2018/04/29,Silver,43700000,,michelle.solis@meadows.com,Robert Manning,03-Nov-2018,renewal call scheduled
+10284,Nguyen LLC,Active,TECH,PA,United States,www.nguyen.com,10/25/17,Platinum,"$6,250,000",3286,lisa.long@nguyen.com,Justin Vargas,15-Apr-2022,moved HQ 2024
+10102,"Mcintyre, James and Mcneil",Active,MFG,Arizona,United States,,2022/01/22,Silver,"$30,300,000",553,laura.pearson@mcintyre.com,Vincent Martinez,05/08/25,do not contact billing before 9am
+10062,"Alvarado, Miller and Patterson",Active,CONST,TN,,https://www.alvarado.com,2025/12/04,Strategic,9650000,2042,michelle.white@alvarado.com,Garrett Gibson,05/22/26,
+10314,Reid-Terry,Active,MFG,Colorado,US,N/A,11/19/2018,Silver,,521.0,melissa.flynn@reid-terry.com,Walter Summers,03/05/19,acquired by parent co
+10688,"Smith, Johnson and Myers",Prospect,CONST,NY,U.S.,www.smith.com,2017-08-06,Silver,9150000,unknown,edward.rivera@smith.com,Aaron Zimmerman,2018/08/03,
+10292,Perry-Nixon,Active,MFG,IL,US,www.perry-nixon.com,16-Jun-2022,Strategic,6250000,1997,darren.shepard@perry-nixon.com,Eric Gibson,2026-04-02,renewal call scheduled
+10757,Butler Inc,Inactive,CONST,Que.,CA,N/A,"May 20, 2025",Gold,,2545,darryl.anderson@butler.com,Gregory Vazquez,"July 28, 2025",acquired by parent co
+10580,Kane and Sons,Active,CONST,AB,Canada,www.kane.com,03/23/2019,Strategic,"$21,800,000",1049,julie.atkinson@kane.com,Madison Chen,2019/12/12,
+10345,Woodward-Kaufman,Actve,LOG,QC,Canada,,29-Jul-2024,Silver,"$35,900,000",unknown,douglas.ramirez@woodward-kaufman.com,David Bruce,10/28/2025,moved HQ 2024
+10599,  Delgado PLC ,Active,HC,Alberta,Canada,https://www.delgado.com,"June 03, 2021",Bronze,"$11,800,000",,amber.mcbride@delgado.com,Ellen Thornton,07/13/24,acquired by parent co
+10942,Clark-Miller,Active,PS,AB,Canada,https://www.clark-miller.com,09-Apr-2017,Platinum,16400000,3111,thomas.alvarado@clark-miller.com,Jordan Potter,2025/12/05,
+10399,Cooper-Monroe,Active,23,Wash.,US,https://www.cooper-monroe.com,02/24/2019,Strategic,,unknown,jonathan.rivas@cooper-monroe.com,Alexander Williams,13-Jun-2022,moved HQ 2024
+10890,  Mccullough LLC ,Active,TECH,FL,United States,www.mccullough.com,"November 19, 2017",Silver,41800000,,amber.rubio@mccullough.com,Nancy Brewer,2025/08/14,
+10815,"Christian, Williams and Williamson",,MFG,NC,United States,https://www.christian.com,02/24/2019,Gold,"$42,550,000",957.0,caroline.hernandez@christian.com,Carolyn Bradley,,moved HQ 2024
+10872,"Haynes, Russo and Griffith",Churned,,New York,US,https://www.haynes.com,2018-10-11,Gold,27.00M,1454,lee.cooper@haynes.com,Stephanie Bishop,06/19/2023,acquired by parent co
+10881,"Simmons, Jenkins and Davis",Active,CONST,MI,United States,www.simmons.com,07/03/17,Gold,"$3,100,000",3513,roger.anderson@simmons.com,Blake Rhodes,2024/08/26,acquired by parent co
+10164,Perez and Sons,Active,CONST,IN,US,N/A,04/11/2019,Silver,25000000,724.0,ERIC.PHILLIPS@PEREZ.COM,Katie Fernandez,"March 01, 2024",do not contact billing before 9am
+10307,Rowe and Sons,,MFG,FL,United States,,"November 22, 2024",,17600000,3088.0,jason.rojas@rowe.com,Shannon Bishop,2026-06-14,
+10055,Salazar-Ball,Prospect,PS,Colorado,USA,https://www.salazar-ball.com,2017/08/01,Bronze,33150000,2087,william.rivas@salazar-ball.com,Stephanie Manning,"April 07, 2021",acquired by parent co
+10459,Bennett Group,Active,LOG,MI,US,https://www.bennett.com,2025/05/28,Silver,n/a,2889,joshua.baker@bennett.com,Ryan Smith,"September 06, 2026",acquired by parent co
+10384,Cardenas-Barnes,Active,TECH,Ohio,,https://www.cardenas-barnes.com,2017/11/02,,"$40,300,000",1196,amanda.camacho@cardenas-barnes.com,Stephen Alvarez,2025/11/23,
+10759,Walker Ltd,active,MFG,WA,US,N/A,2018/12/04,Gold,"$39,750,000",  3312 ,douglas.perez@walker.com,Carlos Miller,"May 29, 2025",do not contact billing before 9am
+10628,Mclaughlin and Sons,Active,TECH,Tennessee,US,https://www.mclaughlin.com,09-Apr-2022,,"$9,650,000",,lauren.duarte@mclaughlin.com,Gene Castro,2026-07-08,acquired by parent co
+10591,"Williams, Jackson and Campbell",Active,LOG,ON,Canada,www.williams.com,2018-08-22,Silver,"$34,000,000",unknown,kristina.williamson@williams.com,Matthew Smith,2024/09/19,moved HQ 2024
+10329,Smith Inc,Active,HC,QC,Canada,https://www.smith.com,"January 14, 2026",Bronze,"$33,700,000",3896,alexander.lewis@smith.com,Tiffany Sanders,2026-01-16,do not contact billing before 9am
+10528,"Anderson, Johnston and Perez",Active,31,Quebec,Canada,www.anderson.com,2018-09-20,Silver,32150000,176.0,CORY.NELSON@ANDERSON.COM,Jeffrey James,10/31/18,
+10574,Moyer-Smith,Active,LOG,Illinois,US,www.moyer-smith.com,04/23/2024,Bronze,"$40,350,000",3158.0,austin.mitchell@moyer-smith.com,Chad Zamora,08/16/26,
+10419,Howard-Lopez,active,LOG,OH,US,www.howard-lopez.com,04/13/2017,Gold,30200000,  2739 ,STACY.HULL@HOWARD-LOPEZ.COM,Darryl Acosta,08/18/25,moved HQ 2024
+10157,"Alvarez, Hernandez and Brown",Churned,TECH,Tennessee,US,www.alvarez.com,13-Jun-2019,Silver,"$27,000,000",758,dale.nolan@alvarez.com,Miguel Wagner,"May 08, 2026",moved HQ 2024
+10692,Ponce Ltd,Active,CONST,British Columbia,CAN,www.ponce.com,05/04/23,Silver,"$14,100,000",2328,james.dominguez@ponce.com,Lydia Howard,"January 11, 2025",do not contact billing before 9am
+10840,Rose-Holland,Closed,MFG,Quebec,CAN,https://www.rose-holland.com,"May 31, 2026",Silver,"$3,050,000",unknown,CHRISTOPHER.MCDONALD@ROSE-HOLLAND.COM,Robert Evans,09/13/2026,
+10786,Garcia-Leonard,Inactive,MFG,,Mexico,www.garcia-leonard.com,05/01/24,Strategic,5150000,3483,matthew.shaw@garcia-leonard.com,Gina Mendez,10/06/24,
+10079,"Ferguson, Hill and Mccann",Active,MFG,QC,Canada,https://www.ferguson.com,03/09/17,Gold,"$13,450,000",,angela.terry@ferguson.com,Sean Henry,12/24/2021,renewal call scheduled
+10679,"Townsend, Meyer and Byrd",Active,MFG,GA,U.S.,https://www.townsend.com,"May 19, 2021",Silver,n/a,2020,victoria.edwards@townsend.com,Adam Jones,12/13/21,renewal call scheduled
+10962,"Barnes, Paul and Price",ACTIVE,,QC,Canada,N/A,04/03/18,Gold,40.15M,1630,rebecca.clark@barnes.com,Emily Meyers,05/03/2021,moved HQ 2024
+10381,Jacobson-Baker,,MFG,,MX,https://www.jacobson-baker.com,2020/08/11,Gold,,2295.0,darlene.hughes@jacobson-baker.com,James Lopez,2024-11-04,
+10537,Martinez and Sons,Active,MFG,Tex.,US,www.martinez.com,2017/06/18,,32250000,1156.0,ebony.shepard,Angela Jackson,2023-10-06,moved HQ 2024
+10086,"Hall, Baker and Moody",Active,CONST,NY,US,https://www.hall.com,2025-10-24,Silver,,383,brittany.lara@hall.com,Brian Walker,2026/08/07,
+10318,"Ward, Miller and Beck",Active,MFG,BC,CA,www.ward.com,02/07/24,Silver,,272,deborah.williams@ward.com,Molly Fischer,"December 15, 2024",moved HQ 2024
+10158,Williams Ltd,,HC,WA,U.S.,www.williams.com,"March 23, 2017",Gold,"$31,900,000",168.0,samuel.gonzales@williams.com.,Caitlin Watson,2025/08/28,
+10060,Medina-Navarro,Active,LOG,Colorado,USA,https://www.medina-navarro.com,12/19/2018,Silver,44800000,2608,lauren.hurst@medina-navarro.com,Don Tucker MD,2019-12-04,
+10005,Ray-Bush,Active,31,Ohio,USA,https://www.ray-bush.com,04/08/22,,,,BRANDON.PEREZ@RAY-BUSH.COM,Bobby Hall,07/17/2026,do not contact billing before 9am
+10061,"Shelton, Powell and Martin",Churned,,FL,US,https://www.shelton.com,03-Apr-2019,Bronze,36.75M,1879,tanner.anderson@shelton.com,Alyssa Long,03/20/2021,
+10383,MILLER LLC,Active,CONST,Tennessee,USA,https://www.miller.com,01/29/22,Gold,"$39,750,000",,lindsey.gutierrez@miller.com,Crystal Brown,02/23/2026,acquired by parent co
+10154,"Stewart, Gonzales and Harrison",Inactive,LOG,Colorado,US,https://www.stewart.com,07/01/18,,"$5,550,000",600,crystal.hogan@stewart.com,Heather Jones,2023-03-06,
+10800,"King, Wilkerson and Young",Active,MFG,Texas,USA,www.king.com,08-Jul-2020,,9400000,158,david.roman@king.com,Kevin Price,,acquired by parent co
+10760,"  Hines, Rodriguez and Smith ",ACTIVE,OTH,NC,United States,https://www.hines.com,12/18/2021,Bronze,17850000,143  ,todd.reynolds@hines.com,Andrew Keller,2023/08/19,
+10783,Reed-Howard,active,TECH,IN,US,https://www.reed-howard.com,07/21/2020,Silver,"$21,050,000",2823.0,michael.stanley@reed-howard.com,Matthew Watkins,2027-09-03,
+10206,Li PLC,Churned,LOG,NC,US,https://www.li.com,12/15/24,Silver,"$8,450,000",137,JENNIFER.LEE@LI.COM,Zachary Owens,"May 13, 2026",renewal call scheduled
+10398,Maldonado and Sons,,LOG,ON,Canada,www.maldonado.com,02/22/2025,Silver,"$6,300,000",  126 ,nathan.wheeler@maldonado.com,Seth Matthews,02/08/2026,
+10383,Miller LLC,Active,CONST,Tennessee,USA,https://www.miller.com,01/29/22,Gold,"$39,750,000",,lindsey.gutierrez@miller.com,Crystal Brown,02/23/2026,acquired by parent co
+10150,Richard-Sanchez,Active,PS,CO,United States,www.richard-sanchez.com,,Strategic,36750000,2937,brianna.warren@richard-sanchez.com,Eric Morgan,2026-09-03,
+10693,Mcclure Group,Churned,LOG,WA,US,https://www.mcclure.com,13-Apr-2018,Silver,,,jill.taylor@mcclure.com,Nathan Watkins,04/24/2018,do not contact billing before 9am
+10850,Hernandez-Henderson,Active,MFG,OH,US,https://www.hernandez-henderson.com,2026-01-18,Gold,13.55M,1973,darren.barrera@hernandez-henderson.com,Jill Washington,,
+10665,Thomas Ltd,Closed,LOG,GA,United States,www.thomas.com,2024/09/22,Silver,"$23,300,000",2698,alicia.villarreal@thomas.com,Diana Black,2026/04/29,acquired by parent co
+10663,Kelly-Lopez,Active,ENR,Illinois,US,https://www.kelly-lopez.com,04/01/19,Gold,n/a,290,cassandra.lane@kelly-lopez.com,Cynthia Shaw,11/18/23,
+10923,"Brown, Anderson and Ellison",On Hold,,,MX,https://www.brown.com,08/17/24,Strategic,"$25,550,000",unknown,scott.turner@brown.com,Andrea Byrd,01/04/2025,
+10441,Rivera-Saunders,Churned,CONST,WA,US,https://www.rivera-saunders.com,2019-12-17,Silver,n/a,unknown,carol.moran@rivera-saunders.com,Jesse Davis,08/28/2025,
+10661,"Smith, Griffith and Tucker",Active,MFG,AZ,USA,,"March 26, 2023",Silver,"$1,400,000",3490,samuel.branch@smith.com,Martin Perry,2024-03-24,acquired by parent co
+10134,"Jacobs, Garcia and Miles",Prospect,TECH,Illinois,US,https://www.jacobs.com,13-Feb-2018,Silver,42250000,,melissa.curtis@jacobs.com,Michelle Lewis,"February 01, 2023",
+,Hughes Group,Prospect,CONST,Florida,,https://www.hughes.com,2024/11/02,Gold,"$9,350,000",unknown,kathy.ramirez,Melanie Wilson DVM,2025/05/04,renewal call scheduled
+10813,"Watkins, Murphy and Campbell",Active,OTH,Georgia,USA,https://www.watkins.com,27-Nov-2020,Strategic,"$8,950,000",,christopher.richardson@watkins.com,James Davenport,01-Jun-2025,moved HQ 2024
+10007,"Wong, Lynch and Jackson",Active,MFG,B.C.,CA,https://www.wong.com,08/31/25,Bronze,40250000,1672  ,JESSICA.MARTIN@WONG.COM,William Bowman,2026-05-21,
+10877,Dennis LLC,active,ENR,,USA,https://www.dennis.com,2016/12/20,Bronze,"$23,500,000",2985,jordan.romero@dennis.com,Peter Pugh,03/25/2024,renewal call scheduled
+10768,Snyder-Cruz,Active,HC,TN,U.S.,https://www.snyder-cruz.com,05-Dec-2019,Strategic,"$13,550,000",158,stephen.fitzgerald@snyder-cruz.com,Sarah Perez,2020/06/27,
+10553,Moss-Davis,Active,LOG,MI,US,N/A,"January 15, 2018",Silver,"$41,750,000",656  ,elizabeth.clark@moss-davis.com,Tyrone Mayer,10/26/2018,acquired by parent co
+10626,Fox-Carney,On Hold,TECH,FL,United States,,07/13/2020,,"$33,050,000",3889,michael.anderson@fox-carney.com,Kelly Welch,12/03/21,renewal call scheduled
+10531,Lewis LLC  ,Active,LOG,CO,US,https://www.lewis.com,2018-05-17,Silver,"$16,350,000",2809,thomas.soto@lewis.com,George Ward,2023/04/18,acquired by parent co
+10218,"Hampton, Knapp and Salas",Active,TECH,Colorado,US,https://www.hampton.com,02/09/24,Silver,"$5,950,000",2556,jill.brown@hampton.com,Daniel Nguyen,"January 02, 2025",renewal call scheduled
+10829,Harris LLC,Closed,MFG,PA,USA,www.harris.com,06/18/21,Silver,"$35,600,000",2058,HENRY.JACKSON@HARRIS.COM,Denise Macdonald,12/03/2021,
+10042,Bailey-Hoover,Inactive,CONST,QC,Canada,,2023/04/29,Gold,18900000,2646,monica.walker@bailey-hoover.com,Jennifer Ramirez,05-Jul-2023,
+10865,Chandler Ltd,Active,HC,North Carolina,U.S.,https://www.chandler.com,2017-05-23,Gold,"$7,100,000",787,scott.hunter@chandler.com,Annette Holland,2025-12-26,
+10243,"Stuart, Brooks and Vance",Active,PS,GA,United States,www.stuart.com,2016-11-06,,"$12,700,000",1783,shane.stark@stuart.com,Bobby Brandt,2022/09/13,moved HQ 2024
+10814,"Walker, Vaughan and Leblanc",Active,LOG,NC,USA,www.walker.com,12/08/2024,Silver,6.20M,3107,deborah.sims@walker.com,Valerie Gonzalez,2026/04/24,
+10492,Lopez LLC,Active,CONST,GA,USA,https://www.lopez.com,2018/09/30,Silver,19000000,1169,carolyn.montoya@lopez.com,Jennifer Rivera,2026/09/01,
+10907,"Murphy, Sloan and Anderson",Active,MFG,NY,US,https://www.murphy.com,2026-06-06,Gold,41700000,1841,sandra.lynch@murphy.com,Adam Thompson,2026-07-22,
+10565,  Conley and Sons ,Churned,LOG,IL,USA,www.conley.com,"August 09, 2018",Silver,n/a,2810,gregory.johnson@conley.com,Corey Johnson,2023/11/30,do not contact billing before 9am
+10482,Vance and Sons,Inactive,PS,Ohio,US,www.vance.com,12/17/16,Bronze,,3263,jose.mercado@vance.com,Bernard Smith,2019/11/27,do not contact billing before 9am
+,Boone-Davis,Active,MFG,Tennessee,United States,https://www.boone-davis.com,2024/12/04,Silver,28.70M,924,jenny.lee@boone-davis.com,Michael Morrison,06/26/25,
+10794,Flores-Greer,On Hold,HC,WA,US,,04-Dec-2017,,"$41,200,000",467.0,caleb.harris@flores-greer.com,Rodney Lucas,2023-04-22,renewal call scheduled
+10817,Lee LLC,,LOG,OH,USA,www.lee.com,06/05/23,Gold,"$15,900,000",unknown,keith.snyder@lee.com,Scott Greene,"July 04, 2025",renewal call scheduled
+10022,"Jordan, Henderson and Owens",Inactive,MFG,TN,US,https://www.jordan.com,02/25/19,,"$34,350,000",3887,jessica.nunez@jordan.com,Mrs. Jennifer Morgan,08-Aug-2019,moved HQ 2024
+10306,Garcia-Greer,Prospect,LOG,Quebec,Canada,https://www.garcia-greer.com,"December 28, 2025",,"$24,750,000",,karen.evans@garcia-greer.com,Mrs. Hannah Montoya MD,2025-12-28,renewal call scheduled
+10809,Holloway Ltd,On Hold,PS,PA,US,N/A,20-Dec-2021,,,328,jose.jones@holloway.com,Nicholas Kelley,2022/05/11,
+10467,Clark Ltd,Prospect,MFG,ON,Canada,,29-Dec-2022,Silver,"$15,500,000",  761 ,kim.hancock@clark.com,Brian Medina,2023/10/14,do not contact billing before 9am
+10789,Vargas LLC,Active,LOG,Alberta,CA,,11-Aug-2022,Silver,,97,carlos.solis@vargas.com,Daniel Flynn,"June 08, 2024",acquired by parent co
+10271,Smith-Clark,Active,MFG,Illinois,United States,https://www.smith-clark.com,2017-08-09,Bronze,"$4,350,000",,douglas.hoover@smith-clark.com,Tanya Evans,"August 13, 2026",do not contact billing before 9am
+10064,"Williams, Crane and Walker",Actve,MFG,MI,US,https://www.williams.com,05/26/2022,Gold,4000000,2173,casey.bernard@williams.com,Andre Wright,2024/07/18,
+10113,"Mcgee, Wall and Leach",Active,TECH,New York,USA,https://www.mcgee.com,2024-03-07,Silver,22.45M,3472,kimberly.hall@mcgee.com,Colleen Lee,06/12/26,
+10063,Juarez-Gray,Active,TECH,Ariz.,USA,https://www.juarez-gray.com,05/31/2018,Silver,n/a,3887,karen.decker@juarez-gray.com,Bradley Smith,2023-03-11,
+10604,Howard Ltd,Active,,Penn.,USA,https://www.howard.com,2025-12-28,Gold,"$42,950,000",,kimberly.anderson@howard.com,Julie Banks,15-Jan-2026,
+10632,"Huang, Ford and Olsen",Active,TECH,Alberta,CA,,2018-09-28,Bronze,,3618.0,sarah.brown@huang.com,Krystal Gregory,"December 21, 2022",
+10395,Figueroa-Malone,,31,QC,Canada,https://www.figueroa-malone.com,"January 06, 2025",Gold,"$41,100,000",489.0,MICHELLE.NICHOLSON@FIGUEROA-MALONE.COM,Caitlin Collins,,
+10027,"Tucker, Lee and Robinson",,HC,OH,U.S.,https://www.tucker.com,2023/05/21,Bronze,"$44,750,000",1169,brian.fitzgerald@tucker.com,Erik Williams,08/22/2023,
+10607,Camacho-Burns  ,Active,CONST,Washington,US,https://www.camacho-burns.com,2019/01/31,Silver,"$38,000,000",286,mark.ellis@camacho-burns.com,Jared Williams,2022-06-02,
+10139,"Olson, Boone and Bell",Active,OTH,NY,US,https://www.olson.com,05-Dec-2018,Platinum,13.30M,,angela.wilson@olson.com,Darrell Patterson,12-Dec-2022,
+10696,"Ellis, Gregory and Sawyer",Prospect,,CO,US,,2020-01-16,Silver,19300000,,edward.riley@ellis.com,Amanda Thomas,02-Jun-2023,
+10514,"Smith, Padilla and Calhoun",Active,MFG,WA,USA,www.smith.com,03/01/2018,Silver,"$38,800,000",,andrea.barber@smith.com,Lauren Bailey,"September 18, 2020",do not contact billing before 9am
+10034,Wilson-Rodriguez,Active,ENR,QC,Canada,www.wilson-rodriguez.com,2020/06/02,Bronze,"$29,350,000",,angela.nelson@wilson-rodriguez.com,Michelle Harris,2025-11-06,
+10448,"Moon, Farmer and Hill",Active,MFG,TX,US,https://www.moon.com,09/16/2017,Silver,,,tamara.waller@moon.com,Casey Gutierrez,,acquired by parent co
+10195,Mcdonald-Bird,ACTIVE,LOG,Texas,,,08/03/2024,Silver,n/a,,david.henson@mcdonald-bird.com,James Love,03-Feb-2025,
+10816,Higgins Group,Prospect,31,OH,United States,,20-Jul-2022,,,2508,kiara.hebert@higgins.com,Kathleen Walker,12-Jan-2024,
+10683,Dominguez LLC,Active,ENR,Georgia,US,N/A,"March 06, 2022",Silver,"$39,100,000",754,kenneth.guerrero@dominguez.com,Jesse Carney,,do not contact billing before 9am
+10269,Newman-Rivera,Prospect,MFG,Washington,U.S.,www.newman-rivera.com,2021/05/18,Gold,11000000,3379.0,TIFFANY.DICKSON@NEWMAN-RIVERA.COM,Tamara Hall,02/21/2025,
+10309,"Jackson, Werner and Carter",Inactive,MFG,Indiana,USA,N/A,2026-03-28,Bronze,"$11,400,000",unknown,ashley.farley@jackson.com,Stephanie Ochoa,2026/06/07,
+10966,Myers-Colon,Active,CONST,AB,CAN,,01/10/2026,Platinum,n/a,3593.0,melissa.perry@myers-colon.com,Luke Reynolds,02/17/2026,
+10278,"George, Nguyen and Cruz",Churned,,GA,USA,https://www.george.com,12/31/24,Bronze,21.00M,122,kelly.hughes@george.com,Steven Stein,2026/03/17,do not contact billing before 9am
+90126,"Williams, White and Jackson Inc",Active,CONST,WA,US,https://www.williams.com,2026/03/11,,"$5,500,000",2738,trevor.morgan@williams.com,Brandon Page,"August 31, 2026",renewal call scheduled
+10846,"Rodriguez, Ferguson and Smith",Active,MFG,Que.,CA,https://www.rodriguez.com,08/24/2025,Gold,,646,darryl.jackson@rodriguez.com,Michael Melton,2025-08-26,
+10080,Andrews Group,Inactive,23,NY,US,,07/28/18,Bronze,"$24,550,000",unknown,timothy.peterson@andrews.com,Dawn Hensley,"January 21, 2022",renewal call scheduled
+10761,"Brown, Wilson and King",Active,MFG,Colorado,USA,www.brown.com,2020-02-13,Bronze,"$9,250,000",456,carl.contreras@brown.com,Rachel Mora,"February 18, 2024",acquired by parent co
+10836,Price Group,On Hold,LOG,TX,United States,N/A,2019/06/29,Silver,15100000,3404,justin.goodwin@price.com,Barbara Henry,12-Jun-2024,
+10279,Armstrong and Sons,Inactive,MFG,GA,US,https://www.armstrong.com,"July 08, 2018",Silver,n/a,3852.0,gina.jackson@armstrong.com,Derrick Thomas,"April 06, 2023",
+10796,Castro-Graham,Active,CONST,BC,CA,https://www.castro-graham.com,2021-07-13,Silver,"$30,650,000",1795,deborah.johnson@castro-graham.com,Chad Green,2025-12-23,
+10244,"Anderson, Dalton and Wilson  ",Prospect,MFG,Tennessee,US,www.anderson.com,"July 06, 2017",Silver,"$11,250,000",1216,victoria.long,William Davenport,04/28/25,renewal call scheduled
+10753,Palmer Ltd,Inactive,,ON,CAN,,2019/05/06,Silver,"$29,050,000",  3346.0 ,isaac.davis@palmer.com,Kimberly Brennan,2020-07-13,renewal call scheduled
+10313,"Mayer, Wood and Clements",Prospect,PS,QC,CA,https://www.mayer.com,"December 12, 2022",Gold,5300000,2295,mark.smith@mayer.com,Morgan Simon,"April 24, 2023",moved HQ 2024
+10825,Campbell-Mcdowell,Active,23,Illinois,,https://www.campbell-mcdowell.com,"December 21, 2025",Bronze,n/a,2566,chloe.juarez@campbell-mcdowell.com,Erik Stafford,"January 15, 2026",moved HQ 2024
+10118,Dalton Ltd,Active,,WA,US,https://www.dalton.com,"December 18, 2024",Bronze,"$41,100,000",3412.0,emily.sanders@dalton.com,Kristin Davis,25-Jan-2026,acquired by parent co
+10266,Warren and Sons,Churned,TECH,AZ,U.S.,https://www.warren.com,2025-12-15,Silver,5050000,1468,james.fox@warren.com,Debra Sanders,18-Feb-2026,
+10020,Perez Inc,ACTIVE,TECH,GA,US,https://www.perez.com,02/03/2022,Bronze,"$38,650,000",unknown,michele.jones@perez.com,Michael Lewis,2026/05/29,do not contact billing before 9am
+10374,Snyder-Gray,Active,,TN,United States,https://www.snyder-gray.com,07/10/2025,Bronze,"$36,300,000",575,amy.garcia@snyder-gray.com,Sean Curtis,2025-02-23,
+10916,Davidson-Hahn,Active,MFG,Alberta,Canada,https://www.davidson-hahn.com,12/14/2023,Silver,n/a,272,brett.mcmillan@davidson-hahn.com,Zachary Hill,"December 21, 2025",
+10968,Khan-Medina,Active,HC,NC,US,N/A,12/16/2018,,,1230,elizabeth.jones@khan-medina.com,Stephanie Kerr,2019/01/02,
+10964,Griffin Group  ,Active,MFG,Michigan,USA,https://www.griffin.com,27-Dec-2023,Gold,39.80M,2330.0,cassidy.wright@griffin.com,Keith Henry,09/01/25,
+10827,Hernandez and Sons,Active,,AZ,US,N/A,05/29/2026,Bronze,1250000,,isaac.harrison@hernandez.com,John Wilson,05/29/26,moved HQ 2024
+10178,"Hartman, Romero and Smith",Active,MFG,IL,U.S.,www.hartman.com,2024/02/22,Gold,34050000,,morgan.williams@hartman.com,James Burgess,10/13/2024,acquired by parent co
+10582,"Dennis, Long and Griffin",Active,TECH,NC,US,N/A,09/18/2021,Strategic,9250000,3196,brooke.wagner@dennis.com,Dylan Foster,"August 27, 2022",moved HQ 2024
+10898,Williams and Sons,Active,ENR,NC,US,https://www.williams.com,20-Jan-2019,Silver,"$18,000,000",1721,karen.willis@williams.com,Paul Cruz Jr.,"October 13, 2023",renewal call scheduled
+10819,Solomon-Wood,Active,MFG,IN,United States,https://www.solomon-wood.com,21-Feb-2019,,41150000,560,GABRIELLE.ELLIS@SOLOMON-WOOD.COM,Casey Morris,16-Jan-2021,acquired by parent co
+10934,Aguirre-Bennett,Closed,MFG,WA,US,www.aguirre-bennett.com,"October 21, 2019",,6150000,unknown  ,richard.mckenzie@aguirre-bennett.com,Adam Howard,01/24/20,moved HQ 2024
+10703,Butler-Aguirre,Active,PS,FL,United States,,23-Aug-2025,Gold,"$42,400,000",1352.0,kendra.schwartz@butler-aguirre.com,Mark Mills,04/23/2026,
+10394,Schroeder-Flores,Active,HC,NY,U.S.,https://www.schroeder-flores.com,"January 28, 2019",,"$1,400,000",,jessica.jacobs@schroeder-flores.com,Jeremy Mcintyre,01/15/22,renewal call scheduled
+10866,Fuentes-Martinez,Churned,LOG,Florida,US,www.fuentes-martinez.com,27-Nov-2025,Silver,"$6,550,000",3041,james.montes@fuentes-martinez.com,Adriana Davenport,08/18/2026,do not contact billing before 9am
+10372,Underwood Ltd,Churned,LOG,Georgia,US,https://www.underwood.com,2019/02/16,Bronze,29850000,,danielle.tanner@underwood.com,Derek Wright,01/05/2022,moved HQ 2024
+10323,"Lewis, Goodman and Gillespie",Active,TECH,Pennsylvania,USA,N/A,08-May-2018,Silver,,,christina.ramos@lewis.com,Steven Taylor,2020/09/13,acquired by parent co
+10833,WHEELER-SMITH,Active,TECH,PA,,https://www.wheeler-smith.com,"August 08, 2020",Gold,n/a,2573,tara.douglas,Erika Dennis,03/18/22,acquired by parent co
+10835,"Crane, James and Ross",ACTIVE,CONST,BC,CAN,N/A,2023/10/29,Silver,38450000,3388,gregory.hanna@crane.com,Ann Phelps,10/14/2025,acquired by parent co
+10436,"Cruz, Combs and Grant",Inactive,TECH,Tennessee,,https://www.cruz.com,12/13/2022,Bronze,"$29,900,000",2979,vanessa.brown@cruz.com,Brooke Allison,2025-10-24,acquired by parent co
+10501,"Reynolds, Fisher and Golden",active,OTH,CO,U.S.,,2022-04-11,Gold,2450000,3128,heidi.patterson@reynolds.com,Karen Mack,"February 03, 2025",renewal call scheduled
+10282,Alexander-Jordan,Churned,PS,Pennsylvania,USA,https://www.alexander-jordan.com,11-Apr-2023,Bronze,300000,2342  ,madison.curtis@alexander-jordan.com,Elizabeth Morrison,14-Apr-2024,
+10076,"Schmidt, Coleman and Reese",Closed,TECH,IN,United States,https://www.schmidt.com,07/29/2025,Bronze,28850000,567,mark.warner@schmidt.com,David Martinez,01/22/2026,
+10304,Medina and Sons,Active,LOG,TN,US,https://www.medina.com,06/15/2025,Silver,"$20,050,000",588,kimberly.cunningham@medina.com,Kathleen Dixon,2025-09-01,
+10575,Evans and Sons,Active,MFG,TN,US,www.evans.com,2019-05-11,Bronze,"$27,600,000",1048.0,jason.edwards@evans.com,Terri Short,"February 20, 2023",moved HQ 2024
+10993,Nelson Group,Active,OTH,,Mexico,www.nelson.com,05/09/2018,,"$23,550,000",947.0,christopher.kaufman@nelson.com,Christopher Alexander,"September 17, 2024",do not contact billing before 9am
+10183,Atkins-Williams,Active,MFG,NY,USA,https://www.atkins-williams.com,2025-08-29,Gold,22.85M,3850,diana.nelson@atkins-williams.com,Jessica Ross,10/08/2025,
+10985,Parker Ltd,Active,ENR,,MX,N/A,"December 05, 2024",Silver,"$14,650,000",1191,roy.sanchez@parker.com,Chad Jimenez,2025-08-01,do not contact billing before 9am
+10085,Hayes-Wheeler,Active,TECH,AB,CA,www.hayes-wheeler.com,28-Oct-2021,Bronze,n/a,3861.0,kelly.hall@hayes-wheeler.com,Michele Gibson,07/05/23,
+10808,Morrow Group,Actve,OTH,,US,www.morrow.com,2026-05-06,Silver,"$16,200,000",1001.0,THOMAS.GUTIERREZ@MORROW.COM,Michelle Mcdowell,08-Jul-2026,
+10446,Tran Group,Active,HC,NY,USA,https://www.tran.com,2017/12/29,,"$5,900,000",1635.0,mary.webb@tran.com.,Tammy Thompson,2026/07/24,
+10475,"Arroyo, Torres and Goodman",Active,MFG,CO,United States,N/A,22-Nov-2022,Gold,30200000,2443,rebecca.cooper@arroyo.com,Matthew Hunt,06/08/2023,do not contact billing before 9am
+10995,Larson-Hernandez,Active,PS,Illinois,US,,2017/10/15,,"$26,150,000",  2836 ,jessica.scott@larson-hernandez.com,Jesse Brooks,"November 17, 2023",
+,Brock Inc,Active,PS,NY,US,www.brock.com,04/20/18,Bronze,"$35,850,000",,stephanie.jones@brock.com,Douglas Kirk,04/19/2019,
+10647,Meza and Sons,Active,MFG,,US,https://www.meza.com,01/09/22,,,1636,MICHELLE.JENSEN@MEZA.COM,Jenna Lyons,2023/09/03,acquired by parent co
+10979,"Foster, Patterson and Hall",Active,OTH,GA,US,www.foster.com,01-Jun-2025,Bronze,"$26,300,000",1966.0,daniel.morris@foster.com,Matthew Smith,2025-09-23,moved HQ 2024
+10731,Conley PLC,Prospect,MFG,Alberta,Canada,https://www.conley.com,2021-10-05,Gold,"$9,650,000",unknown,deanna.jenkins@conley.com,Matthew Nguyen,07/10/2025,
+10672,Green Ltd,Inactive,CONST,AZ,U.S.,https://www.green.com,10/23/2017,Gold,31.70M,1833,joel.white@green.com,Amanda Riggs,2026/03/05,renewal call scheduled
+10440,"Walsh, Wu and Hart",Active,MFG,Quebec,CAN,,"February 26, 2018",Silver,"$4,350,000",36,diamond.bryant@walsh.com,Roger Velasquez,2023-01-15,moved HQ 2024
+10251,Williams-Cooper  ,Prospect,31,,Mexico,https://www.williams-cooper.com,11-Jan-2020,Bronze,,576.0  ,dawn.james@williams-cooper.com,Melissa Russell,2021-09-04,
+10114,Byrd-Le,Prospect,MFG,MI,United States,https://www.byrd-le.com,08/05/20,Bronze,6.10M,125,donna.massey@byrd-le.com,Stephanie Lucas,24-May-2026,
+10119,Smith-Herrera,Churned,PS,IL,United States,www.smith-herrera.com,07-Apr-2021,Gold,,1347,SHAWN.CHAMBERS@SMITH-HERRERA.COM,Lauren Carson,10/01/22,moved HQ 2024
+10135,  Beasley-Gutierrez ,Churned,ENR,N.Y.,United States,https://www.beasley-gutierrez.com,2017/02/13,Gold,42250000,1630.0,maria.ross@beasley-gutierrez.com,Emily Edwards,05/16/19,
+10361,"Howard, Silva and Hall",Active,MFG,,US,www.howard.com,"September 03, 2027",Gold,42650000,,erik.wright@howard.com,Joseph Moody,"May 28, 2026",acquired by parent co
+10356,"Foster, Johnson and Vega",Active,PS,Illinois,US,https://www.foster.com,2019/05/12,Silver,40400000,unknown,gerald.lewis@foster.com,Douglas Stephenson,08/07/2026,
+10651,Peterson Ltd,Active,MFG,WA,US,https://www.peterson.com,10/18/17,Silver,,3275,brittany.mueller@peterson.com,Richard Stephens,"June 10, 2025",
+10642,"Bell, Flores and Thomas",ACTIVE,MFG,Washington,U.S.,N/A,2024/10/15,Strategic,8500000,921,janet.campbell@bell.com,Benjamin Austin,2025-06-18,
+10834,"Meadows, Robles and Anderson  ",,MFG,GA,US,,2018/04/29,Silver,43700000,,michelle.solis@meadows.com,Robert Manning,03-Nov-2018,renewal call scheduled
+10743,Hughes-Smith,Closed,MFG,NY,USA,,02-May-2019,Silver,"$20,200,000",2987,michael.parker@hughes-smith.com,Justin Lewis,,do not contact billing before 9am
+10107,"Evans, Johnson and Nguyen",Actve,MFG,Indiana,United States,www.evans.com,04/28/2022,Silver,23550000,2861,brian.howard@evans.com,David Jenkins,2024/11/14,acquired by parent co
+10838,Burns Group,Inactive,TECH,TN,US,https://www.burns.com,"January 27, 2025",Bronze,"$12,850,000",2743,thomas.hart@burns.com,Peter Shepherd,"May 10, 2025",
+10048,"Phillips, Martinez and Fisher",Active,HC,TN,United States,,"December 30, 2022",Gold,4.75M,886,shelby.byrd@phillips.com,Lisa Turner,2024-11-24,
+10905,"Martinez, Taylor and Hawkins",Active,MFG,WA,USA,https://www.martinez.com,2022/08/31,Gold,n/a,3276.0,joshua.reynolds@martinez.com,Tina Flores,2025/10/22,do not contact billing before 9am
+10094,"Murray, Brown and Stone",Active,MFG,IN,US,https://www.murray.com,2025/08/20,Silver,15850000,3123,cindy.jimenez@murray.com,Anthony Adams,2025/10/01,
+10623,Wilkins-Chang,Active,CONST,CO,U.S.,www.wilkins-chang.com,2018/01/25,Gold,"$38,600,000",657,megan.brown@wilkins-chang.com,Bryan Villarreal,"November 06, 2024",acquired by parent co
+10525,Dalton-Parsons,Active,CONST,,United States,N/A,"March 12, 2026",Bronze,"$35,850,000",3409,STEPHEN.MARTINEZ@DALTON-PARSONS.COM,Emily Smith,,
+10377,"Johnson, Dunlap and Martin",Active,MFG,NC,US,N/A,04/29/17,Silver,"$18,150,000",1741,pamela.moore@johnson.com,Daniel Lee,"January 29, 2018",acquired by parent co
+10981,Turner-George,Active,MFG,Tennessee,US,https://www.turner-george.com,03/19/2022,Gold,"$40,750,000",2461,tonya.garcia@turner-george.com,Wanda Jefferson,2022/04/18,renewal call scheduled
+10750,Snyder-Arellano,,OTH,Ohio,US,https://www.snyder-arellano.com,"May 25, 2018",Silver,"$8,750,000",,carol.cox@snyder-arellano.com,Mr. David Jennings,08/01/2022,acquired by parent co
+10019,Walker LLC,Active,MFG,Quebec,Canada,https://www.walker.com,2024/09/04,Strategic,"$22,600,000",1175,ANDREW.SPENCER@WALKER.COM,Adrienne Zimmerman,2026/01/03,
+10428,Sawyer LLC,Inactive,LOG,PA,United States,,10/30/2021,Strategic,,318,michael.rhodes@sawyer.com,Brian York,2026-01-07,
+10056,Cole-Walton,Inactive,LOG,Indiana,US,https://www.cole-walton.com,2020/07/22,,35.55M,unknown,mary.ramirez@cole-walton.com,Kari Allen,2020/12/23,acquired by parent co
+10179,Kramer-Cooper,Inactive,ENR,BC,CAN,https://www.kramer-cooper.com,2021-12-31,Gold,"$17,850,000",,jessica.fuller at kramer-cooper.com,Nancy Cook,30-Mar-2023,moved HQ 2024
+10785,Adams-Dominguez,Churned,CONST,New York,,https://www.adams-dominguez.com,2024/02/21,Bronze,24850000,3064,brianna.odom@adams-dominguez.com,James Armstrong,2026-08-12,
+10171,Velasquez LLC,Active,CONST,Florida,United States,N/A,"December 22, 2025",Strategic,35750000,1747,sarah.perry@velasquez.com,James Hughes,2026-07-29,moved HQ 2024
+10896,Scott Inc,Active,23,Arizona,USA,https://www.scott.com,10-Jan-2021,,n/a,,eric.farley@scott.com,Amy Woodward,,renewal call scheduled
+10675,Alvarez-Alvarez,ACTIVE,TECH,PA,United States,https://www.alvarez-alvarez.com,"September 15, 2021",Silver,,3193,stacy.nielsen@alvarez-alvarez.com,Michael Price,2023-09-20,renewal call scheduled
+10032,"Baker, Mahoney and Ibarra",Active,LOG,Quebec,Canada,https://www.baker.com,29-Oct-2021,Silver,14800000,2865,NATASHA.WOOD@BAKER.COM,Roy Warner,2022/02/17,
+10014,Romero Inc,Prospect,CONST,Quebec,Canada,https://www.romero.com,"December 19, 2023",Silver,"$9,950,000",,MONICA.EVANS@ROMERO.COM,Lisa Hernandez,"July 10, 2024",
+10424,"Williamson, Campbell and Glover",Active,OTH,Pennsylvania,US,www.williamson.com,"January 24, 2020",Silver,"$44,800,000",325,tyler.lynch@williamson.com,Sandra Dudley,05/17/25,
+10471,"Brown, Reese and Williams",Churned,MFG,Ga.,United States,https://www.brown.com,2020/07/01,Gold,,,melanie.howard@brown.com,Donna Jennings,18-Oct-2024,do not contact billing before 9am
+10391,"Washington, Lynch and Johnson",Active,LOG,AZ,US,https://www.washington.com,2025-05-14,,n/a,unknown,joshua.thomas@washington.com,Melissa Williams,"June 01, 2025",renewal call scheduled
+10321,Davis-Shaffer,Active,MFG,GA,US,https://www.davis-shaffer.com,05/27/2021,Silver,"$3,950,000",342,DAKOTA.RICHARDSON@DAVIS-SHAFFER.COM,James Li,09-Jan-2024,
+10676,Thomas-Berg,Churned,MFG,TX,US,www.thomas-berg.com,08/16/21,Gold,"$5,550,000",unknown,alexander.ho@thomas-berg.com,Michael Nixon,2024/01/05,renewal call scheduled
+10876,"Moore, Johnson and Hogan",,CONST,TX,US,,2019-02-20,Gold,24.75M,1102,brittany.allen at moore.com,Molly Benitez,04/10/19,renewal call scheduled
+10601,"Fry, Wilson and Stewart",Active,MFG,IL,,https://www.fry.com,2027-02-14,,27850000,2622,nichole.acosta@fry.com,Sheryl Gutierrez,2021/10/23,
+10161,Rangel LLC,active,CONST,Tennessee,US,https://www.rangel.com,10/08/18,Silver,"$11,350,000",,tammy.hale@rangel.com,Kurt Hurley,,acquired by parent co
+10324,LAWRENCE GROUP,Active,TECH,MI,US,https://www.lawrence.com,"August 26, 2022",Bronze,"$40,300,000",574,michael.jordan@lawrence.com,Danielle Newman,2023/11/30,
+10072,Ramirez Group,Active,ENR,GA,USA,https://www.ramirez.com,"November 07, 2020",Gold,n/a,1309,john.marshall@ramirez.com,Jamie Johnson,04/20/21,
+10684,Schwartz-Contreras,Churned,MFG,BC,Canada,https://www.schwartz-contreras.com,08/10/24,,,437,kayla.scott@schwartz-contreras.com,Destiny Brown,2025-10-25,
+10560,Mann-Hansen,Active,LOG,Tennessee,United States,www.mann-hansen.com,10-Jun-2026,Bronze,"$38,100,000",1496,amy.henry@mann-hansen.com,Kimberly Morris,"September 01, 2026",renewal call scheduled
+10228,Butler and Sons,Active,MFG,NC,U.S.,https://www.butler.com,07/15/25,Platinum,5800000,3732,sarah.johnson@butler.com,Rachel Lopez,09/17/2025,moved HQ 2024
+10239,Bond-Ramos,active,PS,Ohio,USA,https://www.bond-ramos.com,2025/06/17,,"$32,850,000",1849,erin.love@bond-ramos.com,Steven Griffin Jr.,"June 13, 2026",
+10552,MARTINEZ LTD,Active,LOG,Washington,USA,https://www.martinez.com,03/05/2026,Silver,38800000,3622,john.wise@martinez.com,Oscar Johnson,12-Aug-2026,
+10842,Palmer PLC  ,Prospect,CONST,FL,US,https://www.palmer.com,2019/04/30,Silver,"$22,500,000",1388,roger.davis at palmer.com,Laura King,2024-07-23,do not contact billing before 9am
+10351,Hernandez-Dawson,,MFG,,CA,www.hernandez-dawson.com,05/20/2025,Gold,7700000,1659,tanya.foster@hernandez-dawson.com,Edwin Wilkins,2025/11/18,acquired by parent co
+10308,Martin-Taylor,Inactive,TECH,Georgia,US,https://www.martin-taylor.com,03/24/2020,Silver,,1828.0,jamie.clark@martin-taylor.com,Gregory Campbell,09/16/2025,renewal call scheduled
+10496,Valentine-Robinson,Churned,MFG,IL,US,https://www.valentine-robinson.com,05/22/26,Gold,34.60M,2185,catherine.ruiz@valentine-robinson.com,Mr. Jason Thomas,2026-08-09,moved HQ 2024
+10656,Evans-Bauer,,23,BC,CA,https://www.evans-bauer.com,05-Feb-2022,Gold,31.20M,1520,erin.sellers@evans-bauer.com,Michelle Herman,"January 14, 2023",
+10613,Hayes-White,Inactive,LOG,Colorado,US,https://www.hayes-white.com,09/01/2020,Gold,"$41,550,000",3927.0,BRITTANY.MARQUEZ@HAYES-WHITE.COM,Jesse Wright,02/23/24,acquired by parent co
+10234,"Smith, Valdez and Schwartz",Inactive,LOG,QC,CAN,https://www.smith.com,,,22400000,,bryan.wilson@smith.com,Jared Shaw,27-Apr-2024,
+10026,Baker-Bowers,ACTIVE,CONST,MI,United States,https://www.baker-bowers.com,"September 09, 2021",Silver,38100000,3126.0,spencer.henderson@baker-bowers.com,Whitney Peters,14-Nov-2025,
+10552,Martinez Ltd,Active,LOG,Washington,USA,https://www.martinez.com,03/05/2026,Silver,38800000,3622,john.wise@martinez.com,Oscar Johnson,12-Aug-2026,
+10707,Jimenez-Moore,Active,,,USA,https://www.jimenez-moore.com,2024-08-20,Bronze,,unknown,sandra.brown@jimenez-moore.com,Daniel King,2026-02-04,
+10237,Gill Ltd,Active,31,New York,US,www.gill.com,07/12/2019,Bronze,42850000,,karen.marks@gill.com,Jeremy Padilla,12-Jan-2025,
+10900,Spencer-Willis,Inactive,ENR,MI,U.S.,www.spencer-willis.com,2025-08-09,Gold,n/a,372,craig.hines@spencer-willis.com,Beth Carroll,"September 11, 2026",acquired by parent co
+10845,Peterson-Hull,Churned,HC,GA,United States,www.peterson-hull.com,04/11/20,Silver,"$18,350,000",2543.0,LISA.CLARK@PETERSON-HULL.COM,William Green,2024/03/24,
+10956,Morgan-Barnes,Active,PS,GA,US,https://www.morgan-barnes.com,24-Feb-2025,Bronze,"$15,650,000",1642,gina.powell@morgan-barnes.com,Kimberly Nguyen,"October 01, 2025",
+10991,Thompson PLC,Active,LOG,,US,https://www.thompson.com,2026/03/21,Gold,,,marie.frederick@thompson.com,Blake Hardy,01/06/24,
+,"  Singh, Gaines and Smith ",Active,TECH,AZ,USA,www.singh.com,2017/02/27,Gold,"$16,300,000",,kevin.short@singh.com,Jennifer Sullivan,18-May-2019,moved HQ 2024
+10554,Soto Inc,Inactive,MFG,Michigan,USA,www.soto.com,11/03/22,Bronze,35750000,283,julie.dunn@soto.com,John Evans,01/04/2025,moved HQ 2024
+10795,Mcdaniel-Young,ACTIVE,CONST,CO,US,https://www.mcdaniel-young.com,2022/08/13,,"$39,900,000",unknown,john.hernandez@mcdaniel-young.com,Robert Collins,12/24/2024,
+10581,Torres Inc,On Hold,HC,PA,US,,"June 14, 2025",Gold,"$23,250,000",,luis.cunningham@torres.com,Michael Hernandez,06/11/26,
+10163,"Davis, Santiago and Romero",Active,,TX,USA,https://www.davis.com,03/15/2023,Gold,14650000,3691,andrew.parker@davis.com,Gloria Miranda,07/30/2023,acquired by parent co
+10464,"Sellers, Sanchez and Williams",active,CONST,,MX,www.sellers.com,"August 05, 2021",Bronze,38.10M,376,nicole.james@sellers.com,Ashley Scott,2023/07/16,do not contact billing before 9am
+10477,"Murray, Dunn and Roberts",Active,MFG,PA,,www.murray.com,2022/04/02,Bronze,,,carlos.garcia@murray.com,Katelyn Rivera,04/06/25,do not contact billing before 9am
+10182,Mahoney-Robertson,,LOG,Texas,US,N/A,07/10/22,Gold,"$18,250,000",2095,veronica.daniels@mahoney-robertson.com,Paul Lee,"May 01, 2026",moved HQ 2024
+10513,Cantrell Inc,Prospect,,NY,US,https://www.cantrell.com,14-Aug-2023,Silver,23550000,2605,wendy.chan@cantrell.com,James Willis,2025-08-17,
+10666,"Wu, Davis and Kennedy",,31,PA,US,www.wu.com,02/17/20,,,881.0,judith.horne@wu.com,Mark Yates,08/30/2026,
+10511,"Mitchell, Stuart and Brown",Active,,Pennsylvania,USA,www.mitchell.com,11/22/19,Silver,"$29,050,000",,kim.thompson@mitchell.com,Adam Jefferson DVM,10-Jun-2025,moved HQ 2024
+10635,Thornton-Edwards,Active,TECH,TN,US,https://www.thornton-edwards.com,2026/02/26,Silver,"$17,500,000",3353,anthony.gutierrez@thornton-edwards.com,David Hayes DVM,04-Jun-2026,
+10461,"Turner, Tyler and Pierce",Closed,PS,British Columbia,Canada,N/A,09/02/2020,Silver,"$25,750,000",1097,charles.zimmerman@turner.com,Tina Meyer,2020-10-30,
+10220,"Schneider, Steele and Bishop",Active,ENR,IN,US,,2021/03/17,Bronze,"$31,650,000",1493,james.wright@schneider.com,Courtney Dudley,02-Oct-2021,acquired by parent co
+10828,Williams-Kelly,active,TECH,QC,CAN,,"February 28, 2018",Silver,,2248,jenna.washington@williams-kelly.com,Ryan Camacho Jr.,2026-03-12,
+10387,Miller-Vega,Active,ENR,GA,USA,www.miller-vega.com,2024/09/07,Gold,41950000,356,james.carson@miller-vega.com,Kurt Flores,2026/04/13,
+10449,"Tanner, Hunt and Cameron",Active,CONST,WA,United States,https://www.tanner.com,2025-04-24,Silver,14.00M,,amy.edwards@tanner.com,Kristen Robinson,2026-01-05,
+10649,Tate-Munoz,Active,TECH,TN,USA,,06/02/2021,Strategic,23300000,255,david.garcia@,Rebecca Nguyen,07/24/25,acquired by parent co
+10616,"Savage, Huffman and Martin",Active,PS,North Carolina,USA,www.savage.com,2024/02/12,Gold,"$39,050,000",1954.0,duane.hammond@savage.com,Eric Cross,"May 17, 2024",
+10902,"Cisneros, Ali and Peters  ",active,MFG,Illinois,US,https://www.cisneros.com,2026/04/03,Strategic,"$19,650,000",,bobby.hess@cisneros.com,Lisa Delgado,06/05/26,renewal call scheduled
+10576,"Dixon, Duncan and Duncan",Active,LOG,QC,Canada,https://www.dixon.com,24-Mar-2024,Silver,"$9,350,000",,CLINTON.STEVENS@DIXON.COM,Derek Preston,2024-12-21,do not contact billing before 9am
+10645,Marquez Ltd,Prospect,CONST,,Mexico,https://www.marquez.com,02/14/20,Silver,n/a,817,lisa.miller@marquez.com,Pamela Bradley,2020-11-13,renewal call scheduled
+10312,Burton-Brooks,active,MFG,Illinois,,N/A,2025-10-03,Gold,"$12,750,000",unknown,charles.norton@burton-brooks.com,Jennifer Brady,2026-08-19,
+10209,Luna-Gallagher,Active,31,Indiana,United States,https://www.luna-gallagher.com,03/12/2024,Silver,5.90M,2602,michael.morales@luna-gallagher.com,Chloe Tran,09/01/26,acquired by parent co
+10493,Olson Group,Active,MFG,Washington,US,N/A,2017/11/27,Silver,36.50M,,timothy.garza@olson.com,Jennifer Sanchez,25-Apr-2025,
+10409,Ruiz Ltd,Active,TECH,OH,USA,www.ruiz.com,2017/08/25,Silver,24.50M,unknown,jonathan.stokes,Catherine Frazier,06-Dec-2019,
+10124,Johnson-Wood  ,ACTIVE,OTH,AZ,US,https://www.johnson-wood.com,02/21/20,Gold,"$4,700,000",2469,scott.sampson@johnson-wood.com,Ariana Jennings,09/25/21,
+10148,"Williams, Smith and Morse",Active,ENR,Arizona,USA,https://www.williams.com,"May 06, 2018",,"$37,300,000",1421.0  ,michelle.johnston@williams.com,Michelle Butler,2024-09-05,acquired by parent co
+10826,Doyle-Henry,Active,,IL,United States,www.doyle-henry.com,2026-10-25,Platinum,"$38,100,000",64,stephanie.peters@doyle-henry.com,Mallory Gonzales,2022/09/01,
+10260,Hernandez-Rivera,Active,TECH,FL,United States,,2020/11/05,Gold,,2205,noah.whitaker@hernandez-rivera.com,Mr. Michael Scott PhD,23-Jul-2023,renewal call scheduled
+10811,Gonzalez-Torres,Active,MFG,TN,United States,https://www.gonzalez-torres.com,03-Mar-2019,Silver,41.90M,1693,barbara.rodriguez@gonzalez-torres.com,Micheal Saunders,2023/05/30,acquired by parent co
+10644,White-Carlson,Active,CONST,MI,US,www.white-carlson.com,"December 27, 2023",Gold,,2978,brittany.huff@white-carlson.com,Lisa Edwards,2025/10/09,
+10765,Glass PLC,Churned,MFG,Illinois,US,https://www.glass.com,08-Feb-2020,Silver,"$1,500,000",,melissa.wells@glass.com,Cathy Nunez,12/15/2024,
+10484,"Kennedy, Rowe and Diaz",Active,OTH,BC,Canada,,10/18/2024,Silver,17700000,,jeffrey.barton@kennedy.com,Donna Marshall,06/08/26,
+10242,Andersen Group,Active,LOG,,US,https://www.andersen.com,11-May-2021,Gold,35500000,1154,anthony.ortiz@andersen.com,Pamela Good,"May 10, 2022",acquired by parent co
+10724,"Fletcher, Harris and Zavala",Active,OTH,OH,US,https://www.fletcher.com,21-Jul-2021,Strategic,41650000,212,john.wilson@fletcher.com,Todd Carpenter,"August 09, 2026",
+10913,"Snyder, Arnold and Keller",ACTIVE,LOG,Tennessee,United States,,2022/11/15,Silver,32700000,1634,ariel.fleming@snyder.com,Ana Anderson,"June 29, 2025",renewal call scheduled
+10015,Ryan PLC,Inactive,LOG,AZ,US,www.ryan.com,08/03/21,Silver,"$13,100,000",1791,samantha.george@ryan.com,Brian Cox DVM,07/11/23,acquired by parent co
+10078,"Lawrence, Wolf and Carlson",Active,CONST,BC,CA,https://www.lawrence.com,01/15/26,Bronze,,1922,tina.wall@lawrence.com,Isaac Turner,01/17/2026,moved HQ 2024
+10988,Perez Ltd,Active,ENR,FL,U.S.,www.perez.com,02-Oct-2024,Gold,27600000,2859,mark.allen@perez.com,Susan Ortega,2024/06/27,acquired by parent co
+10160,"Gregory, Mitchell and Cummings",Active,MFG,Michigan,U.S.,https://www.gregory.com,,Gold,23150000,1778,diane.escobar@gregory.com,Felicia Aguilar,04-Feb-2026,moved HQ 2024
+10265,Nichols-Mitchell,On Hold,CONST,OH,US,N/A,2020-03-20,Gold,29200000,2708,wayne.wolfe@nichols-mitchell.com,Todd White,13-Aug-2023,
+10534,Ford-Frye,Active,MFG,Ohio,USA,www.ford-frye.com,"May 08, 2018",Gold,23800000,,miranda.davidson@ford-frye.com,Jennifer Salazar,"April 16, 2024",renewal call scheduled
+98343,Guerrero-Alvarado Inc,Active,MFG,GA,US,https://www.guerrero-alvarado.com,12/07/16,Bronze,"$4,300,000",3025,ROBERTA.WARD@GUERRERO-ALVARADO.COM,Eduardo Ware,28-Jul-2019,do not contact billing before 9am
+10767,Martinez-Rodriguez,Active,MFG,AB,Canada,https://www.martinez-rodriguez.com,"December 09, 2018",Gold,"$15,500,000",1851.0,derek.farmer@martinez-rodriguez.com.,Kristin Williams,"June 16, 2020",acquired by parent co
+10858,Marsh-Richard,Active,MFG,AZ,United States,N/A,2026/02/04,,"$28,250,000",2867.0,christy.campbell@marsh-richard.com,Mary Anderson,08/12/2026,
+10456,"Williams, James and Butler",Active,TECH,OH,United States,www.williams.com,07/07/2023,Strategic,n/a,,kristin.jennings@williams.com,Amy Manning,2026-09-03,
+10787,Montes-Harris,Active,LOG,NY,USA,https://www.montes-harris.com,2021/01/19,Bronze,27650000,3512.0,cynthia.dickson@montes-harris.com,Samuel Lewis,"July 31, 2026",renewal call scheduled
+10081,Short Group,Active,MFG,MI,US,,08/02/2025,Strategic,"$22,700,000",846.0,TRAVIS.RAY@SHORT.COM,Brittany Shepherd,05/17/26,
+10322,May Ltd,Churned,LOG,FL,U.S.,www.may.com,"November 04, 2017",Gold,,,DOUGLAS.MORENO@MAY.COM,Matthew Alexander,07/04/2025,acquired by parent co
+10717,Williams Group,Active,23,New York,United States,https://www.williams.com,05/18/20,Gold,6000000,3997,JESSICA.GORDON@WILLIAMS.COM,James Pacheco,07/24/2024,acquired by parent co
+10280,Hamilton Group,Active,MFG,Illinois,US,https://www.hamilton.com,22-Jul-2024,Silver,"$16,100,000",528,kevin.patton@hamilton.com,Tony Le,19-Dec-2025,do not contact billing before 9am
+10953,Wells PLC,Active,MFG,Tennessee,United States,www.wells.com,2021-05-14,Bronze,n/a,  2960 ,brenda.tran@wells.com,Robert Peterson,01/26/26,
+10180,Bell LLC,Active,CONST,AB,Canada,www.bell.com,2020-04-23,Silver,"$19,150,000",1645,lisa.thompson@bell.com,Julie Dominguez,04/04/23,
+10338,White Inc,Prospect,TECH,Arizona,US,www.white.com,21-Aug-2024,,32600000,2857,angela.sloan@white.com,Jennifer Morris,2025/03/07,do not contact billing before 9am
+10781,Garza-Gray,Closed,ENR,Georgia,USA,N/A,06/20/24,,"$26,750,000",unknown,erica.miranda@garza-gray.com,Antonio Garza,"January 24, 2026",
+10379,Hernandez-Ward,Active,TECH,Ontario,Canada,https://www.hernandez-ward.com,01/31/2018,Bronze,5500000,307,ronald.phillips@hernandez-ward.com,Lindsay Gonzalez,08/18/19,
+10287,Mccormick-Jones,Active,MFG,Michigan,US,https://www.mccormick-jones.com,05/18/17,Gold,"$20,300,000",708.0,vicki.mendoza@mccormick-jones.com,Jonathon Knapp,06/23/19,do not contact billing before 9am
+10151,Maxwell-Jones,Active,23,QC,Canada,N/A,2024/11/19,Bronze,"$36,750,000",3106,cynthia.schmidt@maxwell-jones.com,Ricardo Bell,01/12/26,
+10657,Aguilar PLC,Prospect,MFG,MI,US,www.aguilar.com,12/25/2017,Silver,45000000,,valerie.powell@aguilar.com,Edward Wood,14-Jun-2023,acquired by parent co
+10426,Smith Inc,Active,LOG,New York,United States,https://www.smith.com,10/05/25,Strategic,n/a,  2455.0 ,rebecca.conley@smith.com,Brittany Davis,02/02/2026,
+10259,Hart and Sons,Prospect,MFG,PA,US,https://www.hart.com,02-Apr-2025,Silver,"$34,250,000",,joyce.smith at hart.com,Lauren Cortez,"May 05, 2025",
+10886,Tucker-Moody,Active,MFG,NY,USA,https://www.tucker-moody.com,2019/09/29,Silver,,,douglas.lawrence@tucker-moody.com,Steven Small,"June 29, 2021",
+10382,Baker Group,Active,MFG,Arizona,United States,https://www.baker.com,2017/09/23,Silver,"$28,300,000",  3811 ,JOSE.HOOD@BAKER.COM,Brittany Horton,2021/06/28,moved HQ 2024
+10820,"Sanders, Lewis and Reyes",Active,TECH,California,US,https://www.sanders.com,03/03/2026,Silver,10550000,1564,rodney.harper@sanders.com.,Justin Williams,29-Jun-2026,do not contact billing before 9am
+10101,Pollard and Sons,Inactive,CONST,GA,US,https://www.pollard.com,01/09/2022,,14.35M,,ashley.hall@pollard.com,Amanda Garner,03/09/22,
+10263,Kirby and Sons,Inactive,23,AZ,USA,,10/21/2019,Strategic,24900000,,carlos.hernandez@,Jesus Brown,2022-11-12,
+10181,"White, Taylor and Baldwin",Active,ENR,California,United States,https://www.white.com,06/24/24,,,200,sherry.johnson@white.com,Rick Blackwell,29-Aug-2025,
+10214,"Clayton, Patel and Erickson",Active,PS,MI,USA,https://www.clayton.com,05-Mar-2020,Gold,"$400,000",1370,kevin.cabrera@clayton.com,Michael Whitney,07/22/2022,renewal call scheduled
+10421,"Scott, Nichols and Williams",active,ENR,Quebec,Canada,www.scott.com,03/28/2022,Gold,n/a,1430,virginia.stanley@scott.com,Alicia Norris,11/18/24,acquired by parent co
+10462,"Moore, Daniels and Powell",ACTIVE,MFG,Florida,US,www.moore.com,26-Aug-2018,Silver,1.10M,3235,michael.ware@moore.com,Erin Carter,08/13/2019,
+10274,"Sanders, Ayala and Johnson",Active,31,PA,,N/A,2021-07-01,,"$15,300,000",3651,joshua.riddle@sanders.com,Henry Pugh MD,04-Sep-2023,do not contact billing before 9am
+10526,"Clark, Carpenter and Nguyen",Prospect,CONST,MI,United States,https://www.clark.com,06/06/20,Bronze,34950000,3735,chloe.green@clark.com,Cynthia Ruiz,,renewal call scheduled
+10219,"Mendoza, Bennett and Frye",Inactive,MFG,CA,US,www.mendoza.com,03/07/21,Gold,30400000,2831.0,steve.patel@mendoza.com,Megan Dillon,2026-03-30,acquired by parent co
+10335,Quinn-Wilson,active,CONST,IN,U.S.,https://www.quinn-wilson.com,05/23/2018,Silver,"$9,950,000",unknown,rachel.rogers@quinn-wilson.com,Joseph Baker,11/19/2020,renewal call scheduled
+10472,"Miller, Hubbard and Kim",Active,CONST,FL,US,https://www.miller.com,2026/03/13,Silver,"$37,550,000",3030,randall.guerrero@miller.com,Joseph Taylor,07/29/26,acquired by parent co
+10779,Dyer-Martin,Active,LOG,TX,US,https://www.dyer-martin.com,09/13/2022,Silver,33600000,3492,ryan.edwards@dyer-martin.com,Phillip Carroll,06/02/2026,acquired by parent co
+,White Ltd,Active,,,US,www.white.com,2019/01/20,Silver,"$32,400,000",313,tracy.martinez@white.com,Seth Butler,2019-04-08,moved HQ 2024
+10919,Rosario-Stark,Active,PS,IL,US,,2024/12/10,Strategic,"$13,900,000",,james.murphy@rosario-stark.com,Mario Johnson,,renewal call scheduled
+92298,Allen Inc  ,Active,OTH,WA,US,www.allen.com,07/21/2020,Silver,,unknown,craig.johnson@allen.com,Michele Williams,2021/12/05,
+10455,"Stevenson, Hancock and Newton",Active,MFG,Washington,U.S.,https://www.stevenson.com,2021/04/26,Bronze,n/a,1129,anna.young@stevenson.com,Rebecca Roberts,2023-03-04,do not contact billing before 9am
+10112,Johnson-Greer,Inactive,,Quebec,Canada,https://www.johnson-greer.com,2022/05/13,Strategic,"$13,500,000",3783,randy.smith@johnson-greer.com,Paula Beltran,2025-06-04,
+10190,"Taylor, Richardson and Edwards",,HC,Tennessee,US,N/A,26-Sep-2023,Bronze,"$12,800,000",379.0,joshua.horne@taylor.com,Cody Holmes,"October 14, 2023",acquired by parent co
+10129,  Howard and Sons ,Active,PS,CO,US,https://www.howard.com,2023-04-21,Gold,,2565.0,brianna.smith@howard.com,Cameron Fisher,"December 20, 2024",renewal call scheduled
+10595,Long-Moore,Active,MFG,IN,US,https://www.long-moore.com,09/20/24,Bronze,"$39,500,000",1315,michael.bell@long-moore.com,Cynthia Good,2024-10-27,
+10929,Hernandez LLC,Active,OTH,Tenn.,U.S.,,"August 08, 2021",Bronze,,  unknown ,carrie.carter@hernandez.com,Kelly Sandoval,03/06/25,renewal call scheduled
+10520,Spencer and Sons,Prospect,MFG,MI,US,https://www.spencer.com,2019-11-15,Gold,30.85M,,thomas.gomez@spencer.com,Debra Valentine,2021/03/19,renewal call scheduled
+10738,"Rivera, Thornton and Wells",Churned,CONST,AZ,US,https://www.rivera.com,2025/07/20,,n/a,,keith.raymond@rivera.com,Ms. Bridget Cunningham,2026/09/03,
+10713,Ramirez Inc,Active,LOG,Indiana,US,https://www.ramirez.com,2017/11/22,,4100000,,melissa.ellis@ramirez.com,Greg Tanner,2021/11/29,renewal call scheduled
+10252,Bennett-Webster,Actve,CONST,NC,USA,https://www.bennett-webster.com,13-Nov-2018,,,1483,thomas.atkinson@bennett-webster.com,Michael Shaffer,2026/05/25,do not contact billing before 9am
+10277,Lopez Group,Inactive,CONST,QC,Canada,https://www.lopez.com,03/27/24,Gold,"$18,900,000",2328,angela.hunt@lopez.com,Brandon Spencer,20-Dec-2024,
+10194,Hicks-Martinez,Active,CONST,Ont.,CAN,https://www.hicks-martinez.com,03/23/17,Gold,"$37,200,000",1583,james.taylor@hicks-martinez.com,Allison Spencer,02/21/24,do not contact billing before 9am
+10368,Oconnor Group,Active,23,New York,US,https://www.oconnor.com,"February 14, 2019",Silver,"$39,050,000",2957,latoya.yu@oconnor.com,Carrie Novak,2021-04-04,renewal call scheduled
+10622,"Armstrong, Hart and Burch",,MFG,OH,US,www.armstrong.com,2018-10-27,Silver,,2966,kara.ward@armstrong.com,Randy Morris,12/01/21,
+10932,Jensen-Barnes,Active,HC,Ohio,US,www.jensen-barnes.com,"January 19, 2017",Bronze,"$8,200,000",3144,francis.gibson@jensen-barnes.com,Amanda Robinson,07-Nov-2023,moved HQ 2024
+10473,Robles-Atkinson,Active,TECH,North Carolina,US,https://www.robles-atkinson.com,01/02/26,Gold,"$37,200,000",3803.0,kenneth.walters@robles-atkinson.com,Stephen Sanford,02/10/2026,moved HQ 2024
+10397,  Bryant LLC ,Active,MFG,Arizona,US,https://www.bryant.com,04/20/25,Bronze,,856,janet.hill@bryant.com,Kathy Reid,11-Aug-2025,
+10347,Vargas Inc,Actve,MFG,BC,Canada,N/A,2025-01-12,Bronze,"$21,750,000",,ryan.brandt@vargas.com,Dean Edwards,28-Nov-2025,acquired by parent co
+10871,"Hernandez, Andrews and Levine",Active,MFG,Pennsylvania,USA,https://www.hernandez.com,2019/07/27,Strategic,"$8,300,000",1904,tina.lloyd@hernandez.com,Valerie Barnes,2020/05/28,
+10821,Ruiz LLC,ACTIVE,MFG,Texas,USA,https://www.ruiz.com,11/24/2020,Silver,"$20,900,000",,WENDY.CROSBY@RUIZ.COM,Linda Goodman,02/21/2022,
+10305,"Wilson, Hampton and Morrow",Active,31,NC,USA,www.wilson.com,"April 04, 2020",Gold,"$5,250,000",2277.0,michael.carson@wilson.com,Nathan Payne,"October 27, 2024",renewal call scheduled
+10339,Moon-Flores,Actve,MFG,Pennsylvania,USA,,16-Sep-2019,Platinum,20.45M,unknown,margaret.duncan@moon-flores.com,Michael Williams,03/11/26,renewal call scheduled
+10558,"Brown, Kelly and Moore",active,CONST,ON,CAN,,2023/04/28,Silver,,unknown,amanda.rodriguez@brown.com,Eugene Grant DDS,11/02/24,moved HQ 2024
+10156,"Cruz, Carpenter and Best",ACTIVE,TECH,CO,US,,05/03/2022,Bronze,"$3,900,000",716.0,joanne.williams@cruz.com,Laura Lopez,07/27/2026,
+10945,Foster LLC,Active,23,Ontario,Canada,N/A,09/13/2020,Bronze,,2739,ronald.bennett@foster.com,Ryan Scott,10/03/21,acquired by parent co
+10766,White LLC,,CONST,Colorado,U.S.,www.white.com,2018-11-11,Bronze,"$3,600,000",1481,tina.coleman@white.com,Jennifer Juarez,02/23/2024,
+10328,Peck-Anderson,Inactive,MFG,BC,CAN,www.peck-anderson.com,2018-12-26,Bronze,"$18,950,000",435,michelle.carroll@peck-anderson.com,Michael Farmer,09/25/19,renewal call scheduled
+10413,"Orozco, Hatfield and Thomas",Inactive,MFG,Colorado,US,https://www.orozco.com,2024-10-23,Silver,3.40M,68,MICHELLE.WHITE@OROZCO.COM,Gary Hatfield,12-Feb-2026,acquired by parent co
+10047,Hanson-Alvarado,ACTIVE,MFG,BC,CA,https://www.hanson-alvarado.com,07/08/22,Gold,"$39,100,000",,david.mccullough@hanson-alvarado.com,Mary Nguyen,2023-02-05,
+10353,Martinez Inc,ACTIVE,ENR,IN,USA,www.martinez.com,03/29/2026,Silver,40550000,,maria.haas,Rodney Watson,07/07/2026,moved HQ 2024
+10592,Guerrero-Alvarado,Active,MFG,GA,US,https://www.guerrero-alvarado.com,12/07/16,Bronze,"$4,300,000",3025,ROBERTA.WARD@GUERRERO-ALVARADO.COM,Eduardo Ware,28-Jul-2019,do not contact billing before 9am
+10452,"Mckinney, Craig and English",Active,TECH,North Carolina,US,www.mckinney.com,08/04/20,Silver,30750000,27,amanda.rich@mckinney.com,Adam Rodriguez,03/14/23,
+10253,Hart Group,Active,CONST,,MX,https://www.hart.com,"June 13, 2017",Strategic,30150000,593,angela.anderson@hart.com,Dalton Lucas,"May 30, 2022",renewal call scheduled
+10167,"Bowers, Young and Allen",Active,HC,BC,CA,N/A,2017/02/05,Silver,"$26,550,000",unknown,tammy.mueller at bowers.com,Cheyenne Gregory,"June 01, 2025",do not contact billing before 9am
+10414,Walters-Smith,Active,LOG,AB,Canada,https://www.walters-smith.com,30-Jun-2025,,"$18,250,000",2784.0,joshua.juarez@walters-smith.com,Phillip Burns,06/30/2026,do not contact billing before 9am
+10856,Cooper-Hall,Churned,MFG,ON,Canada,,2024-02-19,Gold,29.20M,61,jeffrey.stout@cooper-hall.com,Lance Kirby,2025-10-09,
+,"King, Tran and Dunlap",Active,MFG,New York,USA,https://www.king.com,"December 21, 2016",Silver,38050000,  2895 ,erin.wilson@king.com,Nicole Mack,2017-07-17,
+10147,Thompson-James,Active,HC,FL,US,https://www.thompson-james.com,2024/09/03,Bronze,,,JANE.MASON@THOMPSON-JAMES.COM,Renee Jones,12/18/24,moved HQ 2024
+10605,Christian Group,Active,MFG,California,US,https://www.christian.com,"August 23, 2017",Silver,7100000,3346,thomas.martin@christian.com,Jason Novak,18-Oct-2024,
+10376,Martin-Jones,active,HC,GA,United States,https://www.martin-jones.com,2020-07-06,Bronze,"$5,400,000",2049.0,shelly.spence@martin-jones.com,William Barry,2024/04/07,do not contact billing before 9am
+10567,Rios Inc,Churned,LOG,NY,USA,,2021/05/24,Gold,"$4,000,000",  1996 ,taylor.fowler@rios.com,Patrick Zamora,2023/01/14,acquired by parent co
+10751,"Cardenas, Brooks and Quinn",Active,ENR,OH,US,,12/02/2023,Silver,2400000,1598.0,andres.green@cardenas.com,Brianna Murray,02/07/25,acquired by parent co
+10122,Ferrell-Wilson,Active,MFG,NY,United States,https://www.ferrell-wilson.com,2017-07-09,,40100000,3743,JIMMY.MEDINA@FERRELL-WILSON.COM,Jacob Avery,"June 01, 2023",
+10933,Fowler Ltd,Inactive,MFG,Florida,USA,www.fowler.com,"June 27, 2021",Silver,"$34,950,000",unknown,jerry.hanson@fowler.com,Nicholas Cisneros,"July 26, 2022",
+10231,Wong-Higgins,Active,LOG,Tennessee,United States,https://www.wong-higgins.com,2024-04-10,Bronze,5100000,2812  ,alexis.rogers@wong-higgins.com,Michael Lee,2025-09-24,
+10293,Boyd LLC,,LOG,Florida,US,www.boyd.com,"December 26, 2017",Strategic,"$26,050,000",2585,thomas.kim@boyd.com,Emma Evans,2019-03-25,acquired by parent co
+10855,Wilson-Dean,Active,ENR,OH,U.S.,https://www.wilson-dean.com,2019-03-31,Gold,n/a,441,debbie.west@wilson-dean.com,Christopher Barber,11/23/2020,
+10749,"Flowers, Kennedy and Valdez",Prospect,CONST,Arizona,USA,https://www.flowers.com,2018/09/12,Gold,,817,patricia.butler@flowers.com,Michael Sanchez Jr.,2020/01/30,acquired by parent co
+10132,Simmons-Rodriguez,Active,OTH,IN,U.S.,https://www.simmons-rodriguez.com,2017-05-29,Bronze,35950000,,jennifer.wallace@simmons-rodriguez.com,Erica Hernandez,"February 27, 2018",
+10586,Diaz-Lee,Active,HC,ON,CA,https://www.diaz-lee.com,"February 23, 2023",Silver,26300000,unknown,melvin.rios@diaz-lee.com,Caroline Bailey,2025-03-30,moved HQ 2024
+10216,"Lane, Griffith and Silva",Inactive,MFG,AZ,USA,https://www.lane.com,2025-02-24,Silver,,1244,george.fuller,Sarah Hernandez,05-Jan-2026,renewal call scheduled
+10363,Young LLC,Churned,CONST,TX,US,,07/17/2021,Gold,"$10,250,000",1171,linda.wolfe@young.com,Alyssa Haynes,2025/03/22,acquired by parent co
+10333,Salazar-Brown,Inactive,,Michigan,US,https://www.salazar-brown.com,"June 29, 2024",Bronze,30050000,2098.0,elizabeth.barrett@salazar-brown.com,Adam Taylor,2026-04-10,
+10197,"Holmes, Anderson and Calderon",Active,LOG,Illinois,US,https://www.holmes.com,05/06/22,Silver,16.70M,713,andrea.matthews@holmes.com,Betty Shaw,10-Aug-2025,
+10463,"Moreno, Barajas and Colon",Active,PS,IN,US,,03/30/23,Bronze,13350000,1088,tina.smith@moreno.com,Jill Conway,"March 28, 2024",
+10791,"Hines, White and Smith",Active,MFG,Arizona,United States,,2020/06/22,Silver,n/a,,jacqueline.huffman@hines.com,Christy Hayden,"October 14, 2020",
+10822,Smith PLC,Active,TECH,British Columbia,Canada,N/A,28-Dec-2017,Bronze,,3623,christine.turner@smith.com,Jacob Donaldson,"November 30, 2018",acquired by parent co
+10133,Hill Ltd,Active,CONST,British Columbia,CA,https://www.hill.com,02-Mar-2022,Bronze,,1362.0,brenda.joseph@hill.com,Kyle Phillips,2024-05-26,acquired by parent co
+10710,Hall-Rodriguez,Actve,CONST,FL,US,www.hall-rodriguez.com,02-May-2023,Bronze,22400000,3678.0,JEREMY.YOUNG@HALL-RODRIGUEZ.COM,Curtis Vance,03/06/2025,
+10069,Reed Group,Active,CONST,TX,U.S.,https://www.reed.com,27-Sep-2018,Silver,"$44,150,000",1638,DORIS.JONES@REED.COM,Alexandria Fisher,2019/05/30,
+10481,Griffin-Hampton,Actve,LOG,Ontario,CA,,2017-09-05,,"$36,650,000",,tony.rodriguez@griffin-hampton.com,Angela Ramirez,2022/05/10,acquired by parent co
+10010,"Ryan, Burgess and Patterson",ACTIVE,HC,Texas,US,https://www.ryan.com,2020-01-27,Gold,34.35M,982  ,BRANDY.COX@RYAN.COM,Brenda Snyder PhD,10/31/2022,
+10654,"Wise, Gray and Snyder",On Hold,,IL,USA,www.wise.com,15-Feb-2026,Silver,"$29,200,000",2761,donna.davis@wise.com,Stacy Berger,08/03/2026,
+10770,Smith Ltd,Prospect,CONST,Florida,US,www.smith.com,"September 03, 2021",Bronze,"$8,950,000",1521,travis.garcia@smith.com,Matthew Miller,,
+10255,Lopez PLC,,TECH,Tennessee,USA,,05/09/2023,Gold,32250000,3995.0,jennifer.hansen@lopez.com,Sean Cook,2026-02-11,
+10487,Juarez and Sons,Active,MFG,AZ,US,https://www.juarez.com,2021/02/09,,27850000,2455,bryan.wood@juarez.com,Daniel Velez,2024-12-20,
+10529,  Marsh Ltd ,Active,TECH,QC,CAN,https://www.marsh.com,2023/04/08,Platinum,4500000,2044,edward.shaffer@marsh.com,Jonathan Cowan,2026/04/10,do not contact billing before 9am
+10006,James Group,Active,31,Washington,USA,www.james.com,2024-08-10,Bronze,n/a,2666,cynthia.diaz@james.com,Daniel Adams,05/08/2025,
+10803,Suarez-Giles,Active,HC,PA,United States,https://www.suarez-giles.com,"December 26, 2019",Gold,21050000,unknown,michael.baldwin@suarez-giles.com,Alisha Rasmussen,"March 04, 2020",
+10453,Thomas-Santiago,Active,TECH,QC,Canada,,2018/08/14,Strategic,,  2033 ,james.christensen@thomas-santiago.com,Dustin King,27-Jun-2019,moved HQ 2024
+10172,Brooks Inc,Prospect,MFG,CO,USA,https://www.brooks.com,"February 27, 2024",Silver,27500000,1502.0,lucas.garcia@brooks.com,Gabriela Thomas,31-Jan-2026,acquired by parent co
+10849,Wong-Santos,ACTIVE,MFG,TX,US,,16-Dec-2024,Strategic,"$32,800,000",,ryan.garrett@wong-santos.com,Cheryl Turner,2025/08/12,acquired by parent co
+10955,Brooks PLC,Active,LOG,OH,US,https://www.brooks.com,05/06/2023,Silver,7250000,unknown,morgan.torres@brooks.com,Kathryn Hopkins,07/21/2023,
+10121,Reid Group,Closed,TECH,NC,US,https://www.reid.com,11/22/25,Silver,"$18,200,000",771,regina.turner@reid.com,Charles Shah,02/16/2026,renewal call scheduled
+10215,"Parker, Roach and Wiggins",Active,MFG,NC,USA,www.parker.com,06/09/2020,Strategic,28500000,858,crystal.carlson,Matthew Stanton,"March 12, 2024",moved HQ 2024
+10662,English-Dominguez,Active,LOG,MI,United States,www.english-dominguez.com,09/07/2025,Silver,"$14,600,000",3491,sarah.hanson@english-dominguez.com,Jeff Wilkins,08/08/24,acquired by parent co
+10193,"Reed, Brown and Daniels",Active,LOG,Ohio,USA,https://www.reed.com,2024/06/16,Silver,36000000,206,patricia.york@reed.com,Tammy Little,07/18/24,renewal call scheduled
+10232,"Chase, Prince and Wilcox",Prospect,PS,AB,Canada,https://www.chase.com,03/31/22,Bronze,15150000,3839,zachary.miller@chase.com,Cathy Taylor,2025/12/04,renewal call scheduled
+10894,"Wallace, Roman and Lawson",Active,MFG,Ohio,USA,https://www.wallace.com,01/17/2025,Gold,"$20,500,000",2531.0,richard.williams@wallace.com,Allison Kim,2026-03-05,
+10675,ALVAREZ-ALVAREZ,ACTIVE,TECH,PA,United States,https://www.alvarez-alvarez.com,"September 15, 2021",Silver,,3193,stacy.nielsen@alvarez-alvarez.com,Michael Price,2023-09-20,renewal call scheduled
+10152,"Briggs, Young and Thomas",Active,MFG,Georgia,United States,https://www.briggs.com,01/20/2017,Silver,19900000,unknown,james.morrison@briggs.com,Mary Thompson,2023/08/13,moved HQ 2024
+10352,Johnson Group,Active,ENR,Georgia,USA,https://www.johnson.com,05/17/23,Gold,n/a,1969,melissa.hawkins@johnson.com,Anna Garcia,"November 13, 2025",
+10634,Morgan Group,active,ENR,IN,US,N/A,12/24/2025,Strategic,2450000,398,courtney.kirby@morgan.com,Jean Larson,"June 29, 2026",
+10851,Heath PLC,Churned,CONST,BC,Canada,https://www.heath.com,04/01/2017,Silver,"$28,900,000",,john.phillips@heath.com,Jenna Cook,2018/01/24,
+10175,Young-Martinez,Active,ENR,,MX,https://www.young-martinez.com,"September 19, 2017",Silver,4700000,,john.fowler@young-martinez.com,Amy Copeland,03/13/2022,renewal call scheduled
+10281,Wheeler-Gonzalez,ACTIVE,CONST,,Mexico,https://www.wheeler-gonzalez.com,2017/11/23,,"$9,450,000",1070,daniel.torres@wheeler-gonzalez.com,Evelyn Oliver,08/04/2019,
+10505,Moore Ltd,Churned,MFG,Colorado,US,https://www.moore.com,18-May-2025,Strategic,"$27,900,000",unknown,brenda.green@moore.com,Krystal Carr,"April 25, 2026",
+10036,Wise-Walsh,active,TECH,AZ,US,www.wise-walsh.com,10-Sep-2025,,"$44,750,000",686.0,jose.figueroa@wise-walsh.com,Jessica Smith,01/08/2026,
+10801,"Manning, Walls and Robinson",Active,CONST,Ohio,US,https://www.manning.com,12/01/22,Gold,11650000,,daniel.lewis@manning.com,Jason Roy,04/08/23,renewal call scheduled
+10867,Peterson-Wagner,Active,CONST,Ontario,CAN,,01/25/2023,Gold,"$38,850,000",unknown,christopher.watson@peterson-wagner.com,Heather Ortega,"February 09, 2026",
+10065,Howell and Sons,Active,MFG,,MX,,05-Apr-2023,Gold,41550000,unknown,david.caldwell@howell.com,Claudia Lyons,"January 04, 2026",
+10762,Matthews and Sons,Active,CONST,GA,U.S.,,"July 20, 2022",Silver,"$38,250,000",2909,jack.bell@matthews.com,Ryan Mcmahon,16-Feb-2024,moved HQ 2024
+10348,Haynes-Moss,active,PS,Colorado,USA,https://www.haynes-moss.com,2021/05/08,Gold,"$35,350,000",3477.0  ,louis.nelson@haynes-moss.com,Dale Chan,03/05/2022,do not contact billing before 9am
+10153,"Snyder, Webster and Wolf",Churned,CONST,Indiana,USA,https://www.snyder.com,09/18/2020,Silver,10800000,1195.0,shane.glass@snyder.com,Madison Weber,2024/01/25,moved HQ 2024
+10104,Jones LLC,ACTIVE,ENR,Ohio,US,https://www.jones.com,09/15/17,Strategic,18850000,3104,matthew.schwartz@jones.com,Sarah Phelps,2022-11-01,renewal call scheduled
+10126,May PLC,Active,LOG,Indiana,United States,www.may.com,27-Feb-2023,Gold,9400000,,tasha.williams@may.com,William Buchanan,2023-11-14,acquired by parent co
+10018,"Campos, Vaughn and Marquez",Churned,TECH,IN,United States,www.campos.com,"May 26, 2026",,"$23,850,000",unknown,raymond.powers@campos.com,Steven Hayes,"August 30, 2026",renewal call scheduled
+10939,Johns-Jones,Active,PS,IN,United States,N/A,08-Dec-2023,Silver,,,drew.glass@johns-jones.com,Cheryl Gray,"August 31, 2026",renewal call scheduled
+10804,"Johnson, Stevenson and Lindsey",On Hold,HC,WA,USA,,"April 20, 2022",Silver,"$38,050,000",2431,brian.lowery@johnson.com,Dawn Cruz,"August 24, 2026",moved HQ 2024
+10793,Boyd LLC,Active,TECH,CA,USA,,"December 06, 2025",Bronze,"$30,600,000",837,steven.allen@boyd.com,Pamela Richard,2025/12/06,renewal call scheduled
+10664,House-Johnston,Active,MFG,AZ,US,www.house-johnston.com,06/03/2025,Gold,"$23,800,000",2186,arthur.johnson@house-johnston.com,Mr. Kevin Nixon,07/03/25,
+10723,"Cox, Williams and Reyes",,CONST,GA,,www.cox.com,25-May-2025,Gold,2850000,730,steven.williams@cox.com,Matthew Bush,,
+10610,"Williams, Hughes and Hubbard",Active,MFG,IN,US,https://www.williams.com,26-Aug-2025,,"$35,700,000",443,sydney.lee@williams.com,Stephen Ayala,08/11/2026,acquired by parent co
+10915,Braun Ltd,Inactive,HC,FL,,https://www.braun.com,2024/11/06,Gold,"$13,350,000",3562,erica.mendez@braun.com,Sonya Smith,07/17/2026,moved HQ 2024
+10862,Hammond-Carrillo,Prospect,TECH,Washington,United States,https://www.hammond-carrillo.com,2017-05-05,Silver,"$44,900,000",3485,angela.kemp@hammond-carrillo.com,Shelly Munoz,23-Jul-2023,acquired by parent co
+93398,SHAW-FARRELL,Active,PS,IL,USA,https://www.shaw-farrell.com,07/04/2025,Strategic,"$22,750,000",unknown,ERIC.YU@SHAW-FARRELL.COM,Cody Larson,11/08/2025,
+10535,Sweeney-Jones,On Hold,23,PA,,https://www.sweeney-jones.com,"September 03, 2022",Bronze,"$10,650,000",2737,fernando.perez@sweeney-jones.com,Eddie Adams,10/06/2025,acquired by parent co
+10185,"Coleman, Jordan and Carney",Active,LOG,Ohio,USA,www.coleman.com,21-Aug-2018,Bronze,,1977  ,henry.carter@coleman.com,Garrett Phillips,09/06/24,renewal call scheduled
+10276,"Moore, Price and Ward",Inactive,CONST,AB,CA,https://www.moore.com,"December 17, 2016",Strategic,35250000,,christopher.hahn@moore.com,Philip Garcia,08/16/23,
+10722,"Daniels, Norton and French",Active,MFG,NC,United States,www.daniels.com,07/05/19,Silver,n/a,,christopher.gilmore@daniels.com,Amy Dougherty,2023-04-09,renewal call scheduled
+10630,Jennings LLC,Active,MFG,NY,USA,https://www.jennings.com,07/06/2018,Gold,,511,randy.carroll@jennings.com,Sandra Lee,2019/11/18,acquired by parent co
+10004,Blair PLC,Active,MFG,Georgia,USA,https://www.blair.com,12-Oct-2019,,13.75M,1398,david.nielsen@blair.com,Edward Fuller,01/10/25,moved HQ 2024
+10897,Johnson Inc,Active,ENR,Pennsylvania,,https://www.johnson.com,,Silver,39200000,3005.0,kenneth.garcia@johnson.com,Steven Scott,06/13/2019,
+10369,"Preston, Austin and Kelly",Active,MFG,,US,,"October 23, 2020",Silver,9.80M,1633,elizabeth.olsen@preston.com,Nicholas Phillips,01/20/2021,moved HQ 2024
+10057,Jones-Mitchell,Active,ENR,,United States,N/A,2020-01-24,Silver,,218.0,joseph.flores@jones-mitchell.com,Brenda Hall,2025/01/01,
+10810,Chavez-Johnson,Active,PS,IL,USA,https://www.chavez-johnson.com,05/30/2021,Bronze,17.85M,478,brett.may@chavez-johnson.com,Rachel Taylor,02/21/2025,moved HQ 2024
+10438,"Gray, Montoya and Miller",Closed,31,Georgia,USA,www.gray.com,11/19/2023,Gold,"$40,800,000",1290,SEAN.BERRY@GRAY.COM,Jonathan Stewart,"August 01, 2024",do not contact billing before 9am
+10641,Lambert-Nelson,Active,CONST,MI,US,https://www.lambert-nelson.com,05/09/2020,Silver,"$42,550,000",2306,eric.wilson@lambert-nelson.com,Kristin Garcia,12/30/2021,acquired by parent co
+10668,Fisher-Yu,Active,31,AZ,USA,https://www.fisher-yu.com,07/03/2024,Gold,"$5,850,000",unknown,lauren.roberts@,Thomas Curry,09/26/25,acquired by parent co
+10746,Fitzpatrick PLC,Active,MFG,Colo.,US,www.fitzpatrick.com,10/07/18,Silver,"$22,950,000",3824,katelyn.davis@fitzpatrick.com,Thomas Perry,02/18/20,do not contact billing before 9am
+10082,Miller-Wright,Active,HC,FL,US,,05-Jun-2026,Gold,"$24,250,000",1679,angela.butler@miller-wright.com,Lisa Rowe,09/08/26,do not contact billing before 9am
+10577,Hall LLC  ,,MFG,CA,US,www.hall.com,2025/03/18,Bronze,"$38,550,000",2268,christopher.ross@hall.com,Morgan Cummings,26-Feb-2026,acquired by parent co
+10545,Robles PLC,Active,,TN,USA,https://www.robles.com,2021/01/27,Strategic,18150000,3609,nathaniel.jenkins@robles.com,Jennifer Martin,03/24/2025,acquired by parent co
+10547,"Cohen, Mitchell and Paul",Active,MFG,ON,CAN,N/A,2022-07-01,Silver,21400000,3924,lisa.gutierrez@cohen.com,Catherine Roberts,02/03/2023,
+10095,Pennington Group,Inactive,,GA,USA,www.pennington.com,2017-09-21,Bronze,"$8,750,000",1238,nicole.washington@pennington.com,Mark Lloyd,2018/09/02,
+10359,Mayo Ltd,Churned,CONST,AB,Canada,https://www.mayo.com,2023-01-14,,"$37,450,000",388,michael.stephens@mayo.com,Dr. Jonathan Price,"August 07, 2026",do not contact billing before 9am
+10405,"Farley, Curtis and Lopez",Active,LOG,Florida,,https://www.farley.com,10/29/21,Gold,37500000,381,zachary.allen@farley.com,Scott Patrick,05/25/2025,
+10360,Johnson PLC,Active,TECH,,MX,www.johnson.com,2020-06-28,Bronze,"$38,450,000",3031.0,jeffery.huang@johnson.com,Amy Frey,11/20/2021,
+10805,"Mullen, Cox and Burnett",Active,LOG,AZ,,,2021/05/24,Gold,"$41,600,000",,david.camacho@mullen.com,Jasmine Browning,2026-06-07,
+10071,"Nelson, Morton and Medina",Prospect,CONST,Ohio,US,www.nelson.com,2023-06-30,Silver,"$3,850,000",,timothy.graham@nelson.com,Debra Christian,07/18/2025,
+10587,Hanson-Alexander,Active,CONST,WA,US,N/A,04/19/22,Silver,"$30,050,000",,SANDRA.HALL@HANSON-ALEXANDER.COM,Brittney Chandler,2022/06/07,
+10564,Cannon-Moore,Active,MFG,CA,,https://www.cannon-moore.com,"February 10, 2026",Gold,18400000,48.0,justin.ortiz@cannon-moore.com,Brent Hopkins,2026/04/26,
+10494,Berry and Sons,Active,ENR,NY,USA,,2026/03/15,Silver,"$26,300,000",2322,DENNIS.HUNT@BERRY.COM,Bridget Jackson,"April 19, 2026",acquired by parent co
+10337,"Craig, Wilson and Yang",Active,ENR,IL,United States,https://www.craig.com,03/12/22,Silver,"$9,800,000",3534,aaron.trevino@craig.com,Angel Cox,2024-10-16,
+10948,Baker Inc,Active,PS,NC,US,www.baker.com,22-May-2021,Gold,"$10,900,000",3520,michael.miller@baker.com,Kayla Schneider,2024/10/31,acquired by parent co
+10111,Gonzalez-Cruz,Active,MFG,Arizona,US,https://www.gonzalez-cruz.com,2019-09-25,,"$33,150,000",,timothy.young@gonzalez-cruz.com,Laura Haney,04/30/2024,renewal call scheduled
+10451,Gordon Ltd,Actve,TECH,CA,USA,https://www.gordon.com,2020-11-20,Strategic,"$39,550,000",1519,dana.page@gordon.com,Kristina Aguilar,04/20/2025,renewal call scheduled
+10669,"Glover, Green and Soto",Active,LOG,California,,,25-Apr-2020,,26650000,3542,belinda.berry@glover.com,Dorothy Mclaughlin,2022-06-05,
+10167,"BOWERS, YOUNG AND ALLEN",Active,HC,BC,CA,N/A,2017/02/05,Silver,"$26,550,000",unknown,tammy.mueller at bowers.com,Cheyenne Gregory,"June 01, 2025",do not contact billing before 9am
+10074,Black and Sons,Active,TECH,N.C.,U.S.,www.black.com,12/11/2022,Bronze,3.25M,2129,christopher.cortez@black.com,Peter Vaughn DDS,04/16/25,do not contact billing before 9am
+10030,"Mills, Donovan and Harris",Inactive,ENR,NC,US,https://www.mills.com,2018-09-27,,22.20M,2477,jennifer.allen@mills.com,Michael Evans,2022/02/23,moved HQ 2024
+10324,Lawrence Group,Active,TECH,MI,US,https://www.lawrence.com,"August 26, 2022",Bronze,"$40,300,000",574,michael.jordan@lawrence.com,Danielle Newman,2023/11/30,
+10589,Benson-Rodriguez,Prospect,31,CA,USA,https://www.benson-rodriguez.com,"June 26, 2023",Gold,34350000,3688,shannon.johnson@benson-rodriguez.com,Joshua Harris,"March 10, 2026",
+10773,"Miranda, Wheeler and Avila",Prospect,CONST,CA,United States,,06/17/2017,Silver,37.20M,3884,laurie.harding@miranda.com,Melvin Clements,"January 07, 2024",
+10378,"Spencer, Frost and Fernandez",Active,MFG,TX,US,https://www.spencer.com,12/12/2019,Strategic,"$43,650,000",2292,donna.evans@spencer.com,James Dunn,09/03/2024,
+10570,"Garrett, White and Curry",ACTIVE,MFG,Wash.,U.S.,N/A,2018-12-29,Gold,9750000,1964,robert.garcia@garrett.com,Heather Ellis,"December 22, 2021",
+10192,Farrell Group,Active,TECH,Illinois,USA,https://www.farrell.com,"May 21, 2020",Strategic,"$31,850,000",2958,gerald.reeves@farrell.com,Rita Ponce DVM,07/02/24,
+,Weaver-Gibson,Active,HC,FL,US,https://www.weaver-gibson.com,07/03/2017,Strategic,25750000,2133,kimberly.hunter@weaver-gibson.com,Sonya Harvey,08-Dec-2023,moved HQ 2024
+10992,Martin-Gonzalez,Active,MFG,Arizona,US,,09/27/17,,"$33,700,000",22,roger.obrien@martin-gonzalez.com,Kenneth Faulkner,,
+10969,Riddle-Tran,Active,,Pennsylvania,US,N/A,31-Mar-2020,Bronze,"$14,750,000",2632,wanda.jones@riddle-tran.com,Randall Nguyen,2021/02/20,
+10389,"Dean, Mills and Barnes",Churned,HC,FL,United States,https://www.dean.com,06/22/2018,Silver,"$22,000,000",3090,robert.hernandez@dean.com,Olivia Ayers,"July 15, 2023",acquired by parent co
+10652,Thompson Ltd,Active,ENR,Ontario,CAN,www.thompson.com,03/15/19,Silver,"$22,650,000",3788,christian.galvan@thompson.com,Katelyn Vargas,"February 22, 2020",
+10330,Fuller-Mason,Active,MFG,North Carolina,United States,N/A,2022/06/12,Gold,32900000,unknown,robert.miles@fuller-mason.com,Joshua Jensen,2023/06/11,
+10977,Rogers and Sons,Active,MFG,CA,USA,www.rogers.com,27-Nov-2018,Bronze,36850000,unknown,erin.brown@rogers.com,Anne Conley,15-Jun-2021,do not contact billing before 9am
+10892,Lee PLC,,MFG,GA,US,,"May 23, 2024",Bronze,29200000,729,amber.todd@lee.com,Kelly Christensen,"November 08, 2024",
+10476,White PLC,Churned,LOG,Georgia,US,https://www.white.com,"February 05, 2026",,"$27,200,000",,mary.lee@white.com,Robert Phelps,24-Jul-2026,moved HQ 2024
+10491,Eaton-Smith,Active,HC,OH,United States,https://www.eaton-smith.com,03-May-2021,Strategic,21.95M,1339,nicole.gonzales@eaton-smith.com,Jose Campbell,2025/08/20,
+10488,Hughes-Hardin,active,MFG,Arizona,US,https://www.hughes-hardin.com,2023-06-05,Silver,"$17,550,000",2303,nicole.williams@hughes-hardin.com,Ashley Schmitt,2026/03/09,do not contact billing before 9am
+10349,"Rodriguez, Garcia and Cole",Churned,MFG,New York,U.S.,https://www.rodriguez.com,10/04/17,Bronze,1200000,1387,lee.martinez@rodriguez.com,Randy Hayes,10/07/2019,
+10331,Miller-Miller,Inactive,,,Mexico,N/A,"September 06, 2022",Gold,"$34,100,000",689,samantha.mccann@miller-miller.com,Gabriel Willis,04-Oct-2023,
+10138,Parrish-Griffith,Active,MFG,New York,United States,https://www.parrish-griffith.com,02/26/19,Silver,16450000,2959  ,tanya.burke@parrish-griffith.com,Kenneth Lewis,"July 03, 2022",do not contact billing before 9am
+10108,"Sparks, Jackson and Miller",Active,MFG,Colo.,US,https://www.sparks.com,2017-11-29,Bronze,"$22,000,000",unknown,monica.harvey@sparks.com,Thomas Thomas,2018/06/15,do not contact billing before 9am
+10548,"Gibson, Chavez and Graves",Active,CONST,NC,U.S.,https://www.gibson.com,10/02/25,Silver,24.45M,2278,travis.flores@gibson.com,Wayne Johnson,10/11/2025,renewal call scheduled
+10579,"Stokes, James and Deleon",Active,MFG,PA,US,https://www.stokes.com,11/29/2018,,"$10,600,000",2886,sandra.cook@stokes.com,Jessica Conrad,"June 03, 2024",renewal call scheduled
+10325,Tran PLC,active,HC,MI,United States,www.tran.com,2020/01/28,Silver,"$1,450,000",unknown  ,jennifer.mitchell@tran.com,Alyssa Boone,2025-02-19,
+10247,Allen Inc,Active,OTH,WA,US,www.allen.com,07/21/2020,Silver,,unknown,craig.johnson@allen.com,Michele Williams,2021/12/05,
+10597,Prince-Sandoval,On Hold,LOG,,CAN,www.prince-sandoval.com,"June 19, 2027",Gold,"$21,450,000",42.0,christopher.reyes@prince-sandoval.com,Lisa Garrett,01-Dec-2024,moved HQ 2024
+10594,Gonzalez Group,Active,ENR,AZ,US,https://www.gonzalez.com,2016/11/25,Strategic,17400000,2851,ann.marquez@gonzalez.com,Thomas Torres,10/25/2019,
+10298,"Church, Edwards and Price",,OTH,Pennsylvania,USA,www.church.com,06/06/2017,Bronze,"$18,000,000",,philip.wilson@church.com,Jimmy Thompson,2025/10/16,
+10474,"Wong, Bernard and Smith",ACTIVE,MFG,Illinois,US,,23-Jul-2019,Strategic,14.15M,3192,NANCY.THOMAS@WONG.COM,Kenneth Long,27-Apr-2025,renewal call scheduled
+10000,"Rodriguez, Figueroa and Sanchez",Active,TECH,CA,USA,https://www.rodriguez.com,2018/02/22,Gold,"$4,850,000",2074.0,DONALD.GARCIA@RODRIGUEZ.COM,Kimberly Garza,24-Mar-2021,
+10550,Fisher-Floyd,active,LOG,,USA,https://www.fisher-floyd.com,2021-01-09,Silver,"$37,650,000",3629,tyrone.watson@fisher-floyd.com,Amanda Miller,,do not contact billing before 9am
+10563,Parsons-Allen,Active,MFG,Quebec,Canada,N/A,01/02/24,Silver,"$38,650,000",unknown,jennifer.barrett@parsons-allen.com,Jasmine Warren,2025-08-14,acquired by parent co
+10947,Simmons-Mcdonald,On Hold,PS,Mich.,US,N/A,02/01/2018,Silver,"$6,650,000",unknown,robert.ballard@simmons-mcdonald.com,James White,"July 04, 2022",do not contact billing before 9am
+10173,Mitchell Group,Inactive,HC,IN,US,https://www.mitchell.com,2024-11-29,Silver,,2520.0,heather.taylor@mitchell.com,Joan Smith,30-Mar-2025,
+10332,"Becker, Jones and Hale",Active,HC,GA,USA,https://www.becker.com,"February 16, 2019",Gold,11250000,3148,jessica.mathis@becker.com,Brandon Hamilton,09/03/22,acquired by parent co
+10404,Evans-Rodriguez,On Hold,31,,,,2024/04/26,Silver,,181,caleb.mcneil@evans-rodriguez.com,Shannon Green,05/07/2026,acquired by parent co
+10087,Kerr and Sons,Active,TECH,British Columbia,CAN,www.kerr.com,23-Jan-2023,Gold,"$36,100,000",3753,charles.martin@kerr.com,Paul Carroll,2023/02/23,acquired by parent co
+10637,Lloyd PLC,Inactive,MFG,MI,US,,"February 17, 2020",Strategic,13150000,683,eric.peterson@lloyd.com,Dr. Eric Murphy,"August 23, 2026",acquired by parent co
+10677,"Blanchard, Davis and Schmidt",Active,MFG,TN,USA,,15-Apr-2019,,"$19,100,000",3459,michael.richard@,Marissa Nelson,"May 07, 2024",
+10959,Hudson-Hayes,Active,LOG,WA,US,https://www.hudson-hayes.com,2019-12-14,Bronze,,unknown,patricia.davis@hudson-hayes.com,Juan Johnson,07/10/24,do not contact billing before 9am
+10853,Freeman Group,ACTIVE,TECH,Washington,US,https://www.freeman.com,04-Aug-2020,Gold,1400000,,william.hardy@freeman.com,Susan Dillon,27-Mar-2024,
+10011,Hernandez and Sons,Active,LOG,,CA,https://www.hernandez.com,"April 26, 2022",Platinum,41900000,3821.0,laura.henderson@hernandez.com,James Ferrell,30-Nov-2023,moved HQ 2024
+10625,Webb Ltd,Active,MFG,AZ,US,,"April 02, 2022",Bronze,28650000,,CASSANDRA.FRENCH@WEBB.COM,Jessica Abbott,2026-05-05,acquired by parent co
+10527,"Cooper, White and Coleman",Active,PS,,,N/A,2025/02/26,Gold,,1651,robert.goodwin@cooper.com,James Hayes,12/20/25,do not contact billing before 9am
+10719,Allen-Duarte,Active,LOG,AZ,USA,https://www.allen-duarte.com,26-Mar-2020,Platinum,42.90M,3934.0,allen.caldwell@allen-duarte.com,Joe Hudson,29-Aug-2026,
+10445,"Chapman, Barton and Hayes",Active,MFG,AB,Canada,https://www.chapman.com,04-Jun-2026,Bronze,"$29,950,000",1433,dominique.blanchard@chapman.com,Jonathan Moreno,29-Jul-2026,
+10643,Fernandez-Williams,Prospect,MFG,Fla.,US,https://www.fernandez-williams.com,08/07/2019,Strategic,"$33,250,000",1205.0,anthony.berger@fernandez-williams.com,James Miller,05/09/23,
+10435,Stone-Watts,Active,PS,North Carolina,US,https://www.stone-watts.com,11-Mar-2025,Gold,"$14,550,000",1342.0,CHRISTINE.REYNOLDS@STONE-WATTS.COM,Karen Alvarado,2026-08-16,
+10188,"Moore, Johnson and Allison",,PS,TN,United States,,2017-06-30,Silver,"$2,950,000",1612,erika.kim@moore.com,David Brewer,01/31/23,
+10162,Hansen-Schneider,ACTIVE,MFG,TX,United States,www.hansen-schneider.com,2025-12-28,Silver,10900000,,mark.anderson@hansen-schneider.com,Theresa Osborn,"December 30, 2025",renewal call scheduled
+10818,Acosta-Lopez,,PS,OH,US,N/A,11-Apr-2022,Platinum,35600000,881,henry.sparks@acosta-lopez.com,William Young,09/18/2022,moved HQ 2024
+10176,Carlson-Smith,Active,,Washington,United States,www.carlson-smith.com,2025/08/25,,35600000,1549,zachary.allen@carlson-smith.com,Jeffrey Mendez,05/09/2026,do not contact billing before 9am
+10411,"Carter, York and Ruiz  ",Active,OTH,Illinois,U.S.,,05/17/2022,Silver,30600000,1110.0,michelle.silva,Andrea Preston,12/11/2024,renewal call scheduled
+10470,Hughes-Mccoy,Active,CONST,GA,USA,,2017/06/13,Silver,20650000,228,ryan.smith@hughes-mccoy.com,Kimberly May,2026-07-01,acquired by parent co
+10949,House-Garcia,ACTIVE,LOG,Pennsylvania,USA,https://www.house-garcia.com,"September 18, 2025",Strategic,"$38,900,000",  753 ,charles.johnson@house-garcia.com,Craig Murphy,07/05/2026,do not contact billing before 9am
+10895,Johnson-Rice,Active,ENR,TN,USA,https://www.johnson-rice.com,2020-01-06,,,1576,patrick.davis@johnson-rice.com,Kimberly Mitchell,28-Jul-2025,acquired by parent co
+10089,"Williams, Reynolds and Morris",Inactive,31,MI,USA,https://www.williams.com,07/24/2024,Silver,,unknown,john.davis@williams.com,Sara Johnston,12/14/24,do not contact billing before 9am
+10833,Wheeler-Smith,Active,TECH,PA,,https://www.wheeler-smith.com,"August 08, 2020",Gold,n/a,2573,tara.douglas,Erika Dennis,03/18/22,acquired by parent co
+10863,Mccarthy Group,Active,CONST,Ohio,USA,https://www.mccarthy.com,17-Dec-2019,Silver,"$2,950,000",unknown,lauren.estes@mccarthy.com,Vanessa Harrington,08/08/20,
+,"Marsh, Nelson and Wolfe",Churned,OTH,NY,US,https://www.marsh.com,03-May-2019,Gold,40700000,,michael.ferguson@marsh.com,Charles Taylor,09/14/24,
+10557,Watson Inc,ACTIVE,OTH,NY,USA,,"December 12, 2020",Silver,"$43,750,000",,JOHN.PORTER@WATSON.COM,Gina Booker,2026/05/01,do not contact billing before 9am
+10442,"Walker, Peterson and Gallegos",Closed,MFG,BC,CA,N/A,,Bronze,1500000,unknown,tamara.carter at walker.com,Michaela Williams,2020/11/07,do not contact billing before 9am
+10241,Velasquez-Reese,Active,MFG,CA,US,www.velasquez-reese.com,2020/06/07,Gold,"$21,550,000",unknown,beth.williams@velasquez-reese.com,Arthur Mcknight,2022/05/28,
+10418,Fry-Bryant,Active,MFG,PA,USA,N/A,"March 05, 2025",Bronze,"$22,800,000",3798,abigail.warren@fry-bryant.com,Michael Anderson,05/12/2025,do not contact billing before 9am
+10155,Hayes-Brown  ,Churned,LOG,TX,United States,N/A,"July 21, 2019",Bronze,14800000,unknown  ,marie.jones@hayes-brown.com,Savannah Gilbert,11/07/2025,do not contact billing before 9am
+10555,Clay-Boyer  ,Active,MFG,CO,USA,https://www.clay-boyer.com,2018/02/11,Bronze,,1613,jeff.rodriguez@clay-boyer.com,Erika Jackson,02/04/2025,
+10543,Green-Torres,Active,MFG,QC,CAN,www.green-torres.com,"May 21, 2024",Gold,36.05M,775,aaron.ochoa@green-torres.com,Hailey Harrison,22-Oct-2025,do not contact billing before 9am
+10128,"Smith, Garrison and Thomas",Active,MFG,CA,United States,https://www.smith.com,2023/02/26,,"$4,850,000",unknown,david.king@smith.com,Matthew Johnson,04/08/23,do not contact billing before 9am
+10407,Aguilar PLC,Active,MFG,Florida,US,https://www.aguilar.com,"December 27, 2019",,33950000,1446,lisa.cooper@aguilar.com,Melissa Little,2021/02/17,do not contact billing before 9am
+98257,NGUYEN-DAVIS,active,OTH,Colorado,US,https://www.nguyen-davis.com,04/15/21,Silver,"$43,350,000",3421,SEAN.PARKER@NGUYEN-DAVIS.COM,Kyle Jennings,01/23/2024,
+10782,Hood LLC,Active,MFG,GA,US,https://www.hood.com,2017-05-23,Gold,"$5,850,000",unknown,lisa.silva@hood.com,Lori James,"December 29, 2024",moved HQ 2024
+10521,"Conrad, Lee and Mclaughlin",Active,CONST,OH,US,https://www.conrad.com,"December 16, 2016",Silver,"$10,350,000",2656.0,jimmy.allen@conrad.com,Daryl Conley,2027-07-12,
+10100,"Burns, Hernandez and Ryan",Inactive,MFG,NC,United States,https://www.burns.com,14-May-2025,Silver,17650000,,michael.arnold@burns.com,Jordan Morris,12/24/2025,
+10490,Black Group,Prospect,MFG,,MX,https://www.black.com,2019/02/18,Strategic,,1523,TERESA.WALKER@BLACK.COM,Robert Reed,2025/10/22,
+10990,Brown Group,Active,CONST,,CAN,https://www.brown.com,2017/06/05,,"$42,800,000",1611,chad.lee@brown.com,Brenda Harris,17-Jan-2019,do not contact billing before 9am
+10497,"Hoover, White and Keller",Active,OTH,Fla.,USA,https://www.hoover.com,2026/01/07,Silver,8450000,1115,JOSEPH.RAMSEY@HOOVER.COM,Jesse Garza,07/25/2026,renewal call scheduled
+10415,Anderson Group,ACTIVE,LOG,Illinois,USA,https://www.anderson.com,2024/12/09,Silver,,398,cynthia.powell@anderson.com,Janet Johnson,2026-02-08,acquired by parent co
+10106,Bright-Francis,Closed,OTH,TN,U.S.,https://www.bright-francis.com,2017/08/25,,"$36,500,000",,RYAN.GARCIA@BRIGHT-FRANCIS.COM,Shelia Wallace,2022/04/06,moved HQ 2024
+10029,"Hensley, Powell and David",Active,HC,IN,USA,,20-Oct-2019,Gold,40.40M,2420.0,ashley.riley@hensley.com,Bradley Sandoval,"January 25, 2025",
+10364,"Elliott, Hart and Lopez",Active,CONST,OH,US,https://www.elliott.com,10/26/22,,"$8,050,000",,vanessa.keith,Eric Henry Jr.,2025/01/21,
+10830,"Lewis, Bolton and Smith",Active,MFG,California,US,https://www.lewis.com,06/15/2021,Bronze,"$22,700,000",224,KATIE.WHITE@LEWIS.COM,Danielle Jimenez,04/04/23,
+10485,"Davis, Cox and Smith",Active,MFG,IL,USA,www.davis.com,23-Feb-2024,Bronze,,3445.0,JOHN.MAYNARD@DAVIS.COM,Miss Nicole Taylor,"October 09, 2024",moved HQ 2024
+10238,Stark Inc,Active,TECH,,Mexico,https://www.stark.com,2020-01-01,Platinum,"$6,250,000",3107,bryan.kelley@stark.com,Laura Hernandez,2026/02/13,
+10620,Williams and Sons,Active,PS,GA,US,www.williams.com,2017-10-18,Gold,n/a,468,brian.bailey@williams.com,Andrew Lane,"October 20, 2023",acquired by parent co
+10432,Pruitt-Webb,ACTIVE,MFG,WA,United States,,06-Apr-2021,Bronze,,,ASHLEY.KIM@PRUITT-WEBB.COM,Peggy Carr,22-Aug-2023,acquired by parent co
+10706,"Romero, Marshall and Sims",active,ENR,New York,United States,https://www.romero.com,"November 21, 2017",Silver,43050000,568,jared.brown@romero.com,Chase Anthony,"August 19, 2025",do not contact billing before 9am
+10315,Adams-Clayton,Active,CONST,AZ,USA,www.adams-clayton.com,05/23/2020,Silver,"$3,000,000",,matthew.lane@adams-clayton.com,Karina Cooper,2022/01/09,moved HQ 2024
+10127,Jones PLC,Active,MFG,CO,US,https://www.jones.com,2018-04-13,Silver,19850000,unknown,jamie.robinson@jones.com,Erin Hernandez,2022/01/17,
+10598,Butler PLC,Closed,TECH,Washington,US,,2019-11-03,Gold,30350000,unknown,eric.waller@butler.com,Erin Daniels,09/15/2026,
+10571,"Simmons, Garcia and Sparks",Churned,MFG,PA,US,https://www.simmons.com,06/07/2019,Silver,"$44,650,000",1621,andrea.wagner@simmons.com,Kimberly Greene,01/25/24,acquired by parent co
+10998,"Jones, Dyer and Riddle",Active,LOG,PA,U.S.,https://www.jones.com,"February 08, 2021",Silver,"$16,350,000",1837  ,david.frederick@jones.com,Phillip Krueger,01/20/25,moved HQ 2024
+10832,Hood and Sons,ACTIVE,MFG,AZ,US,https://www.hood.com,2025-05-26,Gold,9.10M,3996,anthony.stevens@hood.com,Karen Fuller,2026-06-25,
+10812,"Hines, Bradford and Jennings",Active,,MI,US,https://www.hines.com,"January 24, 2025",Bronze,"$21,700,000",3516,laura.flores@hines.com,Nicholas Green,2023/10/19,moved HQ 2024
+10515,Perez-Mccarty,ACTIVE,MFG,IL,USA,,12/22/17,Silver,,602.0,shawn.powell@perez-mccarty.com,Christopher Hunter,04/02/2024,renewal call scheduled
+10996,"Castillo, Cook and Espinoza",ACTIVE,MFG,MI,US,,,Platinum,n/a,1537,james.hendricks@castillo.com,Scott Cross,"April 30, 2023",do not contact billing before 9am
+10458,"Rodgers, Gonzalez and Hardy",Inactive,CONST,IN,US,https://www.rodgers.com,2017/08/12,Bronze,23.95M,1422.0,james.cole@rodgers.com,Mrs. Tonya Moss,06/03/2020,
+10619,Ramos-Burke,Actve,OTH,Ind.,,,2020/03/27,,,2439,adam.khan@ramos-burke.com,Mark Wilkins,2026-03-10,
+,"Martinez, Hicks and Kelly",Active,MFG,MI,US,https://www.martinez.com,2025/08/29,Silver,26300000,unknown,TIMOTHY.OLIVER@MARTINEZ.COM,Chad Williams,2026/03/29,acquired by parent co
+10509,Price Ltd,Prospect,LOG,CO,U.S.,N/A,2021/07/18,Silver,"$36,950,000",unknown,adam.davis@price.com,Timothy Graham,03/21/2023,moved HQ 2024
+10443,Vasquez Ltd,Active,PS,OH,US,https://www.vasquez.com,02/21/17,Gold,"$44,350,000",1145.0,julia.ortiz@vasquez.com,Craig Martinez,03/25/22,acquired by parent co
+10627,Morton-Stephenson,Active,CONST,IL,US,,27-Apr-2018,Bronze,38.80M,1513.0,jesse.roberts@morton-stephenson.com,Bruce Marshall,2020/03/26,
+10008,"Robinson, Nguyen and Tate",Active,31,WA,U.S.,www.robinson.com,2021/06/06,Silver,2650000,,brian.underwood@robinson.com,Jennifer Jones,2022-03-20,renewal call scheduled
+10250,Turner-Brown,Active,,NC,US,,07/17/2023,Bronze,"$27,400,000",3775  ,stacy.hobbs@turner-brown.com,Lori Simmons,14-Apr-2024,acquired by parent co
+,"Allen, Armstrong and Graves",Active,23,Washington,US,www.allen.com,2022-12-24,,"$23,600,000",3547,james.alexander@allen.com,Jason Harris,2024-10-24,moved HQ 2024
+10561,Hill-Guerra,Active,HC,MI,,https://www.hill-guerra.com,2017-11-09,Bronze,,unknown,robin.spencer@hill-guerra.com,Christopher Phillips,02/18/21,acquired by parent co
+10847,"Guzman, Tucker and Montgomery",Prospect,MFG,QC,Canada,https://www.guzman.com,09/22/2019,Silver,24.45M,,terri.ward@guzman.com,Melissa Foster,23-Jul-2020,moved HQ 2024
+10037,Landry Ltd,Active,LOG,GA,USA,,2019/07/06,Bronze,,2780,rebecca.gardner@landry.com,Lauren Hernandez,2022-03-18,
+10716,  Hamilton-Walker ,Active,PS,QC,Canada,https://www.hamilton-walker.com,"May 18, 2023",Gold,28750000,3639.0,sara.shah@hamilton-walker.com,Stephanie Butler,2023/09/03,
+10075,West-Smith,Active,MFG,,US,https://www.west-smith.com,2019-08-15,Gold,10700000,2007,kelly.sullivan@west-smith.com,Matthew Wood,01/18/2025,
+10721,"Smith, Burton and Cruz",,OTH,Ariz.,USA,https://www.smith.com,04/25/2020,,"$9,150,000",938,HANNAH.SCHMIDT@SMITH.COM,Paul Wolfe,10/09/22,
+10355,Stein LLC,Active,PS,,USA,https://www.stein.com,2019/01/11,Gold,"$18,450,000",2991.0,david.dunlap@stein.com,Thomas Hamilton,07/13/2019,
+10745,Taylor-Matthews,Active,LOG,TX,United States,https://www.taylor-matthews.com,2017/05/03,Bronze,,,christopher.clark@taylor-matthews.com,Sean Hatfield,07/17/20,
+10468,"Johns, Figueroa and Graham",Prospect,MFG,North Carolina,US,N/A,"July 17, 2018",Gold,,,lisa.jones at johns.com,Allison Love,06-Apr-2021,moved HQ 2024
+10262,"Mooney, Bernard and Warren",Inactive,ENR,California,US,https://www.mooney.com,11/25/2018,Silver,35650000,421.0,mary.jones@mooney.com,Amber Smith,30-May-2024,acquired by parent co
+10921,Wall-Underwood,Churned,PS,North Carolina,US,www.wall-underwood.com,"January 24, 2018",Bronze,36250000,145,april.young@wall-underwood.com,Kyle Gonzales,03-Jul-2024,
+10310,Estes Group,Inactive,MFG,Colorado,United States,https://www.estes.com,03/05/18,Bronze,,3613,samantha.riddle@estes.com,Beth Cline,05/21/27,do not contact billing before 9am
+10882,Chapman-Stone,Active,MFG,New York,United States,https://www.chapman-stone.com,11/17/2018,,,3816,RALPH.BAKER@CHAPMAN-STONE.COM,Mr. Jeremiah Galvan MD,"January 16, 2019",renewal call scheduled
+10884,Benson Group,Active,LOG,AZ,,https://www.benson.com,08/25/22,Gold,26.30M,1143.0,thomas.francis@benson.com,Jaclyn Crane,2025-09-01,renewal call scheduled
+10068,"Rivas, Sanchez and Terry",Active,LOG,Ohio,USA,N/A,10/28/19,Bronze,"$1,550,000",3890.0  ,kevin.sutton@rivas.com,Rebecca Knight,05/02/26,renewal call scheduled
+10532,"Grant, Patrick and Cooper",active,LOG,Fla.,,www.grant.com,12/11/23,Bronze,14550000,1589,robert.bell@grant.com,Lisa Ray,01/29/2026,
+10439,Mcgee-Smith,Churned,MFG,ON,Canada,https://www.mcgee-smith.com,16-Jan-2025,Gold,,1456,richard.johnson@mcgee-smith.com,Samantha Conner,19-Feb-2025,renewal call scheduled
+10650,"Jones, Turner and Murray",Active,HC,Pennsylvania,US,https://www.jones.com,05/28/2019,Gold,n/a,2817,brittany.allen@jones.com,Christopher Olson,"April 27, 2023",
+10944,Adams-Morales,Prospect,HC,AB,CA,https://www.adams-morales.com,"February 05, 2023",Platinum,32450000,2236,SAMANTHA.SILVA@ADAMS-MORALES.COM,Daniel Harris,,
+10140,"Villegas, Cardenas and Austin",Active,23,NC,U.S.,https://www.villegas.com,2016/11/30,,44500000,2175,dawn.johnson@villegas.com,Sandra Adams,03/27/2018,acquired by parent co
+10143,Wood Ltd,Inactive,MFG,IN,USA,https://www.wood.com,2024-12-27,Bronze,44950000,  3164 ,mark.pugh@wood.com,Sophia Moore,07/31/2025,do not contact billing before 9am
+10903,Smith Group,Active,,CA,USA,www.smith.com,2024/10/05,Bronze,,2963,joshua.king@smith.com,Yvonne Kirby,2025/11/10,renewal call scheduled
+10524,"Ramirez, Walker and Ray",Prospect,HC,Michigan,US,https://www.ramirez.com,10/20/2025,,34050000,3740,brian.lloyd@ramirez.com,Joshua Shaw,2026/06/22,renewal call scheduled
+10025,Martin Group,Active,MFG,MI,,https://www.martin.com,2017-07-07,,36950000,,timothy.hancock@martin.com,Carmen Smith,30-May-2020,renewal call scheduled
+10658,"Faulkner, Smith and Castro",Active,MFG,Florida,US,https://www.faulkner.com,2022/05/18,Gold,"$8,950,000",3634,TIFFANY.RODRIGUEZ@FAULKNER.COM,Andre Reynolds,07/22/2023,do not contact billing before 9am
+10546,"  Brewer, Clayton and Walker ",Active,HC,FL,USA,https://www.brewer.com,"May 16, 2019",Gold,"$4,950,000",1939,christian.garrett@brewer.com,Rebecca Austin,01/16/2021,renewal call scheduled
+10174,Smith and Sons,active,LOG,Ind.,United States,www.smith.com,"February 24, 2022",Silver,"$22,550,000",3488.0,mary.dunn@smith.com,Kelsey Rodriguez,05/24/2024,
+10403,Silva-Smith,Active,MFG,Tennessee,USA,https://www.silva-smith.com,2021-10-21,Silver,15350000,  1866 ,yvonne.levy@,Kristina Wheeler,11/10/25,renewal call scheduled
+10899,Flores PLC,Active,,NC,US,https://www.flores.com,01/03/2026,Gold,0.10M,2025,richard.washington@flores.com,David Mercado,,acquired by parent co
+10893,"Prince, Martinez and Mayer",Churned,ENR,Tennessee,USA,https://www.prince.com,05-Apr-2020,Silver,40050000,1238,HECTOR.SMITH@PRINCE.COM,Danielle Thornton,08/12/2025,acquired by parent co
+10930,Brown PLC  ,Active,LOG,Washington,U.S.,www.brown.com,2026-04-20,Bronze,32.25M,189,lori.hansen@brown.com,Gregg Bray,09/13/2026,
+10434,"Edwards, Bush and Gregory",Active,MFG,Alberta,Canada,https://www.edwards.com,2023-11-29,,22600000,176,katrina.ray@edwards.com,Vanessa Santiago,04-Sep-2025,
+10427,"Jones, Cummings and Conway",Prospect,OTH,Ontario,CA,www.jones.com,"October 14, 2017",Silver,"$2,750,000",1550.0,dawn.bryant@jones.com,Deborah Williams,07/21/2026,
+10748,Davenport-Torres,Prospect,MFG,B.C.,Canada,www.davenport-torres.com,26-Apr-2017,,n/a,153,anita.ford@davenport-torres.com,Aaron Baker,"January 10, 2019",
+10844,Miller Ltd,Active,LOG,Ontario,Canada,,2024/06/02,Gold,"$1,700,000",2672,kenneth.matthews@miller.com,Michael Hanson,2026/08/28,moved HQ 2024
+10870,"Acevedo, Miller and Edwards  ",Active,MFG,AB,CA,https://www.acevedo.com,2023-09-15,Bronze,,1821,tina.martin@acevedo.com,Peter Keller,03/28/25,
+10268,"Malone, Davis and Gray",Active,MFG,Alberta,Canada,N/A,03/28/23,,4950000,1124,angela.brown@malone.com,Christopher Porter,2024/09/21,renewal call scheduled
+10938,Bryant-Wood,Prospect,MFG,Ohio,U.S.,https://www.bryant-wood.com,01/01/24,Bronze,36250000,,nathan.jackson@bryant-wood.com,Rebecca Hanson,2025/05/07,acquired by parent co
+10235,"Carrillo, Vaughn and Fowler",Active,PS,Georgia,US,https://www.carrillo.com,2025/11/03,Platinum,"$28,450,000",1578.0,shelia.richardson@carrillo.com,Tyler Mendoza,12/19/25,moved HQ 2024
+10636,Warren and Sons,Active,,California,US,https://www.warren.com,"February 28, 2025",Bronze,44250000,2258.0,daniel.glover@warren.com,Susan Wallace,"November 02, 2025",acquired by parent co
+10912,Vasquez-Padilla,Active,CONST,Ontario,Canada,https://www.vasquez-padilla.com,13-Sep-2025,Bronze,27050000,258,catherine.smith@vasquez-padilla.com,Miss Ashley Ramirez,26-Apr-2026,
+10699,"Walker, Brock and Simmons",Active,MFG,Florida,,https://www.walker.com,"October 25, 2020",Silver,24350000,1627,lisa.hendrix@walker.com,Erika Daugherty,19-Aug-2023,renewal call scheduled
+10936,Robinson LLC,Active,CONST,AZ,USA,https://www.robinson.com,2023-01-25,Bronze,28250000,1688,jennifer.morgan@robinson.com,Cassandra Smith,02/19/25,moved HQ 2024
+10184,Kline-Hughes,ACTIVE,TECH,TX,US,https://www.kline-hughes.com,09/29/2025,Gold,n/a,1601  ,terri.crawford@kline-hughes.com,Tim Stone PhD,"May 29, 2026",
+10860,Howard LLC,Active,OTH,CA,USA,www.howard.com,07-Oct-2021,Silver,5350000,,michael.moore@howard.com,Stephanie Johnson,"December 17, 2025",
+10556,Richards-Foster,Churned,OTH,Indiana,US,https://www.richards-foster.com,01/30/2018,Bronze,"$32,150,000",unknown,john.novak@richards-foster.com,Melissa Barker,2021/06/06,moved HQ 2024
+10736,"Johnson, Stewart and Cooper",Active,ENR,AB,CAN,https://www.johnson.com,2022/04/12,,"$20,350,000",unknown,nathan.fernandez@johnson.com,Eric Knapp,04/21/2026,acquired by parent co
+10066,Jackson-Lawson,Active,LOG,PA,,https://www.jackson-lawson.com,2017-07-30,Silver,"$4,500,000",unknown,JULIE.WILSON@JACKSON-LAWSON.COM,Traci Rodriguez,02/18/2019,acquired by parent co
+90073,Rowe and Sons Inc,,MFG,FL,United States,,"November 22, 2024",,17600000,3088.0,jason.rojas@rowe.com,Shannon Bishop,2026-06-14,
+10715,"Burns, Forbes and Vargas",Prospect,MFG,IL,United States,https://www.burns.com,12/24/24,Silver,40000000,,mary.ramirez@burns.com,Nancy Wright,04/10/2025,do not contact billing before 9am
+10343,Randolph Inc,Churned,PS,Tex.,US,https://www.randolph.com,"June 05, 2026",Silver,"$27,250,000",,jesse.reed@randolph.com,Sherry Tapia,02-Aug-2026,
+10236,Adkins-Obrien,active,PS,,US,https://www.adkins-obrien.com,"October 02, 2025",Silver,17.35M,180,robert.dunn@adkins-obrien.com,Joshua Beck,07/05/26,
+10659,"Long, Flores and Reyes",Active,LOG,Ont.,Canada,www.long.com,"April 13, 2023",Silver,24300000,2483.0,patrick.gardner@long.com,Karen Lopez,08-Oct-2023,moved HQ 2024
+10539,Montgomery-Miller,active,CONST,,Mexico,https://www.montgomery-miller.com,2020/11/29,Bronze,,101,sarah.price@montgomery-miller.com,Oscar Ramos,02/02/21,
+10177,Duncan and Sons,Actve,MFG,Tennessee,US,https://www.duncan.com,02-Dec-2022,Silver,34.55M,1405,elizabeth.miller@duncan.com,Andrea Fox,03/25/2025,do not contact billing before 9am
+10045,"Hartman, Graham and Joyce",Active,LOG,North Carolina,United States,https://www.hartman.com,"August 20, 2025",Gold,30650000,1863,darrell.lam@hartman.com,Andrew Graham,2025/09/30,renewal call scheduled
+10544,Watts Group,Active,ENR,Calif.,US,N/A,12-Feb-2019,Gold,"$22,100,000",unknown,stacey.woods@watts.com,Jeffrey Carter,08-Dec-2021,renewal call scheduled
+10823,"Williams, White and Jackson",Active,CONST,WA,US,https://www.williams.com,2026/03/11,,"$5,500,000",2738,trevor.morgan@williams.com,Brandon Page,"August 31, 2026",renewal call scheduled
+10003,Lewis LLC,Active,LOG,AZ,US,www.lewis.com,2018/05/30,Silver,"$27,650,000",2399,curtis.james@lewis.com,Gregory Baker,2021/12/08,moved HQ 2024
+10744,Figueroa-Perry,On Hold,MFG,BC,CA,www.figueroa-perry.com,01/20/2017,Silver,16.60M,1525  ,scott.martin@figueroa-perry.com,Stephanie Chandler,2023-12-27,
+10910,Martinez LLC,Active,MFG,NY,US,www.martinez.com,10/07/2022,Gold,"$27,200,000",,sharon.wallace@martinez.com,Alejandro Campbell,2023/08/08,
+10533,"Banks, Thompson and Deleon",On Hold,MFG,Ohio,US,https://www.banks.com,2022/02/07,Silver,,3493,michael.nunez@banks.com,Dr. Steve James,18-Jul-2023,
+10454,Vaughn LLC,Active,TECH,AB,Canada,https://www.vaughn.com,15-Nov-2024,Gold,n/a,unknown,JAMES.WEAVER@VAUGHN.COM,Jesse Jensen,09/08/2025,
+10566,"Huff, Barrett and Fox",Active,ENR,Arizona,US,www.huff.com,"March 13, 2021",Bronze,,3203,jacqueline.scott@huff.com,Larry Jones,05/22/21,moved HQ 2024
+10067,Hickman PLC,Prospect,ENR,Colorado,United States,https://www.hickman.com,2019-11-14,Gold,"$15,650,000",unknown,erica.rubio@hickman.com,Miguel Jones,"November 28, 2021",
+10771,Foster Ltd,Active,,Tennessee,United States,,25-Dec-2024,Silver,"$39,550,000",1865.0  ,brittany.garcia@foster.com,Vanessa Brown,2025/02/10,do not contact billing before 9am
+10602,Turner-Reese  ,Active,LOG,Tennessee,US,https://www.turner-reese.com,2017-02-04,Silver,"$9,100,000",780,lorraine.walsh@turner-reese.com,Brittany Lopez,11/01/2025,renewal call scheduled
+10609,Meyer Group,On Hold,MFG,Georgia,US,https://www.meyer.com,11/02/2019,Silver,33250000,unknown,stephen.rich@meyer.com,Danielle Medina,06/13/2024,
+10538,Davis Group,ACTIVE,,Fla.,USA,,05/25/22,Gold,,287,amy.johnson@davis.com,Phillip Miller,13-Nov-2024,moved HQ 2024
+10044,WILSON LLC,Inactive,TECH,IL,United States,https://www.wilson.com,2025/11/15,Silver,5650000,unknown,gregory.estes,Brian Hamilton,2026-01-18,renewal call scheduled
+10975,"Williams, Walters and Mills",Closed,31,CO,USA,,"July 05, 2020",Gold,n/a,  unknown ,elaine.keller@williams.com,Michael Wallace,24-Dec-2021,
+10901,Miller-Fields,ACTIVE,MFG,California,USA,https://www.miller-fields.com,2022/08/07,Gold,41050000,  2745 ,james.faulkner@miller-fields.com,William Casey,16-Jul-2024,
+10739,Morgan-Rodriguez,Prospect,CONST,IL,,https://www.morgan-rodriguez.com,"December 11, 2019",Strategic,10150000,,timothy.williams@morgan-rodriguez.com,Audrey Johnson,02/28/2023,renewal call scheduled
+10776,Wolf Ltd,Active,MFG,PA,USA,https://www.wolf.com,2024/03/11,Silver,n/a,53,KAREN.SAUNDERS@WOLF.COM,Christina Bates,01/01/25,renewal call scheduled
+10059,"Shah, Smith and Gilmore",Active,LOG,TX,United States,https://www.shah.com,"April 01, 2026",Gold,"$6,300,000",1724.0  ,barbara.woods@shah.com,Elizabeth Price,06/05/2026,moved HQ 2024
+10861,Morgan Inc,Actve,MFG,,US,https://www.morgan.com,09/13/24,Gold,,3715.0,christina.martinez@morgan.com,David Peterson,09/04/2025,acquired by parent co
+10922,Garrett PLC,ACTIVE,MFG,Indiana,USA,,12/19/2023,,,310.0,david.villegas@,Jamie Wu,09/12/26,do not contact billing before 9am
+10935,"Wilson, Roberts and Lee",Active,CONST,NC,USA,https://www.wilson.com,11/02/25,Silver,"$25,500,000",  834 ,brenda.cannon@wilson.com,Allen Gonzalez,2026/08/11,moved HQ 2024
+10941,Clarke-Murphy,Closed,MFG,TN,USA,,01/18/22,Silver,23150000,2207,brian.flynn@clarke-murphy.com,Sarah Schmitt,22-Aug-2026,
+10874,Barron-Harrington,active,CONST,AZ,US,https://www.barron-harrington.com,08-Mar-2023,Gold,26250000,unknown,richard.gonzalez@barron-harrington.com,Andrew Cook,10-Mar-2024,acquired by parent co
+10390,Hart Inc,Inactive,CONST,,CAN,www.hart.com,08/03/25,Bronze,37.80M,63,KRISTI.DILLON@HART.COM,Sherry Baker,08/08/2026,do not contact billing before 9am
+10222,"Hill, Martinez and Rhodes",ACTIVE,ENR,Texas,United States,https://www.hill.com,2018-03-03,Silver,"$20,850,000",450.0,noah.baird@hill.com,Tina Ballard,2026-02-24,acquired by parent co
+10671,Hodge-Smith,Active,MFG,IL,USA,https://www.hodge-smith.com,02/17/2019,Bronze,30450000,unknown,daniel.thompson@hodge-smith.com,Brittany Griffin,11/11/24,
+10430,"Davis, Briggs and White",Active,,Washington,USA,https://www.davis.com,05-Feb-2024,Strategic,"$5,900,000",3430,RICHARD.RIVERS@DAVIS.COM,James Jefferson,06/09/2024,
+10792,"Hurley, Adams and Little",Active,LOG,FL,USA,https://www.hurley.com,08/18/23,Strategic,"$24,800,000",3342,lisa.farrell@hurley.com,Taylor Barber,2023/08/30,acquired by parent co
+10960,"Morrison, Johnson and Gonzalez",Active,CONST,Pennsylvania,US,www.morrison.com,"October 29, 2022",Bronze,21.20M,1615.0,rhonda.cruz@morrison.com,Eddie Warren,05/06/2024,do not contact billing before 9am
+10202,"Butler, Fowler and Jimenez",Churned,OTH,Colorado,US,https://www.butler.com,"June 02, 2023",Gold,"$36,400,000",1297,courtney.roberts at butler.com,Karen Ballard,2025/06/08,renewal call scheduled
+10742,Stewart-Jacobs,Active,HC,IL,USA,https://www.stewart-jacobs.com,03/11/24,Bronze,"$1,500,000",2949,sherry.kerr@stewart-jacobs.com,Charles Nash,23-Jun-2026,do not contact billing before 9am
+10712,Taylor-Cortez,ACTIVE,MFG,PA,USA,www.taylor-cortez.com,"May 28, 2020",Silver,40100000,1496,crystal.cantrell@taylor-cortez.com,Cameron Schwartz,2025-04-07,
+10660,Bridges-Ward,Active,LOG,TN,United States,https://www.bridges-ward.com,05-Oct-2017,,"$14,400,000",691,robert.roberts@bridges-ward.com,Beth Smith,24-Jul-2022,acquired by parent co
+10058,"Hernandez, Lewis and Perry",On Hold,CONST,AB,Canada,https://www.hernandez.com,2017-04-20,,"$4,250,000",120,mark.owens@hernandez.com,Ross Price,2022/05/11,moved HQ 2024
+10747,"Murray, Bradley and Melendez",Active,LOG,Quebec,Canada,https://www.murray.com,2025/11/30,Bronze,"$40,850,000",,james.collier@murray.com,John Carson,2027-03-06,do not contact billing before 9am
+10207,Jimenez-Davis,Active,TECH,FL,,www.jimenez-davis.com,04/30/2021,Silver,27550000,3592.0,phillip.bryant@jimenez-davis.com,Kevin Williams,02/09/24,
+10667,  Austin-Berger ,Active,MFG,Indiana,USA,www.austin-berger.com,2023/09/20,,"$25,300,000",3315,amanda.smith@austin-berger.com,Taylor Berry,"November 09, 2024",renewal call scheduled
+10885,"Phelps, Rodriguez and Wood",Inactive,LOG,Colorado,United States,,06/03/23,Silver,"$2,750,000",,keith.mills@phelps.com,Eric Brooks,2024-08-30,
+10904,Richards PLC,Active,MFG,Indiana,US,www.richards.com,09/04/2019,,4800000,,juan.martin@richards.com,Andrea Davis,2025-12-08,
+10507,"Cooper, Thornton and Fitzgerald",Active,CONST,AZ,USA,https://www.cooper.com,09/15/2021,Gold,24450000,562.0,melissa.hopkins@cooper.com,Jillian Lyons,07/08/2026,renewal call scheduled
+10146,"Brown, Harris and Dougherty",Active,CONST,Florida,,https://www.brown.com,12/16/17,Gold,"$37,600,000",3343,katrina.duran@brown.com,Bryan Jimenez,06/21/18,do not contact billing before 9am
+10880,Stone-Wright,Active,ENR,TN,USA,https://www.stone-wright.com,07/20/2025,Silver,,196,mark.aguilar@stone-wright.com,Heather Garcia,2026/05/30,
+10286,Fuentes Group  ,Active,ENR,QC,Canada,www.fuentes.com,2023/02/23,Gold,"$41,700,000",  1048 ,emily.taylor@fuentes.com,David Moore,2024/11/14,moved HQ 2024
+10346,Haynes-Watson,Inactive,23,North Carolina,USA,www.haynes-watson.com,06/12/2025,,,3048.0,TERRI.MILLER@HAYNES-WATSON.COM,Casey Wilkins,07/24/2026,do not contact billing before 9am
+10784,"Jones, Torres and Morgan",On Hold,MFG,IL,USA,,09/21/23,Silver,,705.0,andrew.nguyen@jones.com,Scott Bradley,09/09/2026,acquired by parent co
+10572,Orr-Pierce,Active,MFG,OH,US,,03-Oct-2023,Strategic,7.55M,168,wendy.kirk@orr-pierce.com,Mark Mckenzie,2026/09/04,renewal call scheduled
+10024,Ramos PLC,Active,MFG,Quebec,Canada,https://www.ramos.com,07/12/2018,Bronze,,2431,corey.pearson@ramos.com,Alexis Davis,29-Mar-2020,
+10603,Lopez PLC,Active,TECH,,Mexico,https://www.lopez.com,12/20/17,Silver,41650000,691,christina.obrien@lopez.com,Linda Hall,2025/01/18,
+10798,"Evans, Brown and Friedman",Active,PS,WA,U.S.,https://www.evans.com,"October 26, 2022",Bronze,n/a,1347,penny.powers@evans.com,Jennifer Larsen,11-Oct-2023,
+10327,Simpson Inc,Active,CONST,Arizona,United States,https://www.simpson.com,01/08/26,Bronze,,722,john.little@simpson.com,Stephen Smith,07/15/2026,
+10954,Edwards and Sons,On Hold,MFG,ON,Canada,https://www.edwards.com,2018-11-21,Gold,20750000,155,roy.mcmahon@edwards.com,Jeffrey Farrell,07/20/2022,
+10963,"Wells, Munoz and Crosby",Churned,OTH,OH,US,www.wells.com,26-Jan-2018,Bronze,,unknown,briana.shaw@wells.com,Desiree Smith,08/18/24,moved HQ 2024
+10764,Rice Ltd,Inactive,MFG,TX,U.S.,N/A,16-May-2026,Silver,"$24,600,000",,james.campbell@rice.com,Kimberly Beltran,09/07/2026,
+10682,Miller PLC,Active,LOG,PA,USA,www.miller.com,2018-12-22,Gold,,unknown,david.douglas@miller.com,Kylie Coffey,"September 17, 2019",do not contact billing before 9am
+10311,Thomas LLC,Active,HC,ON,Canada,N/A,"November 19, 2016",,"$37,000,000",unknown,maria.juarez@thomas.com,Katherine Ray,07/04/2020,
+10088,Gonzales-Harrison,Active,MFG,AB,CAN,www.gonzales-harrison.com,04/21/22,Bronze,"$21,450,000",808,kevin.powell@gonzales-harrison.com,Joshua Kim,2024/01/21,
+10050,"Kennedy, Santana and Flynn",Active,ENR,PA,US,https://www.kennedy.com,2020/11/06,,20.80M,1715,GENE.MILLER@KENNEDY.COM,Mackenzie Rogers,"February 13, 2025",renewal call scheduled
+10680,Davis-Garcia,Active,HC,North Carolina,US,https://www.davis-garcia.com,2026-02-16,Gold,,3850,sean.robinson@davis-garcia.com,Corey Johnson,2026-04-09,
+10400,"Chan, Lewis and Walker",ACTIVE,MFG,GA,US,https://www.chan.com,08/24/2021,Silver,30100000,,jeffrey.clark@chan.com,Kayla Hancock,10/07/2022,do not contact billing before 9am
+10559,Trujillo-Gonzales,Active,MFG,California,US,https://www.trujillo-gonzales.com,31-Jul-2018,Bronze,42600000,unknown,james.norris@trujillo-gonzales.com,Chad Roach,11/22/2024,
+10920,Morton-Watkins,Active,HC,ON,CA,N/A,"January 04, 2017",Silver,,3263,connie.cook@morton-watkins.com,Brian Allen,06/16/17,acquired by parent co
+10128,"Smith, Garrison and Thomas  ",Active,MFG,CA,United States,https://www.smith.com,2023/02/26,,"$4,850,000",unknown,david.king@smith.com,Matthew Johnson,04/08/23,do not contact billing before 9am
+10839,"Lopez, Mccoy and Davis",Churned,PS,,MX,,12/01/2021,Gold,"$9,400,000",,WILLIAM.MCPHERSON@LOPEZ.COM,Maria Reeves,"May 16, 2023",do not contact billing before 9am
+10573,Franklin-Hart  ,Inactive,LOG,Florida,USA,https://www.franklin-hart.com,28-Sep-2018,,4750000,3999,jason.cannon@franklin-hart.com,Dawn Nixon,05/08/2025,moved HQ 2024
+10752,"Taylor, Martin and Nelson",active,OTH,Alberta,CA,https://www.taylor.com,03/14/2020,Gold,36.30M,,robert.barr@taylor.com,Dylan Moreno,06/25/2026,
+10705,Bailey-Smith,Prospect,LOG,Pennsylvania,U.S.,www.bailey-smith.com,"May 30, 2021",Gold,"$16,500,000",2445,joe.wilson@bailey-smith.com,Anna Cox,"May 11, 2025",acquired by parent co
+10035,"Farrell, Wagner and King",Churned,ENR,AZ,United States,https://www.farrell.com,27-Sep-2022,Silver,n/a,311,rebekah.williams@farrell.com,Sandra Williams,2023/04/20,acquired by parent co
+10040,Hancock and Sons,Active,HC,Texas,US,N/A,17-Mar-2021,Strategic,"$28,600,000",3243,nicole.johnson@hancock.com,Evelyn Galvan,2026-08-10,moved HQ 2024
+10002,Robinson-Lawrence,Active,HC,Colorado,US,www.robinson-lawrence.com,08-Feb-2017,Silver,27.40M,674,lisa.smith@robinson-lawrence.com,Melissa Peterson,13-Mar-2021,
+10490,Black Group  ,Prospect,MFG,,MX,https://www.black.com,2019/02/18,Strategic,,1523,TERESA.WALKER@BLACK.COM,Robert Reed,2025/10/22,
+10131,"Williams, Logan and Camacho",Active,31,Quebec,CA,www.williams.com,2023/02/09,Platinum,n/a,1844,adrienne.ellis@williams.com,Amy Mendoza,"July 29, 2023",
+10879,"Wade, Richard and Hall",Active,CONST,Tenn.,USA,https://www.wade.com,2021-08-28,Gold,"$1,450,000",2645,kevin.estrada@wade.com,Laura Taylor,2021/11/04,moved HQ 2024
+10510,Baker LLC,Churned,PS,IN,United States,https://www.baker.com,11-Sep-2019,Gold,3000000,,christopher.johnson@baker.com,William Mendez,2026-05-30,do not contact billing before 9am
+10737,Velazquez-Mack,,HC,California,,https://www.velazquez-mack.com,2019-02-25,Gold,"$15,350,000",2495,stacie.reilly@velazquez-mack.com,Wayne Payne,2020/12/19,renewal call scheduled
+10170,Mitchell and Sons,Active,HC,Georgia,USA,https://www.mitchell.com,"December 23, 2024",Silver,31550000,,JOSHUA.WHITEHEAD@MITCHELL.COM,Jeffrey Potts,2025/04/13,moved HQ 2024
+10606,Clements-Walker,active,MFG,TX,US,,"December 02, 2024",Platinum,9450000,,EMILY.HARRIS@CLEMENTS-WALKER.COM,Christopher Blevins,05/23/26,moved HQ 2024
+10270,"Clay, Alvarez and Williams",Active,LOG,Tennessee,US,https://www.clay.com,04-Feb-2023,,"$8,300,000",2467,charles.frost@clay.com,Kristy Johnson,07/14/2025,
+10341,Miller-Bryant,ACTIVE,TECH,Washington,US,,2025-03-23,Gold,44700000,unknown,miguel.carter@miller-bryant.com,Nancy Sanchez,2026-06-27,
+10551,Brown Group,Prospect,CONST,TX,US,https://www.brown.com,30-Apr-2022,,"$16,150,000",1125,charles.harrison@brown.com,Ryan Roth,07-Dec-2024,acquired by parent co
+10402,"  Day, Coleman and Bennett ",Active,ENR,Tennessee,USA,https://www.day.com,2020-12-02,Silver,"$1,150,000",,michael.king@day.com,Michael Holloway,2026-07-06,renewal call scheduled
+10317,Harris-Barker,Active,LOG,Michigan,US,https://www.harris-barker.com,2026-02-15,Silver,"$10,200,000",unknown,david.santos@harris-barker.com,Timothy Hill,07/07/26,acquired by parent co
+10145,Jordan-Campbell,Active,PS,Quebec,Canada,https://www.jordan-campbell.com,2022/10/02,Bronze,"$26,250,000",2968  ,erika.tucker@jordan-campbell.com,Amber Foster,2024/01/25,do not contact billing before 9am
+10530,"Holmes, Le and Floyd",Inactive,,Arizona,United States,https://www.holmes.com,2017-11-01,Silver,n/a,,kevin.hart@holmes.com,Jennifer Vaughn,04/18/2018,do not contact billing before 9am
+10989,Solis Ltd,active,CONST,British Columbia,CAN,https://www.solis.com,20-Apr-2025,Gold,,576,jennifer.franklin@solis.com,Frank Ramos,09/04/2026,acquired by parent co
+97687,Miller-Bryant  ,ACTIVE,TECH,Washington,US,,2025-03-23,Gold,44700000,unknown,miguel.carter@miller-bryant.com,Nancy Sanchez,2026-06-27,
+10940,Stewart-Jordan,Active,MFG,CO,USA,https://www.stewart-jordan.com,03/04/2018,Bronze,"$4,000,000",unknown,daisy.mccall@stewart-jordan.com,Laurie Dickerson,2020/08/31,
+10433,"Hobbs, Acosta and Snow",Active,MFG,TN,USA,https://www.hobbs.com,23-Aug-2019,Bronze,"$23,950,000",1474,timothy.freeman@hobbs.com,Jessica Brown,12-Oct-2019,
+10417,"Wright, Steele and Cooper",ACTIVE,MFG,Texas,USA,www.wright.com,03/30/2017,Bronze,"$36,000,000",595,david.reyes@wright.com,Carol Colon,,renewal call scheduled
+10673,Larson and Sons,Active,TECH,WA,United States,https://www.larson.com,2026-04-24,,"$5,200,000",,mary.mullins@larson.com,James Guerrero,2026/06/08,
+10142,Thomas Ltd,Active,MFG,CO,US,https://www.thomas.com,03/27/2018,,"$2,400,000",1196,teresa.davis@thomas.com,Jamie Chavez,2021/01/09,
+10918,Smith-Lee,On Hold,ENR,CO,,https://www.smith-lee.com,2018/05/02,Silver,37250000,3937  ,christopher.armstrong@smith-lee.com,Omar Spence,01/08/2020,moved HQ 2024
+10506,"Sanders, Harris and Arnold",Active,MFG,New York,USA,N/A,09/24/2020,Bronze,,2155,angela.white@sanders.com,Karen Hinton,12/01/22,
+10852,Mccoy Ltd,Inactive,23,North Carolina,United States,,"February 21, 2019",Gold,10.75M,unknown,ryan.perry@mccoy.com,Kenneth Simon DVM,05/16/23,
+10212,Williams and Sons,ACTIVE,MFG,OH,US,https://www.williams.com,"May 09, 2021",,,270,JENNIFER.BROCK@WILLIAMS.COM,Brittany Barry,"July 21, 2025",
+10023,Wright and Sons,Active,MFG,Georgia,US,www.wright.com,05-Jan-2022,Bronze,"$41,300,000",,amanda.taylor,Joel Baxter,08-Jan-2026,do not contact billing before 9am
+10159,Hughes-Schroeder,Active,,CO,US,https://www.hughes-schroeder.com,04/20/24,,34400000,,erika.williams@hughes-schroeder.com,Felicia Rivera,03/14/2025,
+10831,Clay Inc,,OTH,AZ,USA,https://www.clay.com,11/10/2017,Gold,3650000,2826,justin.zavala@clay.com,James Hickman,2021-02-05,
+10245,Good Group,Active,MFG,Florida,US,https://www.good.com,22-Apr-2022,Bronze,21.90M,unknown,emily.stephens@good.com,Samantha Wright,2025-10-26,renewal call scheduled
+10695,Johnson Inc,Active,MFG,Ontario,Canada,N/A,10-Jul-2022,Gold,"$41,400,000",1730,matthew.le@johnson.com,Daniel Valdez,,
+10931,"Kerr, Glover and Peterson",Active,MFG,Arizona,US,https://www.kerr.com,2017/01/09,Platinum,14700000,1890,elizabeth.neal@kerr.com,Ms. Erin Lane,"March 21, 2017",moved HQ 2024
+10396,"Powell, Deleon and Warren",active,LOG,AZ,United States,,09/29/24,Silver,32550000,1471,ashley.thompson@powell.com,Christina Brown,10/27/2024,do not contact billing before 9am
+10648,"Rivera, Valencia and Nguyen",active,CONST,Florida,US,N/A,05/31/2024,Silver,40.25M,2489,tony.jones@rivera.com,John Singleton,2024-09-12,
+10423,Stanley-Bates,Active,PS,CO,USA,www.stanley-bates.com,2023-04-03,Gold,"$34,300,000",,joseph.obrien@stanley-bates.com,Ronald Garcia,"July 07, 2024",renewal call scheduled
+10517,"Ramos, Bennett and Webb",Active,PS,NY,US,,"February 13, 2022",Strategic,"$12,100,000",1467,john.morgan@ramos.com,Melanie Mosley,"April 22, 2026",
+10727,Oliver-Marsh,Active,ENR,Ohio,US,https://www.oliver-marsh.com,12-Dec-2025,Gold,29300000,unknown  ,sierra.lamb@oliver-marsh.com,Ana Mcclain,06/15/26,
+10248,"Williams, Gonzales and Fernandez",,MFG,ON,Canada,www.williams.com,05-Mar-2023,Silver,"$15,000,000",,karen.parsons@williams.com,Wyatt Young,"July 05, 2025",acquired by parent co
+10393,Ramirez-Vasquez,Active,MFG,TN,US,https://www.ramirez-vasquez.com,2019/06/19,Silver,23350000,473,heather.garcia@ramirez-vasquez.com,Brandy Mccann,07/28/2025,moved HQ 2024
+10258,Owens-Lang,On Hold,TECH,MI,United States,https://www.owens-lang.com,2024-11-25,Bronze,"$41,800,000",,jennifer.gill@owens-lang.com,Dale Edwards,2026/02/20,acquired by parent co
+10837,Fitzgerald-Dorsey,Active,TECH,MI,US,https://www.fitzgerald-dorsey.com,"May 31, 2023",Silver,"$4,500,000",2614,rebecca.munoz,Brendan Richardson,02-Aug-2024,do not contact billing before 9am
+10093,Edwards LLC,Active,MFG,TN,USA,www.edwards.com,"September 24, 2018",,"$30,550,000",3173,darrell.barton@edwards.com,Samantha Smith,"December 13, 2023",
+10583,Rogers Group,Active,OTH,Quebec,CA,https://www.rogers.com,2024/12/12,Gold,12650000,2914,ashley.williams@rogers.com,Bradley Shaw,"June 01, 2025",moved HQ 2024
+10483,"Welch, Hess and Riley",Inactive,MFG,IL,US,https://www.welch.com,10/18/19,Gold,"$15,000,000",2937,kayla.lewis@welch.com,Dean Shannon,03/12/2020,
+10973,Jackson Inc,active,PS,QC,Canada,https://www.jackson.com,11/15/2021,Bronze,24250000,792,catherine.thompson@jackson.com,Patrick Jackson,27-Nov-2024,renewal call scheduled
+10584,"Anderson, Taylor and Hansen",,CONST,New York,United States,www.anderson.com,"July 28, 2020",,"$38,550,000",3842,tony.pearson@anderson.com,Luis Fitzgerald,21-Oct-2025,
+10290,Sheppard-Jordan,ACTIVE,LOG,Washington,US,www.sheppard-jordan.com,"April 01, 2026",Bronze,"$33,150,000",2862,alex.green@sheppard-jordan.com,Kelly Carpenter,07/18/26,renewal call scheduled
+10982,King Inc,active,MFG,NY,US,https://www.king.com,09/21/2018,Silver,"$15,550,000",1905,carol.jarvis@king.com,Megan Compton,2025/08/23,
+10191,"Wilson, Hampton and Padilla",Inactive,CONST,Michigan,US,https://www.wilson.com,2017/06/05,Gold,36250000,1212,jason.carr@wilson.com,Yvonne Gonzalez,05/06/2022,renewal call scheduled
+10614,"Wong, Dawson and Martin",Active,TECH,AZ,USA,https://www.wong.com,08/20/2022,Gold,10300000,,jessica.davis@wong.com,Madison Miller,08/22/2022,moved HQ 2024
+10091,Moon-White,Active,,Pennsylvania,US,https://www.moon-white.com,23-Aug-2018,Strategic,19400000,234.0,BRENDA.WALTERS@MOON-WHITE.COM,Brandon Bailey MD,03/05/2021,acquired by parent co
+10503,Kent Inc,Active,LOG,OH,,https://www.kent.com,2018/04/10,Bronze,"$6,800,000",1540.0,justin.mcdowell@kent.com,Colin Fletcher,,do not contact billing before 9am
+10366,"Thompson, Lang and Oneill",Active,LOG,PA,US,https://www.thompson.com,10-Jun-2025,Silver,26200000,216,BRIAN.HERNANDEZ@THOMPSON.COM,Brenda Rodriguez,26-Aug-2026,renewal call scheduled
+10211,Brooks-Hatfield,Active,LOG,Texas,US,https://www.brooks-hatfield.com,2019-09-20,,2900000,  155 ,angela.diaz@brooks-hatfield.com,Lance Morales,"June 13, 2026",moved HQ 2024
+10952,"Todd, Smith and Valdez",Active,MFG,TX,US,https://www.todd.com,2018-05-09,,11800000,2195,veronica.lynn@todd.com,Crystal Cummings,2026/03/01,
+10512,"Mitchell, Johnson and Greene",Prospect,MFG,New York,US,https://www.mitchell.com,09/09/2019,Bronze,44300000,3856,zachary.hall@mitchell.com.,Andrew Allen,2024-06-01,do not contact billing before 9am
+10519,Black-Smith,Active,ENR,Indiana,,,2023/05/14,,11100000,1274,marilyn.wright@black-smith.com,Michael Nicholson,"July 01, 2023",
+10295,"Simmons, Murray and Salinas",Active,MFG,TN,United States,www.simmons.com,08-May-2026,Silver,"$32,900,000",2358,crystal.lopez@simmons.com,Jennifer Mclaughlin,25-May-2026,
+10326,Harris-Lawson,Active,OTH,NC,United States,www.harris-lawson.com,02/16/2018,,8200000,3851,jacob.myers@harris-lawson.com,Rachel Leon,"November 24, 2018",renewal call scheduled
+10225,Little Inc,,MFG,North Carolina,U.S.,,01/31/2019,Gold,35700000,1748.0,craig.rivera@little.com,Michael Taylor,"December 24, 2023",
+10208,Simpson-Khan,Prospect,MFG,NC,U.S.,www.simpson-khan.com,12/30/21,Silver,7350000,2651,destiny.ruiz@simpson-khan.com,Sarah Jordan,,renewal call scheduled
+10569,Yu Inc,Active,HC,NY,,https://www.yu.com,09/25/2023,Gold,13550000,,craig.hall@yu.com,Corey Sandoval,"July 02, 2024",acquired by parent co
+10971,Reese-Foley,,MFG,,MX,www.reese-foley.com,10/04/2019,Gold,17500000,unknown,randy.smith@reese-foley.com,Thomas Murphy,2022/03/26,
+10612,Davis-Mason,Active,HC,TX,USA,https://www.davis-mason.com,"November 19, 2019",Bronze,8300000,unknown,hector.richards@davis-mason.com,Kimberly Long,12/23/24,
+10344,Blake Group,Inactive,ENR,Florida,United States,https://www.blake.com,"December 12, 2025",Gold,n/a,3515.0,melinda.acosta@blake.com,Joseph Allen,2026-05-27,
+10479,"Hopkins, Steele and Hernandez",active,CONST,AZ,USA,https://www.hopkins.com,10/25/2020,Bronze,n/a,98.0,ashley.aguirre@hopkins.com,Caroline Edwards,09/19/2021,
+10864,"Casey, Meza and Colon",active,MFG,NY,United States,https://www.casey.com,"June 08, 2021",Strategic,"$19,150,000",1646,bobby.garcia@casey.com,Shelby Bartlett,2023-05-09,moved HQ 2024
+10267,Chung-Stevens,Active,LOG,,US,https://www.chung-stevens.com,21-Sep-2021,Silver,"$29,400,000",2005,john.terry@chung-stevens.com,Ronald Miller,2023-11-10,acquired by parent co
+10685,Cook-Brown,ACTIVE,TECH,IN,US,https://www.cook-brown.com,2018-01-15,Bronze,n/a,,stephanie.baker@cook-brown.com,John Mcfarland,08-Dec-2024,
+10213,Murphy PLC,Active,LOG,Indiana,U.S.,www.murphy.com,09/05/2019,Platinum,25500000,  2593 ,lucas.long@murphy.com,Sarah Wheeler,2022/11/24,renewal call scheduled
+10734,Joseph LLC,active,TECH,NY,US,https://www.joseph.com,2022-12-22,,11000000,2203,ian.thompson@joseph.com,Summer Bauer,04/10/2023,do not contact billing before 9am
+10585,Allen LLC,Active,MFG,North Carolina,United States,www.allen.com,2024/03/26,Silver,33.30M,1628,kimberly.morris@allen.com,Ann Powers,05/03/2026,
+10573,Franklin-Hart,Inactive,LOG,Florida,USA,https://www.franklin-hart.com,28-Sep-2018,,4750000,3999,jason.cannon@franklin-hart.com,Dawn Nixon,05/08/2025,moved HQ 2024
+10795,Mcdaniel-Young  ,ACTIVE,CONST,CO,US,https://www.mcdaniel-young.com,2022/08/13,,"$39,900,000",unknown,john.hernandez@mcdaniel-young.com,Robert Collins,12/24/2024,
+10410,Pena-Walker,ACTIVE,ENR,TN,US,N/A,22-Nov-2016,,29100000,,jeffrey.savage@pena-walker.com,Stephen Watson,"December 31, 2016",
+10137,"Watson, Anderson and Brown",Churned,MFG,BC,Canada,www.watson.com,16-Sep-2021,Silver,"$30,000,000",unknown,SUE.HOFFMAN@WATSON.COM,Jennifer Russo,27-Oct-2023,
+10033,"Riggs, Roman and Rice",Active,,OH,USA,https://www.riggs.com,"November 14, 2020",Silver,30750000,3606,elizabeth.spencer@riggs.com.,Ashley Humphrey,02/22/24,renewal call scheduled
+10516,"Jones, Phillips and Arroyo",Inactive,ENR,Alberta,CAN,https://www.jones.com,2020/04/25,Silver,11650000,3329,leah.frye@jones.com,Robin Andrews,"January 19, 2022",renewal call scheduled
+10031,Hickman-Walls,,PS,,USA,https://www.hickman-walls.com,"May 05, 2023",Silver,16500000,  3518 ,albert.howell@hickman-walls.com,Ariel Medina,2024-05-10,do not contact billing before 9am
+10009,"Walter, Edwards and Rios",Active,TECH,Tennessee,USA,https://www.walter.com,"August 28, 2017",Bronze,n/a,2377.0,RANDALL.ROCHA@WALTER.COM,Derek Wright,10/04/22,acquired by parent co
+10429,Smith and Sons,On Hold,CONST,AB,Canada,www.smith.com,2020/11/28,Platinum,44550000,unknown,elizabeth.jackson@smith.com,Jeffrey Howell,"November 29, 2024",
+10994,"Lynch, Hamilton and Moore",Active,CONST,MI,US,https://www.lynch.com,09/28/2025,Strategic,44.25M,3314  ,stephanie.olson@lynch.com,Jessica Miller,18-Apr-2026,
+10848,Miller-Taylor,Prospect,MFG,CA,US,,22-Oct-2022,,25200000,3316,james.cabrera@miller-taylor.com,Chelsea Johnson,2022/11/25,renewal call scheduled
+10725,"Clark, Mcgee and Perez",Active,MFG,Illinois,US,https://www.clark.com,2025/12/20,Silver,38100000,1504.0,michael.adams@clark.com,Destiny Brown,08/29/2026,do not contact billing before 9am
+10406,Guerrero-Becker,Active,LOG,NC,U.S.,N/A,2017/04/13,Gold,16.05M,2689,jennifer.rios@guerrero-becker.com,Deanna Barnes MD,08/07/2021,do not contact billing before 9am
+10070,Garcia-Yu,Closed,MFG,AB,CAN,https://www.garcia-yu.com,2017-05-03,Bronze,15850000,unknown,cynthia.poole@garcia-yu.com,Jessica Gross,2021-01-03,acquired by parent co
+10044,Wilson LLC,Inactive,TECH,IL,United States,https://www.wilson.com,2025/11/15,Silver,5650000,unknown,gregory.estes,Brian Hamilton,2026-01-18,renewal call scheduled
+10935,"Wilson, Roberts and Lee  ",Active,CONST,NC,USA,https://www.wilson.com,11/02/25,Silver,"$25,500,000",  834 ,brenda.cannon@wilson.com,Allen Gonzalez,2026/08/11,moved HQ 2024
+10718,"Nicholson, Chavez and Allen",Active,PS,Quebec,CA,https://www.nicholson.com,11/11/25,Gold,"$24,850,000",,angela.smith@nicholson.com,Tiffany Anderson,"August 29, 2026",moved HQ 2024
+10763,"Bailey, Martin and Mason",On Hold,ENR,Pennsylvania,USA,www.bailey.com,"January 06, 2020",Silver,"$7,550,000",2435,jessica.allen@bailey.com,Annette Lane,14-Jan-2023,
+10038,Williams LLC,,,Michigan,US,www.williams.com,01/06/2020,Silver,35.20M,3992,rachel.flynn@williams.com,Stephanie Clark,05/01/23,acquired by parent co
+10336,"Burton, Crawford and Dixon",ACTIVE,OTH,PA,,https://www.burton.com,2023/01/23,,"$19,400,000",  1812 ,brian.villarreal@burton.com,Christopher Ayala,08/29/2024,moved HQ 2024
+10084,"Garcia, Farmer and Garrett",Active,HC,Ontario,Canada,https://www.garcia.com,10/06/23,Bronze,"$22,550,000",,joseph.miller@garcia.com,Juan Moore,12/01/2024,
+10117,Coffey-Phillips,On Hold,MFG,Colorado,United States,www.coffey-phillips.com,2017-01-17,,"$5,400,000",980,monica.brock@coffey-phillips.com,Bernard Webster,10/27/24,
+10600,"Browning, Jordan and Stout",Inactive,LOG,TN,USA,N/A,2023-01-10,Silver,"$43,850,000",1598,kayla.douglas@browning.com,Brooke Jones,05/23/26,
+10655,"Pacheco, Sherman and Guerrero",Active,TECH,British Columbia,CA,N/A,18-May-2024,,,801,shawn.carter@pacheco.com,Jillian Harris,2026/03/02,
+10807,Moon Ltd,Active,LOG,CA,United States,https://www.moon.com,04/22/22,,42500000,3054,logan.burnett@moon.com,Rachel Hill,"January 28, 2024",
+10504,Lane Inc,Active,OTH,TN,U.S.,,"October 17, 2023",Gold,20850000,884,april.brooks@lane.com,Robert Ortiz,2024/09/12,acquired by parent co
+10342,Vargas-Snyder,ACTIVE,ENR,TN,USA,,19-May-2026,,"$39,050,000",1995,kendra.gonzalez@vargas-snyder.com,Paige Sanchez,12-Aug-2026,acquired by parent co
+10116,Anderson PLC,Active,PS,WA,USA,https://www.anderson.com,12/11/2025,Silver,"$10,350,000",3218,nancy.diaz@anderson.com,Denise Martin,2026-07-04,
+,Keller-Jennings,Inactive,TECH,IN,U.S.,https://www.keller-jennings.com,"February 21, 2023",,27500000,1649,ashley.alvarez@keller-jennings.com,Katie Myers,01/03/26,
+10051,Chambers and Sons,Active,LOG,GA,US,N/A,12/25/2022,Strategic,18.05M,3359.0,lindsay.hernandez@chambers.com,William Carr,"November 19, 2024",acquired by parent co
+10431,Banks-Robles  ,Active,CONST,CO,USA,,08/17/21,Silver,,,daniel.horton@banks-robles.com,Tommy Moore,08/11/24,do not contact billing before 9am
+10925,Reyes-Pope,active,MFG,Georgia,US,https://www.reyes-pope.com,10/05/2018,Bronze,,1826,nichole.harvey@reyes-pope.com,Timothy Logan,26-Sep-2023,do not contact billing before 9am
+10687,Garcia-Jones,active,OTH,Georgia,USA,N/A,06/08/25,Gold,30800000,unknown,ashley.king@garcia-jones.com,Steven Hernandez,07/04/2026,do not contact billing before 9am
+10489,"Gallegos, Davenport and Baker",active,TECH,New York,US,https://www.gallegos.com,06/28/2021,Silver,16.45M,1937,amy.thompson@gallegos.com,Holly Valdez,30-May-2023,moved HQ 2024
+10291,"Walker, Brooks and Ford",Active,HC,IL,USA,,2018/05/09,Silver,8350000,1161.0,erin.vaughn@walker.com,Zachary Webb,2026-04-30,
+10709,Jones and Sons,ACTIVE,MFG,Alberta,CA,www.jones.com,2019-04-09,Strategic,"$7,150,000",1272,JENNIFER.WATKINS@JONES.COM,Cristian Rhodes,03/22/2020,
+10370,Daniel Ltd,Closed,ENR,Indiana,US,,12-May-2026,Silver,15.25M,2266,stacy.myers@daniel.com,Traci Johnson DDS,09/01/2026,moved HQ 2024
+10021,Cummings PLC,Active,MFG,North Carolina,US,https://www.cummings.com,2025/01/11,Silver,"$2,650,000",1345,BARBARA.SANCHEZ@CUMMINGS.COM,Jason Davis,11-Jul-2026,
+10937,Lozano-Smith,ACTIVE,31,Florida,USA,www.lozano-smith.com,2022-09-20,Strategic,43450000,3127,erica.gray@lozano-smith.com,Ashley Boyle,2023-03-19,
+10013,Rodriguez-Graham,Active,,Pennsylvania,U.S.,https://www.rodriguez-graham.com,2018/12/25,Bronze,n/a,3325,shawn.mckay@rodriguez-graham.com,Deborah Mason,2020-02-19,renewal call scheduled
+10720,"Johnson, Gibson and Ingram",Inactive,HC,MI,U.S.,https://www.johnson.com,10/09/2017,Silver,40.20M,1479,morgan.sullivan@johnson.com,Jacqueline Marshall,01/25/24,renewal call scheduled
+10638,Short PLC,Inactive,MFG,IN,US,N/A,18-Nov-2018,Platinum,"$29,750,000",3904,erica.anderson@short.com,Julia Reeves,2026-06-27,
+10249,"Johnston, Ray and Barton",Active,MFG,NC,,N/A,01/19/2023,Strategic,"$2,500,000",1169,loretta.young@johnston.com,Victoria Boyd,2026-03-25,
+10264,"Estrada, Jensen and Webb",Active,HC,CO,USA,https://www.estrada.com,2022-10-17,Bronze,15100000,2013,tony.smith@estrada.com,Alexandra Moreno,2023/08/25,renewal call scheduled
+10778,Reyes LLC,ACTIVE,OTH,Ind.,US,https://www.reyes.com,09/10/2024,Gold,"$30,350,000",3107.0,melissa.ramos@reyes.com,Christopher Hopkins,02/11/2025,
+10077,Stewart Ltd,Closed,ENR,AB,CAN,https://www.stewart.com,11/24/2021,,"$33,150,000",3153,amanda.gill@stewart.com,Daniel Washington,2025/07/23,
+10986,Hernandez and Sons,Inactive,CONST,North Carolina,USA,N/A,2021-08-30,Silver,"$3,500,000",3215,dawn.young@hernandez.com,Virginia Wallace,2024-01-08,do not contact billing before 9am
+10090,Key Ltd,Active,MFG,Quebec,Canada,https://www.key.com,01/25/2019,Silver,,2765,lori.johnston@key.com,Casey Stone,15-Jul-2024,renewal call scheduled
+10857,"Mcdonald, Ware and Sharp",Active,HC,Tex.,US,https://www.mcdonald.com,2021/12/22,Strategic,9550000,1884,peter.butler@mcdonald.com,Marissa Ward,2023-01-23,moved HQ 2024
+10130,Reese Group,Active,MFG,New York,USA,https://www.reese.com,2022-03-08,Gold,35750000,356.0,shane.cox@reese.com,Jodi Walker,2024/04/02,moved HQ 2024
+10186,Morrison-Simmons,Prospect,LOG,Quebec,Canada,https://www.morrison-simmons.com,2023/02/06,Strategic,28800000,1028,hannah.bell@morrison-simmons.com,Sergio Gomez,24-Feb-2023,
+10711,Ruiz Group,Active,LOG,North Carolina,USA,https://www.ruiz.com,"May 21, 2020",Bronze,"$850,000",,brian.graham@ruiz.com,Leon Thompson,2024/01/07,acquired by parent co
+10205,Adams and Sons,Prospect,CONST,FL,US,,"October 29, 2024",,n/a,1126,donald.williams@adams.com,Sharon Barnes,28-Nov-2024,
+10639,"Wilson, Collins and Williams",Prospect,LOG,,Canada,www.wilson.com,02/28/23,Silver,n/a,1942,melanie.wiggins@wilson.com,Stephen Garcia,"December 14, 2023",moved HQ 2024
+10469,Miller Inc,Active,CONST,QC,CA,https://www.miller.com,08/05/25,Silver,"$14,650,000",,gregory.king@miller.com,Roberto Bartlett,04/29/24,
+10799,Young PLC,Active,OTH,Tennessee,U.S.,https://www.young.com,10-May-2022,Strategic,42.75M,1894,jessica.fitzpatrick@young.com,Sandra Herring,"December 07, 2025",
+10200,"Davidson, Vargas and Carpenter",Active,MFG,GA,,www.davidson.com,09/17/21,Silver,41200000,602,GEORGE.WEBER@DAVIDSON.COM,Gail Bradshaw,05-Oct-2023,
+10980,Ellis Inc,On Hold,CONST,OH,US,https://www.ellis.com,"October 07, 2023",Gold,"$36,400,000",458.0,diane.ramirez@ellis.com,Amanda Mcclure,07/21/2024,acquired by parent co
+10729,Crawford and Sons,active,TECH,OH,US,https://www.crawford.com,2019-12-07,Bronze,"$4,950,000",,ABIGAIL.BURTON@CRAWFORD.COM,Wayne Weaver,2020/08/13,moved HQ 2024
+10698,Bryant and Sons,Active,MFG,MI,US,https://www.bryant.com,10-Sep-2019,,39.10M,unknown,mary.brown@bryant.com,Ashley Larson,2023-12-25,
+10388,"Sloan, Jones and Hughes",Actve,MFG,California,,N/A,05/07/20,Gold,n/a,,ray.nguyen@sloan.com,Jimmy Marks,03-Feb-2022,renewal call scheduled
+10690,"Meyers, Olson and Bradley",Active,MFG,WA,USA,https://www.meyers.com,2025/01/21,Bronze,"$31,500,000",1790,SAVANNAH.HOWARD@MEYERS.COM,Jennifer Chen,2025-01-21,
+10141,Nelson LLC,Active,MFG,Michigan,USA,https://www.nelson.com,2019-05-21,Gold,40.30M,  365 ,SANDRA.BELL@NELSON.COM,Charles Sandoval,05/14/2021,
+10288,"Barnes, Johnson and Schmitt",Active,HC,IL,US,https://www.barnes.com,06/24/2025,Gold,7500000,,JACQUELINE.BURNETT@BARNES.COM,Suzanne Rodriguez,08/27/25,renewal call scheduled
+10859,Moore Group,Prospect,PS,Illinois,USA,www.moore.com,"October 19, 2017",Gold,"$42,250,000",3539,CRAIG.PERRY@MOORE.COM,Elizabeth Clark MD,"February 11, 2024",renewal call scheduled
+10843,Richards-Mack,Active,TECH,TX,United States,https://www.richards-mack.com,"October 20, 2021",Bronze,10450000,,allen.yang@richards-mack.com,Richard Cameron,2022/05/24,moved HQ 2024
+10165,"Stephenson, Johnson and Rogers",Prospect,MFG,AZ,U.S.,https://www.stephenson.com,"December 20, 2019",Gold,33.55M,1503,katie.anderson@stephenson.com,Christopher Guerra,"July 05, 2024",do not contact billing before 9am
+10155,Hayes-Brown,Churned,LOG,TX,United States,N/A,"July 21, 2019",Bronze,14800000,unknown  ,marie.jones@hayes-brown.com,Savannah Gilbert,11/07/2025,do not contact billing before 9am
+10375,"Perez, Hayes and Lloyd",Active,CONST,TX,US,,21-Sep-2020,,"$35,100,000",3626.0,arthur.smith@perez.com,Brian Peterson,2023-12-23,moved HQ 2024
+10730,Wells Group,Active,MFG,Calif.,US,www.wells.com,10/05/2024,Silver,"$23,450,000",unknown,scott.newman@wells.com,Arthur Wiggins,2025-02-01,
+10629,"Lewis, Davidson and Vaughn",ACTIVE,,TX,,https://www.lewis.com,05/01/2022,Silver,42650000,2764.0,jonathan.jones@lewis.com,Joshua Wang,"September 07, 2023",
+91008,"EVANS, BROWN AND FRIEDMAN",Active,PS,WA,U.S.,https://www.evans.com,"October 26, 2022",Bronze,n/a,1347,penny.powers@evans.com,Jennifer Larsen,11-Oct-2023,
+10016,Allen-Allen,Active,MFG,NY,US,,,Silver,34.75M,717.0,ashley.miller@allen-allen.com,Rose Spence,2025/12/07,do not contact billing before 9am
+10272,"Allen, Davenport and Price",Active,MFG,Texas,US,www.allen.com,2020/08/10,,,3052,PEGGY.RIVERA@ALLEN.COM,Brenda Hinton,2026-07-01,
+10797,Hopkins-Thompson,Active,MFG,FL,U.S.,,12-Oct-2019,Gold,39950000,,melissa.stuart@hopkins-thompson.com,Mr. Scott Miller,29-May-2020,do not contact billing before 9am
+10294,"Wilson, Sweeney and Wong",Active,MFG,GA,US,www.wilson.com,2017/11/01,Platinum,"$21,300,000",2728,erica.martin@wilson.com,Mrs. Carrie Moore,16-Jun-2026,
+10199,"Jacobson, Singleton and King",Active,LOG,GA,US,https://www.jacobson.com,10/19/24,Silver,"$35,800,000",557,cynthia.pierce@jacobson.com,Eric Ferguson,"March 03, 2025",
+10240,Palmer Group,Active,MFG,Washington,USA,https://www.palmer.com,2025-05-22,Strategic,"$10,000,000",  616.0 ,anne.hansen@palmer.com,Elizabeth Johnson,2026/04/03,
+10875,"Higgins, Hobbs and Meyer",Active,PS,TN,US,https://www.higgins.com,11/23/2020,Silver,29.25M,49,amber.lewis@higgins.com,Emily Peterson,2022/10/13,do not contact billing before 9am
+10536,"Foster, Barron and Norman",Active,TECH,BC,Canada,,2019-08-13,Bronze,"$2,800,000",373,sheila.adkins@foster.com,Joanna Jackson,11/25/24,
+10386,Martinez Group,Active,CONST,FL,USA,https://www.martinez.com,2023-03-31,Bronze,4350000,2077,gerald.joyce@martinez.com,Rhonda Martinez,,acquired by parent co
+10697,"Smith, Meadows and Montgomery",Active,TECH,MI,US,https://www.smith.com,2020/12/18,,40100000,2497,john.banks@smith.com,Mark Conway,2025-12-06,
+10740,"Randall, Griffin and Davis",,TECH,Ontario,CAN,www.randall.com,2025-06-20,Silver,33600000,1318,brian.davidson@randall.com,Courtney Walls,11/18/25,moved HQ 2024
+10978,"  Jackson, Jackson and Perry ",Active,LOG,WA,USA,www.jackson.com,2017/12/10,,,2134.0,daniel.murphy@jackson.com,Chelsey Clark,2023/12/31,
+10621,"Evans, Knapp and Williams",ACTIVE,MFG,NY,USA,N/A,08/18/2025,Gold,2350000,,ROBERT.THOMPSON@EVANS.COM,Lisa Holt,12/19/25,acquired by parent co
+10041,"Shields, Cochran and Adams",active,HC,British Columbia,Canada,https://www.shields.com,08/15/19,Bronze,"$2,000,000",2022,kristin.rodriguez@shields.com,Shannon Walker,02/06/22,
+10303,Mckinney-Wallace,Active,MFG,Ontario,CAN,https://www.mckinney-wallace.com,2019/01/29,Gold,41400000,1317  ,GARY.CUNNINGHAM@MCKINNEY-WALLACE.COM,Connie Johnson,15-Jan-2025,
+10416,Cross Inc,On Hold,LOG,TN,USA,,"November 19, 2024",Strategic,"$45,000,000",,PATRICIA.SHERMAN@CROSS.COM,Alicia Smith,08/10/26,
+10466,Flores Inc,Closed,23,Ill.,US,https://www.flores.com,01/04/26,Gold,n/a,1646,stacy.jackson@flores.com,Kimberly Smith,09-Sep-2026,acquired by parent co
+10788,Williams-Davies,ACTIVE,MFG,Washington,,N/A,01-Apr-2019,Silver,7.80M,1548,richard.perez@williams-davies.com,Anna Richard,"January 06, 2022",moved HQ 2024
+10412,"Wilson, Becker and Moreno",On Hold,,IL,US,www.wilson.com,"June 07, 2019",Silver,"$17,050,000",unknown,robert.pitts@wilson.com,Willie Cooper,2025-07-16,
+10408,Knox-Powers,Active,ENR,AB,CA,www.knox-powers.com,"March 01, 2023",Bronze,"$5,750,000",unknown,william.bruce@knox-powers.com,Sherri White,03/22/24,
+10790,"Colon, Wagner and Evans",Active,OTH,IL,US,,"October 08, 2018",Bronze,,3289,elizabeth.edwards@colon.com,David Robertson,2026-05-23,renewal call scheduled
+10358,Reyes-Barnes,ACTIVE,TECH,Florida,US,www.reyes-barnes.com,2021/12/11,Silver,"$13,750,000",2976.0,dawn.robles@reyes-barnes.com,Zachary Stephens,2024/08/13,moved HQ 2024
+10444,Lewis-Summers,Active,CONST,Indiana,USA,,06-Dec-2022,,n/a,2574,james.morgan@lewis-summers.com,Amber Schultz,02/22/23,
+10624,Rose-Warren,Active,MFG,GA,US,https://www.rose-warren.com,03/15/2021,Silver,"$17,550,000",2970,heather.salazar@rose-warren.com,Nicholas Fuller,13-Jan-2025,acquired by parent co
+10726,Chavez-Mason,Active,CONST,ON,CA,N/A,"June 05, 2026",,"$3,350,000",1233.0,maria.harrison@chavez-mason.com,Samantha Lam,10-Jul-2026,do not contact billing before 9am
+10373,Bell Inc,Active,PS,Indiana,US,https://www.bell.com,2024-06-09,Silver,"$21,900,000",3728.0,JENNIFER.WILLIAMS@BELL.COM,Jason Jackson,04/03/26,
+10385,Foster Ltd,ACTIVE,MFG,OH,US,,2017/11/13,,"$8,350,000",2366,austin.duncan@foster.com,Laura Mcgrath,"May 03, 2021",renewal call scheduled
+10110,Alexander LLC,Active,MFG,TN,US,www.alexander.com,2024/12/19,Bronze,21150000,,vanessa.evans@alexander.com,Melissa Bryant,05/14/25,
+10486,White PLC,Active,PS,ON,CAN,,07/06/17,Silver,11750000,1873,donna.faulkner@white.com,Karen Howard,02/20/2018,
+10646,Hess Ltd,Active,MFG,FL,United States,,08/14/24,Bronze,"$16,350,000",2035,taylor.bryant@hess.com,Michelle Marshall,"November 09, 2024",
+10596,"Hill, Brown and Scott",Active,CONST,Pennsylvania,USA,,"August 04, 2022",Platinum,40.20M,1330,paul.cooke@hill.com,Terry Avery MD,2022-12-17,renewal call scheduled
+10593,Hall-James,Inactive,MFG,FL,US,,2018/08/11,Gold,n/a,2521,tiffany.garcia@hall-james.com,Sean Schmidt,13-Aug-2022,
+90071,Hill-Guerra Inc,Active,HC,MI,,https://www.hill-guerra.com,2017-11-09,Bronze,,unknown,robin.spencer@hill-guerra.com,Christopher Phillips,02/18/21,acquired by parent co
+10123,"Bautista, Barnes and Newton",active,31,,Mexico,,03-May-2025,Silver,11300000,3271,eric.perry@bautista.com,John Russell,,do not contact billing before 9am
+10957,Bradley Inc,Inactive,OTH,TN,USA,www.bradley.com,05/16/2021,Bronze,"$32,100,000",2552,sandra.hernandez@bradley.com,Erin Soto,2024-12-09,
+10437,Booth-Jones,active,MFG,Ontario,CAN,https://www.booth-jones.com,2019/08/27,Silver,41.00M,1487,travis.allen@booth-jones.com,Amber Walker,"December 12, 2024",
+10924,"Williams, Horn and Morales",Active,MFG,CO,US,www.williams.com,"May 03, 2020",Bronze,"$37,500,000",2967,christina.jenkins@williams.com,Rachel Hanson,,do not contact billing before 9am
+,Miller-Myers,Active,OTH,AZ,US,https://www.miller-myers.com,2016/12/12,Bronze,,648,harold.mullen@miller-myers.com,Christopher Rodriguez,2020-03-09,renewal call scheduled
+10802,Henry LLC,Prospect,MFG,GA,US,https://www.henry.com,"August 21, 2024",Bronze,30150000,unknown,HOLLY.RODRIGUEZ@HENRY.COM,Karen Sanchez,"April 19, 2026",moved HQ 2024
+10950,Mcgee-Mack,Churned,MFG,MI,USA,,09/30/2025,Strategic,20500000,744,megan.lee@mcgee-mack.com,Brenda Wyatt,14-Jan-2026,do not contact billing before 9am
+10854,Klein PLC,Active,OTH,IN,US,https://www.klein.com,11/08/2022,Bronze,,2408.0,andrew.ray@klein.com,Debra Wong,02/27/2025,
+10633,"Herrera, Clark and Jennings",Active,LOG,Illinois,US,https://www.herrera.com,2023/12/05,Silver,"$37,100,000",888.0,LAUREN.BARRON@HERRERA.COM,Wayne Ramirez,07/28/2024,moved HQ 2024
+10775,"Brown, Jones and Gregory",Active,MFG,TX,USA,https://www.brown.com,"July 10, 2024",Silver,,617,teresa.reyes@brown.com,Brittany Howell,2025-01-05,do not contact billing before 9am
+10096,"Moore, Pierce and Tran",Churned,OTH,CA,US,N/A,2022/01/09,Silver,n/a,562,christopher.gay@moore.com,Julia Wilson,11/20/2023,
+10480,Joseph Ltd,ACTIVE,CONST,TX,US,https://www.joseph.com,2026-02-11,Silver,"$32,900,000",,ryan.larsen@,Nicholas Humphrey,"April 04, 2026",renewal call scheduled
+10457,Oliver Group,Prospect,ENR,CA,United States,https://www.oliver.com,"December 03, 2024",Silver,"$20,200,000",1584.0,maria.pruitt@oliver.com,Maria Fischer,2026/05/10,moved HQ 2024
+10678,Adams-Garcia,Prospect,MFG,CA,United States,https://www.adams-garcia.com,06/03/2017,Bronze,8350000,179,destiny.myers@adams-garcia.com,Nicole Navarro,2025-09-06,
+10708,"Trujillo, Chang and Williams",Active,CONST,OH,US,N/A,09-Jun-2026,Silver,30650000,unknown,JOY.BUCKLEY@TRUJILLO.COM,Richard Washington,"June 11, 2026",
+10841,Sutton LLC,Active,MFG,Quebec,CA,www.sutton.com,04-May-2017,Strategic,2.40M,unknown,mckenzie.mills@sutton.com,Anthony Jones,2018-08-25,moved HQ 2024
+10869,Crane-Black,Active,CONST,Tennessee,USA,https://www.crane-black.com,11/23/2019,Gold,40800000,2608,evelyn.acevedo@crane-black.com,Randy Robbins,,acquired by parent co
+10495,Black Group,Churned,31,Ohio,,N/A,2017-07-03,Gold,39350000,3354,carol.elliott@black.com,Nathan Stanley,2023/04/06,
+10674,"Walsh, Clark and Navarro",Inactive,,Florida,United States,https://www.walsh.com,10/30/19,Silver,38.05M,,michael.may@walsh.com,Audrey Jackson,2021/12/31,
+10756,Pope PLC,Active,LOG,AZ,,www.pope.com,11/12/2017,Silver,23150000,,christina.guerra@pope.com,Kim Arnold,,moved HQ 2024
+10357,Mendez PLC,Actve,MFG,GA,U.S.,www.mendez.com,2023-12-20,Strategic,41400000,2171,john.phillips@mendez.com,Juan Brown,"January 10, 2025",moved HQ 2024
+10053,"Smith, Potter and Carrillo",Prospect,CONST,ON,Canada,https://www.smith.com,2021/06/01,Bronze,,3434,daniel.coleman@smith.com,Tyler Holmes,2026/07/06,renewal call scheduled
+10987,Taylor-Stewart,Inactive,CONST,North Carolina,USA,https://www.taylor-stewart.com,2019/06/10,Silver,"$12,650,000",817.0,kristin.williams@taylor-stewart.com,Jennifer Hess,2025/07/28,
+10694,Price-Sparks,active,CONST,,Mexico,,01/08/22,Silver,"$4,700,000",2414,dawn.porter@price-sparks.com,Robin Levy,12/04/2025,do not contact billing before 9am
+10909,"Wallace, Martinez and Stanton",ACTIVE,MFG,Michigan,USA,https://www.wallace.com,13-Nov-2023,Strategic,n/a,unknown,nicholas.burke@wallace.com,Ryan Cain,"June 29, 2024",
+10221,Wise-Bush,Active,CONST,Arizona,United States,https://www.wise-bush.com,01/12/25,Strategic,20600000,982.0,hannah.burns@wise-bush.com,Justin Michael,06/16/2026,
+10500,Davis Ltd,Inactive,PS,Ohio,USA,https://www.davis.com,08/31/2018,Gold,,1722,david.munoz@davis.com,Stephanie Hampton,,
+10297,Ray PLC,Active,MFG,Washington,USA,https://www.ray.com,09-Apr-2020,Strategic,"$39,700,000",unknown,jacob.nguyen@ray.com,Dennis Huffman,2023-10-09,renewal call scheduled
+10691,"Davis, Nichols and Woodward",Active,PS,,MX,,2025-03-12,Strategic,36650000,957,christopher.stevens@davis.com,Maria Thompson,11/21/25,
+10302,Washington and Sons,Active,CONST,GA,US,https://www.washington.com,"November 07, 2023",Gold,1350000,,lisa.maynard@washington.com,Kathleen Cohen,2026/01/24,moved HQ 2024
+10198,Guerra PLC,Active,PS,Que.,CA,www.guerra.com,10/15/21,Strategic,"$2,850,000",173,eric.martin@guerra.com,Michael Reed,08/27/2026,renewal call scheduled
+10144,"Williams, Miller and Ramos",Inactive,MFG,California,US,N/A,31-Jan-2023,Bronze,5450000,2535,roger.lawson@williams.com,Daniel Hunt,"June 10, 2025",renewal call scheduled
+10285,"White, Saunders and Johnson",Prospect,CONST,TX,US,https://www.white.com,23-Dec-2017,Bronze,23800000,2657.0,jessica.hahn@white.com,Robert Guerra,09/18/22,
+10878,Evans-Doyle,Active,ENR,Tennessee,United States,www.evans-doyle.com,09-Sep-2017,Silver,"$3,150,000",  unknown ,shawn.bird@evans-doyle.com,Virginia Cunningham,,
+10733,Washington LLC,Inactive,LOG,IN,US,,2021/03/09,Gold,,1965,kayla.williams@washington.com,Jesus Jackson,"February 14, 2022",
+10289,Sandoval LLC,ACTIVE,PS,QC,Canada,www.sandoval.com,2026/03/29,Gold,36600000,,gabriel.salazar@sandoval.com,Maria Lucas,2026/07/22,
+10098,Arnold-Reyes,ACTIVE,OTH,NC,US,,10/03/2019,Silver,,2204,sandra.romero@arnold-reyes.com,Sharon Hill,15-Feb-2025,acquired by parent co
+10149,Sullivan LLC,Active,CONST,PA,USA,N/A,2022/10/01,Gold,"$23,000,000",2046  ,george.meza@sullivan.com,Michael Cox,"April 22, 2024",moved HQ 2024
+10299,"Mccarthy, Evans and Mendez",Active,ENR,GA,US,https://www.mccarthy.com,2017/03/03,Gold,30200000,3195,christopher.anderson@mccarthy.com,Eric White,2021/10/15,
+10169,Salas Inc,On Hold,PS,Ariz.,US,www.salas.com,"April 24, 2019",Bronze,,703,danielle.sawyer@salas.com,Ashley Singleton,"July 09, 2019",
+10906,"Dougherty, Reid and Petty",Inactive,MFG,Tennessee,US,https://www.dougherty.com,2025/10/28,Bronze,"$3,350,000",3060,jasmine.nelson@dougherty.com,Erica Clark,07/27/26,acquired by parent co
+10017,"  Cannon, Anderson and Alvarez ",Inactive,MFG,North Carolina,USA,https://www.cannon.com,2017-07-23,Bronze,"$38,550,000",1276,andrea.baker@cannon.com,Jenny Lewis,2026/06/26,
