@@ -19,7 +19,11 @@ RUN uv sync --frozen --no-dev
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-RUN useradd --create-home --uid 1000 onboarding && chown -R onboarding:onboarding /app
+# generated/ is a named volume in compose; docker copies this directory's ownership into a
+# fresh volume, so the non-root user can write there without an entrypoint chown dance
+RUN useradd --create-home --uid 1000 onboarding \
+    && mkdir -p /app/generated \
+    && chown -R onboarding:onboarding /app
 USER onboarding
 
 EXPOSE 8000 8501
