@@ -70,11 +70,33 @@ def render() -> None:
                 elif project["stage"] == "profiled":
                     st.write(
                         "Profiling is done. Review the quality issues and the schema comparison, "
-                        "then move to field mapping (Day 3)."
+                        "then get a proposed target for every field on the Mapping review page."
                     )
+                    st.markdown("[Open mapping review →](mappings)")
+                elif project["stage"] in ("mapped", "in_review"):
+                    ok, summary = api_json(
+                        "GET", f"/api/v1/projects/{project['id']}/mappings/summary"
+                    )
+                    if ok:
+                        c = summary["counts"]
+                        pending = c["suggested"] + c["needs_clarification"]
+                        st.write(
+                            f"{n(pending)} of {n(summary['total'])} fields still need a decision, "
+                            f"{n(summary['open_questions'])} questions are with the customer."
+                        )
+                    else:
+                        st.write("Proposals are in. Decide each field on the Mapping review page.")
+                    st.markdown("[Open mapping review →](mappings)")
+                elif project["stage"] == "ready_to_transform":
+                    st.write(
+                        "Every field is decided and no question is open. "
+                        "Next: deterministic transformation and validation."
+                    )
+                    st.markdown("[Open mapping review →](mappings)")
                 else:
                     st.write("Continue with the current stage.")
-                st.markdown("[Open source assessment →](sources)")
+                if project["stage"] in ("created", "profiled"):
+                    st.markdown("[Open source assessment →](sources)")
     else:
         st.write("No onboarding project selected. Open one below.")
 

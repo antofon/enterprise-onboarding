@@ -61,7 +61,8 @@ def inject_css() -> None:
 
 
 def api(method: str, path: str, **kwargs: Any) -> httpx.Response:
-    return httpx.request(method, f"{API_BASE_URL}{path}", timeout=120, **kwargs)
+    kwargs.setdefault("timeout", 120)
+    return httpx.request(method, f"{API_BASE_URL}{path}", **kwargs)
 
 
 def api_json(method: str, path: str, **kwargs: Any) -> tuple[bool, Any]:

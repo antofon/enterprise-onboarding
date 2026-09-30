@@ -6,7 +6,7 @@ from __future__ import annotations
 import streamlit as st
 
 from common import api_health, inject_css, load_projects
-from views import overview, source_assessment
+from views import mapping_review, overview, source_assessment
 
 st.set_page_config(page_title="Enterprise Onboarding", page_icon="🧭", layout="wide")
 inject_css()
@@ -44,6 +44,12 @@ pages = [
         title="Source assessment",
         icon=":material/fact_check:",
         url_path="sources",
+    ),
+    st.Page(
+        mapping_review.render,
+        title="Mapping review",
+        icon=":material/alt_route:",
+        url_path="mappings",
     ),
 ]
 st.navigation(pages, position="top").run()
