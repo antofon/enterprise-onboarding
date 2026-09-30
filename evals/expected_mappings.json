@@ -1,0 +1,72 @@
+{
+  "customer": "Apex Equipment Services",
+  "rules_document": "sample_customer/business_rules.md",
+  "notes": "golden mappings for the committed sample. `expected` is the right target (null = no home in Meridian). `accept` lists other answers that count as correct. `clarify` marks fields the customer must be asked about, so a proposal is right when it asks. `clarify_ok` means asking instead of answering is acceptable, not required.",
+  "datasets": {
+    "organizations.csv": {
+      "kind": "csv",
+      "location": "sample_customer/data/organizations.csv",
+      "fields": {
+        "acct_num": {"expected": "organization.organization_id"},
+        "company_name": {"expected": "organization.name"},
+        "company_status": {"expected": "organization.lifecycle_status", "transformation": true, "note": "rule 6 resolves On Hold and Closed; Actve is a typo nothing resolves"},
+        "industry_code": {"expected": "organization.industry", "transformation": true},
+        "hq_state": {"expected": "organization.billing_region", "transformation": true},
+        "country": {"expected": "organization.billing_country", "transformation": true, "note": "rule 5: CA is Canada in billing, sometimes California in old CRM rows"},
+        "website": {"expected": "organization.website", "transformation": true},
+        "created_on": {"expected": "organization.customer_since", "transformation": true},
+        "customer_tier": {"expected": null, "clarify": true, "accept": ["organization.account_priority"], "note": "rule 3: Strategic is a designation, Gold/Silver/Bronze a spend band, Platinum retired. neither a plan nor exactly a priority; the customer decides"},
+        "annual_revenue": {"expected": "organization.annual_revenue_usd", "transformation": true},
+        "employee_count": {"expected": "organization.employee_count", "transformation": true},
+        "primary_contact_email": {"expected": "contact.email", "clarify_ok": true, "transformation": true, "note": "rule 1: authoritative for the primary contact. cross-entity, creates or flags a contact"},
+        "account_owner": {"expected": null, "note": "internal sales owner; Meridian has no owner field"},
+        "last_activity_date": {"expected": null, "clarify_ok": true, "note": "input to rule 2 (18-month dormancy); no target field of its own"},
+        "notes": {"expected": null, "accept": ["organization.tags"], "note": "free text, no target"}
+      }
+    },
+    "contacts.csv": {
+      "kind": "csv",
+      "location": "sample_customer/data/contacts.csv",
+      "fields": {
+        "contact_ref": {"expected": "contact.contact_id"},
+        "acct_num": {"expected": "contact.organization_id"},
+        "full_name": {"expected": "contact.first_name", "accept": ["contact.last_name"], "transformation": true, "note": "split; 'LAST, FIRST' and titles are in the data"},
+        "contact_mail": {"expected": "contact.email", "transformation": true},
+        "phone_number": {"expected": "contact.phone", "transformation": true},
+        "contact_role": {"expected": "contact.role", "transformation": true, "note": "rule 13 maps the free-text roles"},
+        "is_primary": {"expected": "contact.is_primary", "transformation": true},
+        "last_touch": {"expected": null, "clarify_ok": true, "note": "no target field; activity history is optional"},
+        "opt_out": {"expected": null, "note": "rule 14: marketing preference, contacts still migrate, no target field"}
+      }
+    },
+    "subscriptions.json": {
+      "kind": "json",
+      "location": "sample_customer/data/subscriptions.json",
+      "fields": {
+        "sub_id": {"expected": "subscription.subscription_id"},
+        "acct_num": {"expected": "subscription.organization_id"},
+        "subscription_level": {"expected": "subscription.plan", "transformation": true, "note": "rules 7 and 8: Legacy Gold, Pro, Basic, ENT"},
+        "billing_freq": {"expected": "subscription.billing_cycle", "transformation": true, "note": "rule 9: quarterly becomes monthly"},
+        "sub_status": {"expected": "subscription.status", "transformation": true, "note": "rule 10: paused to past_due, expired to cancelled; rule 11 drops old trials"},
+        "seat_count": {"expected": "subscription.seats", "transformation": true},
+        "start_dt": {"expected": "subscription.start_date", "transformation": true},
+        "renew_dt": {"expected": "subscription.renewal_date", "transformation": true},
+        "monthly_amount": {"expected": "subscription.mrr_usd", "transformation": true, "note": "rule 12: currency text, CAD as-is"},
+        "currency": {"expected": null, "note": "rule 12 makes it redundant"}
+      }
+    },
+    "activity.csv": {
+      "kind": "csv",
+      "location": "sample_customer/data/activity.csv",
+      "fields": {
+        "activity_id": {"expected": "activity.activity_id"},
+        "acct_num": {"expected": "activity.organization_id"},
+        "activity_type": {"expected": "activity.kind", "transformation": true},
+        "occurred_at": {"expected": "activity.occurred_at", "transformation": true},
+        "amount": {"expected": "activity.amount_usd", "transformation": true},
+        "currency": {"expected": null, "clarify_ok": true},
+        "description": {"expected": "activity.description"}
+      }
+    }
+  }
+}

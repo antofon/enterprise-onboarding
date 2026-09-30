@@ -116,5 +116,138 @@ def profile(
             typer.echo(f"  {fc.source_field:<24} {fc.classification:<24} {target:<34} {fc.reason}")
 
 
+def _require_provider():
+    from app.ai import build_provider
+
+    provider = build_provider()
+    if provider.name == "none":
+        typer.echo(
+            "manual mode: no model provider configured. set LLM_PROVIDER=anthropic|openai and "
+            "its key in .env, or map by hand in the workbench.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+    return provider
+
+
+@app.command()
+def suggest(
+    location: str = typer.Argument(..., help="csv or json under a source root"),
+    kind: str | None = typer.Option(None, help="csv | json (guessed from the location)"),
+    entity: str | None = typer.Option(None, help="target entity the file is about (guessed)"),
+    rules: str | None = typer.Option(
+        "sample_customer/business_rules.md", help="the customer's business rules, or '' for none"
+    ),
+    customer: str = typer.Option("the customer", help="customer name for the prompt"),
+) -> None:
+    """ask the configured model for a target per column of one file. no api, no database."""
+    from app.ai.prompts import build_mapping_prompt
+    from app.models.project import DatasetKind
+    from app.services.comparison import compare as compare_schemas
+    from app.services.comparison import field_comparison_dict
+    from app.services.mapping import propose
+    from app.services.profiling import load_source, profile_frame
+    from app.services.sources import read_document
+    from app.target.catalog import target_field_catalog
+
+    configure_logging()
+    provider = _require_provider()
+    if kind is None:
+        kind = location.rsplit(".", 1)[-1].lower()
+    df = load_source(DatasetKind(kind), location)
+    profile = profile_frame(df, name=location.rsplit("/", 1)[-1])
+    report = compare_schemas([profile], entities={profile.name: entity} if entity else None)
+    catalog = target_field_catalog()
+    bundle = build_mapping_prompt(
+        profile=profile,
+        entity=report.datasets[profile.name],
+        comparisons=field_comparison_dict(report).get(profile.name, {}),
+        catalog=catalog,
+        customer=customer,
+        rules_text=read_document(rules) if rules else None,
+        project_notes=None,
+        provider=provider.name,
+        model=provider.model,
+    )
+    typer.echo(f"{provider.name} / {provider.model}, prompt {len(bundle.user):,} chars")
+    outcome = propose(provider, bundle, profile=profile, catalog_paths={f.path for f in catalog})
+    typer.echo(
+        f"{outcome.attempts} attempt(s), {outcome.input_tokens} in / {outcome.output_tokens} out "
+        f"tokens, {outcome.latency_ms:.0f} ms"
+    )
+    typer.echo("")
+    typer.echo(f"{'source field':<24} {'target':<34} {'conf':>5}  flags  reason")
+    for m in outcome.proposal.mappings:
+        flags = ("T" if m.transformation_required else "-") + (
+            "?" if m.clarification_required else "-"
+        )
+        reason = m.reason if len(m.reason) <= 90 else m.reason[:89] + "…"
+        target = m.target_field or "-"
+        typer.echo(f"{m.source_field:<24} {target:<34} {m.confidence:>5.2f}  {flags:<5}  {reason}")
+    questions = [m for m in outcome.proposal.mappings if m.clarification_question]
+    if questions:
+        typer.echo("")
+        typer.echo("questions for the customer:")
+        for m in questions:
+            typer.echo(f"  [{m.source_field}] {m.clarification_question}")
+    if outcome.proposal.observations:
+        typer.echo("")
+        typer.echo("observations:")
+        for o in outcome.proposal.observations:
+            typer.echo(f"  - {o}")
+
+
+@app.command("eval-mapping")
+def eval_mapping(
+    golden: str = typer.Option("evals/expected_mappings.json", help="the golden set"),
+    out: str = typer.Option("evals/results", help="where the result json lands; '' to skip"),
+) -> None:
+    """run the mapping prompt over the golden set and score it. writes evals/results/*.json."""
+    from pathlib import Path
+
+    from app.services.evaluation import run_mapping_eval
+
+    configure_logging()
+    provider = _require_provider()
+    report = run_mapping_eval(
+        provider, golden_path=Path(golden), out_dir=Path(out) if out else None
+    )
+    m = report.metrics
+    typer.echo(f"{report.provider} / {report.model}, prompt {report.prompt_version}")
+    typer.echo(
+        f"fields {m['fields']}  correct {m['correct']}  accuracy {m['accuracy']}  "
+        f"target accuracy {m['target_accuracy']} ({m['target_correct']}/{m['target_fields']})"
+    )
+    typer.echo(
+        f"deferred {m['deferred']}  unresolved {m['unresolved']}  wrong {m['wrong']}  "
+        f"overconfident {m['overconfident']}  incorrect at >= {m['high_confidence_threshold']}: "
+        f"{m['incorrect_high_confidence']}"
+    )
+    typer.echo(
+        f"clarification recall {m['clarification_recall']} "
+        f"({m['clarify_flagged']}/{m['clarify_expected']}), false positives "
+        f"{m['clarification_false_positives']}; transformation flag recall "
+        f"{m['transformation_flag_recall']}"
+    )
+    typer.echo(
+        f"mean confidence: correct {m['mean_confidence_correct']}, "
+        f"incorrect {m['mean_confidence_incorrect']}"
+    )
+    u = report.usage
+    typer.echo(
+        f"{u['calls']} calls, {u['attempts']} attempts, {u['input_tokens']} in / "
+        f"{u['output_tokens']} out tokens, {u['latency_ms']:.0f} ms"
+    )
+    typer.echo("")
+    for r in report.rows:
+        if r.outcome != "correct":
+            typer.echo(
+                f"  {r.outcome:<13} {r.dataset}.{r.source_field}: proposed "
+                f"{r.proposed or '-'} ({r.confidence:.2f}"
+                f"{', asks' if r.clarification_required else ''}), expected "
+                f"{r.expected or '-'}{' or a question' if r.clarify_expected else ''}"
+            )
+
+
 if __name__ == "__main__":
     app()
