@@ -10,7 +10,7 @@ This tool is what an implementation or forward-deployed engineer would use to an
 
 ## Status
 
-Day 1 of a 7-day build. What is in place today:
+Day 1 of a 7-day local build, followed by an AWS demo phase. What is in place today:
 
 - [x] Docker Compose brings up PostgreSQL, the FastAPI service, and the Streamlit workbench
 - [x] structured JSON logging with request ids
@@ -32,7 +32,22 @@ Day 1 of a 7-day build. What is in place today:
 - [ ] mapping accuracy eval against a golden set
 - [ ] unit, integration, and end-to-end tests
 
-Stretch, only after the above is solid: LangGraph (if the workflow earns it), RAG over the target docs, a second customer dataset, batching for large datasets, PDF export.
+AWS demo, required, started only once the local workflow above is verified end to end:
+
+- [ ] Dockerized application runs locally
+- [ ] private S3 bucket configured
+- [ ] Python application reads/writes appropriate artifacts through S3
+- [ ] application deployed on Linux EC2
+- [ ] EC2 uses an IAM role for S3 access
+- [ ] no long-lived AWS credentials are stored on EC2 or committed to Git
+- [ ] PostgreSQL is not publicly exposed
+- [ ] AWS deployment process is documented
+- [ ] AWS resources and expected costs are documented
+- [ ] unnecessary AWS resources can be safely stopped/deleted after the demo
+
+The AWS scope is S3 + EC2 + an IAM role, nothing more. No RDS: PostgreSQL stays in Docker on the instance. Local development never depends on AWS; the S3 path sits behind a storage switch. See [Local development vs AWS demo](docs/ARCHITECTURE.md#local-development-vs-aws-demo).
+
+Stretch, only after the above is solid: LangGraph (if the workflow earns it), RAG over the target docs, a second customer dataset, batching for large datasets, PDF export. Hosted deployment is not on this list because it is required, see the AWS block above.
 
 ## Quick start
 

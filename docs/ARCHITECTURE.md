@@ -101,6 +101,50 @@ Planned for Day 3.
 
 Planned for Day 4.
 
+## Local development vs AWS demo
+
+Two deployments of the same code. Local is the build and review environment and stays fully functional with no AWS account. The AWS demo (planned, after the local workflow is verified end to end) extends it with object storage and a hosted instance. Nothing in the local path depends on AWS.
+
+**Local development (implemented):**
+
+```
+laptop or vps
+  docker compose
+    db   postgres 16, published on 127.0.0.1:5433 only
+    api  fastapi, mock target platform, mock billing source (Day 2), 127.0.0.1:8000
+    ui   streamlit workbench, 127.0.0.1:8501
+  files
+    sample_customer/   the committed 1,000-org customer, mounted read-only
+    generated/         named volume for bigger generated customers
+  STORAGE_BACKEND=local   planned: artifacts (profiles, reports, run output) on the local filesystem
+```
+
+**AWS demo (planned):**
+
+```
+customer dataset
+   |
+   v
+S3 bucket (private)                 intake/{customer}/{project}/...
+   |
+   v
+EC2, small linux instance           docker compose, the same three services
+   instance profile = IAM role       s3 get/put/list on this bucket and prefix only
+   security group                    8000 and 8501 from the operator's ip, for the demo only
+   postgres                          inside compose, bound to 127.0.0.1 on the instance, never public
+   |
+   v
+S3 bucket                           output/{customer}/{project}/readiness.md, readiness.json, run logs
+```
+
+Rules the AWS phase follows:
+
+- **Scope is S3 + EC2 + IAM.** No RDS, no load balancer, no container service. Postgres in Docker is enough for this project; the point is the onboarding workflow, not the infrastructure.
+- **No long-lived keys anywhere.** The instance gets its permissions from an IAM role via the instance profile; boto3 picks them up on its own. Nothing AWS-related is ever committed, and the operator's own credentials stay on the operator's machine.
+- **Least privilege, explained.** The IAM policy lists only the S3 actions the application calls, scoped to the one bucket, and the deployment doc says why each statement exists.
+- **Configuration, not code.** `STORAGE_BACKEND=local|s3`, `AWS_REGION`, `S3_BUCKET`, `S3_PREFIX` via environment. The S3 adapter implements the same storage interface as the local filesystem store.
+- **Documented and disposable.** `docs/AWS_DEPLOYMENT.md` (planned) covers instance configuration, security group, IAM policy, deployment steps, expected monthly cost, and how to stop or delete everything after the demo.
+
 ## Security considerations
 
 Planned for Day 6: what is implemented versus what production would need.
