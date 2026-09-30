@@ -37,7 +37,7 @@ Stretch, only after the above is solid: LangGraph (if the workflow earns it), RA
 ## Quick start
 
 ```bash
-cp .env.example .env
+cp deploy/env.template .env
 docker compose up --build
 ```
 
@@ -58,6 +58,7 @@ Local development without containers (needs [uv](https://docs.astral.sh/uv/) and
 
 ```bash
 uv sync
+make hooks       # one-time: pre-commit hook that blocks .env files and runs gitleaks
 uv run uvicorn app.main:app --reload
 uv run streamlit run ui/streamlit_app.py
 uv run pytest

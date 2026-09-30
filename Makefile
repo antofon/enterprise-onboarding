@@ -1,4 +1,4 @@
-.PHONY: up down logs ps seed test lint fmt shell
+.PHONY: up down logs ps seed test lint fmt shell hooks
 
 up:            ## build and start postgres, api, ui
 	docker compose up --build -d
@@ -26,3 +26,6 @@ fmt:
 
 shell:
 	docker compose exec api bash
+
+hooks:         ## one-time per clone: pre-commit hook that blocks .env files and runs gitleaks
+	git config core.hooksPath .githooks

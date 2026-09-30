@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# refuses any .env file (real or template) and runs gitleaks on the staged diff.
+# activate once per clone with `make hooks` (points core.hooksPath at .githooks).
+set -euo pipefail
+
+staged=$(git diff --cached --name-only --diff-filter=ACR)
+
+blocked=$(printf '%s\n' "$staged" | grep -E '(^|/)(\.env(\.[^/]*)?|[^/]+\.env)$' || true)
+if [ -n "$blocked" ]; then
+  echo "pre-commit: env files are never committed, templates included:" >&2
+  printf '  %s\n' $blocked >&2
+  echo "pre-commit: real values go in .env (ignored), the template lives at deploy/env.template" >&2
+  exit 1
+fi
+
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --pre-commit --staged --redact --no-banner
+else
+  echo "pre-commit: gitleaks not installed, secret scan skipped (https://github.com/gitleaks/gitleaks/releases)" >&2
+fi

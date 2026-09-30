@@ -8,8 +8,8 @@ __pycache__/
 .coverage
 htmlcov/
 
-# secrets and local config
-.env
+# secrets and local config. no .env file of any kind is ever committed, templates included (see deploy/env.template)
+.env*
 .streamlit/secrets.toml
 
 # generated data (regenerate with `make seed` or the CLI)
