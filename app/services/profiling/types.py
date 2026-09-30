@@ -72,7 +72,7 @@ class DatasetProfile(BaseModel):
 
     def summary(self) -> dict[str, Any]:
         """the dataset-level part, what goes into source_datasets.quality."""
-        return self.model_dump(exclude={"fields"})
+        return {**self.model_dump(exclude={"fields"}), "issue_counts": self.issue_counts()}
 
     def issue_counts(self) -> dict[str, int]:
         counts = {s.value: 0 for s in Severity}
