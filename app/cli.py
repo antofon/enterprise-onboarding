@@ -52,5 +52,53 @@ def generate_data(
     typer.echo(f"manifest: {summary.out_dir / 'manifest.json'}")
 
 
+@app.command()
+def profile(
+    location: str = typer.Argument(..., help="csv or json under a source root, or a feed url"),
+    kind: str | None = typer.Option(None, help="csv | json | api (guessed from the location)"),
+    columns: bool = typer.Option(True, help="print the per-column table"),
+) -> None:
+    """profile one source without the api or the database: types, nulls, uniqueness, issues."""
+    from app.models.project import DatasetKind
+    from app.services.profiling import assess, load_source, profile_frame
+
+    if kind is None:
+        kind = "api" if location.startswith("http") else location.rsplit(".", 1)[-1].lower()
+    try:
+        dataset_kind = DatasetKind(kind)
+    except ValueError as exc:
+        raise typer.BadParameter("kind must be csv, json or api") from exc
+
+    df = load_source(dataset_kind, location)
+    result = profile_frame(df, name=location.rsplit("/", 1)[-1])
+    result.issues = assess(result)
+
+    typer.echo(f"{result.name}: {result.row_count} rows, {result.column_count} columns")
+    key = result.key_column or "none found"
+    typer.echo(
+        f"key column {key}, {result.key_missing} missing, {result.key_duplicates} duplicated, "
+        f"{result.exact_duplicate_rows} exact duplicate rows, {result.duration_ms} ms"
+    )
+    if columns:
+        typer.echo("")
+        typer.echo(
+            f"{'column':<24} {'type':<10} {'null%':>6} {'uniq%':>6} {'distinct':>8}  samples"
+        )
+        for f in result.fields:
+            samples = ", ".join(f.sample_values[:3])
+            typer.echo(
+                f"{f.name:<24} {f.inferred_type:<10} {f.null_pct:>6} {f.unique_pct:>6} "
+                f"{f.distinct_count:>8}  {samples}"
+            )
+    counts = result.issue_counts()
+    typer.echo("")
+    typer.echo(
+        f"issues: {counts['error']} error, {counts['warning']} warning, {counts['info']} info"
+    )
+    for issue in result.issues:
+        pct = f" ({issue.pct}%)" if issue.pct is not None else ""
+        typer.echo(f"  [{issue.severity:<7}] {issue.message}{pct}")
+
+
 if __name__ == "__main__":
     app()
