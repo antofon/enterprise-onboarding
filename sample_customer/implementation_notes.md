@@ -17,6 +17,8 @@
 | Activity export | `activity.csv` | one-off export from the CRM's activity module | ops lead |
 | Account handling rules | `business_rules.md` | word doc from the ops lead, converted to markdown | ops lead |
 
+*For this build the billing API is simulated by the application itself under `/mock/billing/v1` (bearer token, paginated, read-only), serving the same records as `data/subscriptions.json`.*
+
 ## Known issues the customer told us about
 
 - Accounts were merged by hand for years; there are duplicates under different account numbers
