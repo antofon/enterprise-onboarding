@@ -7,6 +7,7 @@ from fastapi import APIRouter, Response, status
 from app.core.db import DbSession
 from app.core.http import HttpClient
 from app.schemas.common import ErrorEnvelope
+from app.schemas.mapping import AvailableDocument
 from app.schemas.project import SourceDatasetRead
 from app.schemas.sources import (
     AvailableSource,
@@ -40,6 +41,15 @@ PROFILE_ERRORS = {
 )
 def list_available() -> list[AvailableSource]:
     return source_service.available_sources()
+
+
+@router.get(
+    "/sources/documents",
+    response_model=list[AvailableDocument],
+    summary="context documents under the document roots: business rules, kickoff notes",
+)
+def list_documents() -> list[AvailableDocument]:
+    return source_service.available_documents()
 
 
 @router.get(

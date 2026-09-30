@@ -5,7 +5,7 @@ from __future__ import annotations
 import enum
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import (
     DateTime,
@@ -22,6 +22,9 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import ONBOARDING_SCHEMA, Base
+
+if TYPE_CHECKING:
+    from app.models.mapping import ClarificationQuestion, FieldMapping
 
 
 class ProjectStage(enum.StrEnum):
@@ -72,6 +75,12 @@ class OnboardingProject(Base):
 
     datasets: Mapped[list[SourceDataset]] = relationship(
         back_populates="project", cascade="all, delete-orphan", order_by="SourceDataset.name"
+    )
+    mappings: Mapped[list[FieldMapping]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
+    questions: Mapped[list[ClarificationQuestion]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
     )
 
 

@@ -22,6 +22,7 @@ from app.models.project import (
     SourceDataset,
     SourceField,
 )
+from app.schemas.mapping import AvailableDocument
 from app.schemas.sources import AvailableSource, ProfiledDataset, ProfileRunRead, SourceAttach
 from app.services.comparison import ComparisonReport, compare
 from app.services.profiling import (
@@ -37,6 +38,43 @@ from app.services.profiling import (
 log = get_logger(__name__)
 
 _SKIP_FILES = {"manifest.json"}
+_DOC_SUFFIXES = {".md", ".txt"}
+DOCUMENT_MAX_CHARS = 60_000
+
+
+def available_documents(settings: Settings | None = None) -> list[AvailableDocument]:
+    """markdown and text files under the document roots: the customer's rules, kickoff notes."""
+    settings = settings or get_settings()
+    out: list[AvailableDocument] = []
+    for root in settings.document_root_paths:
+        root_path = Path(root)
+        if not root_path.is_dir():
+            continue
+        for file in sorted(root_path.rglob("*")):
+            if file.is_file() and file.suffix.lower() in _DOC_SUFFIXES:
+                out.append(
+                    AvailableDocument(
+                        name=file.name, location=file.as_posix(), size_bytes=file.stat().st_size
+                    )
+                )
+    return out
+
+
+def read_document(location: str, settings: Settings | None = None) -> str:
+    """a context document, path-checked against the document roots, size-capped."""
+    settings = settings or get_settings()
+    path = resolve_source_path(location, settings.document_root_paths)
+    if path.suffix.lower() not in _DOC_SUFFIXES:
+        raise AppError(
+            "context documents must be .md or .txt",
+            status_code=422,
+            error_type="invalid_location",
+            details={"location": location},
+        )
+    text = path.read_text(encoding="utf-8", errors="replace")
+    if len(text) > DOCUMENT_MAX_CHARS:
+        text = text[:DOCUMENT_MAX_CHARS] + f"\n\n[truncated at {DOCUMENT_MAX_CHARS} characters]"
+    return text
 
 
 def available_sources(settings: Settings | None = None) -> list[AvailableSource]:
