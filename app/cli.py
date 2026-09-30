@@ -57,6 +57,8 @@ def profile(
     location: str = typer.Argument(..., help="csv or json under a source root, or a feed url"),
     kind: str | None = typer.Option(None, help="csv | json | api (guessed from the location)"),
     columns: bool = typer.Option(True, help="print the per-column table"),
+    compare: bool = typer.Option(False, help="classify every column against the target catalog"),
+    entity: str | None = typer.Option(None, help="target entity the file is about (guessed)"),
 ) -> None:
     """profile one source without the api or the database: types, nulls, uniqueness, issues."""
     from app.models.project import DatasetKind
@@ -98,6 +100,20 @@ def profile(
     for issue in result.issues:
         pct = f" ({issue.pct}%)" if issue.pct is not None else ""
         typer.echo(f"  [{issue.severity:<7}] {issue.message}{pct}")
+
+    if compare:
+        from app.services.comparison import compare as compare_schemas
+
+        report = compare_schemas([result], entities={result.name: entity} if entity else None)
+        guessed = report.datasets[result.name] or "unknown"
+        typer.echo("")
+        typer.echo(
+            f"schema comparison, entity {guessed}: "
+            + ", ".join(f"{k} {v}" for k, v in report.counts.items() if v)
+        )
+        for fc in report.fields:
+            target = fc.target or (fc.candidates[0].target + "?" if fc.candidates else "-")
+            typer.echo(f"  {fc.source_field:<24} {fc.classification:<24} {target:<34} {fc.reason}")
 
 
 if __name__ == "__main__":
