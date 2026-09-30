@@ -36,6 +36,21 @@ class Settings(BaseSettings):
 
     data_dir: str = Field(default="sample_customer/data", description="where source files live")
 
+    # directories a source file may be attached from, relative to the project root. anything
+    # outside these (or reached through "..") is refused by the api.
+    source_roots: str = "sample_customer/data,generated"
+
+    # the customer's legacy billing system, simulated by this same process under
+    # /mock/billing/v1. the loader pages through it over http like any external feed.
+    billing_api_base_url: str = "http://localhost:8000/mock/billing/v1"
+    billing_api_token: str = "legacybill-readonly-demo"
+    billing_source_file: str = "sample_customer/data/subscriptions.json"
+    billing_page_size: int = 200
+
+    @property
+    def source_root_paths(self) -> list[str]:
+        return [r.strip() for r in self.source_roots.split(",") if r.strip()]
+
     @property
     def effective_llm_provider(self) -> LlmProvider:
         """the provider we can actually use. a provider without its key means manual mode,

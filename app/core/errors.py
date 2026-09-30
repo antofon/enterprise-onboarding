@@ -60,6 +60,18 @@ class ConflictError(AppError):
     error_type = "conflict"
 
 
+class UnauthorizedError(AppError):
+    status_code = 401
+    error_type = "unauthorized"
+
+
+class SourceUnavailableError(AppError):
+    """a source file or feed could not be read."""
+
+    status_code = 502
+    error_type = "source_unavailable"
+
+
 class InvalidStateError(AppError):
     """the project is not in a stage where this action makes sense."""
 

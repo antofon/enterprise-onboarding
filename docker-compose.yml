@@ -23,6 +23,7 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://onboarding:onboarding@db:5432/onboarding
       TARGET_API_BASE_URL: http://api:8000/target/v1
+      BILLING_API_BASE_URL: http://api:8000/mock/billing/v1
       LOG_FORMAT: json
     volumes:
       - ./sample_customer:/app/sample_customer:ro
