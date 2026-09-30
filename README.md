@@ -100,9 +100,9 @@ The result is not "import succeeded." It is evidence that lets an implementation
 
 Three ways in:
 
-- **Workbench UI** (Streamlit): create a project, attach sources, profile them, read the quality issues and the schema comparison. Talks to the API over HTTP only.
+- **Workbench UI** (Streamlit): create a project, attach sources, profile them, read the quality issues and the schema comparison, get a proposed target for every field, decide each one, answer the customer's questions. Talks to the API over HTTP only.
 - **REST API** (FastAPI): every operation the UI performs, plus the simulated billing source and, in the same process, the simulated target platform.
-- **CLI** (Typer): `check`, `generate-data`, `profile [--compare]`. Profiles a file or feed without the API or the database.
+- **CLI** (Typer): `check`, `generate-data`, `profile [--compare]`, `suggest`, `eval-mapping`. Profiles a file or feed, asks the model about it, or scores the model against the golden set, all without the API or the database.
 
 ## The one rule: where AI is and is not allowed
 
@@ -118,7 +118,7 @@ The transformation engine never executes model-generated Python. A model suggest
 
 ## End-to-end workflow
 
-Profiling and schema comparison are in the codebase today. The stages after them are specified here as designed and listed under [Current limitations](#current-limitations).
+Profiling, schema comparison, AI-assisted mapping, human review and customer clarification are in the codebase today. The stages after them are specified here as designed and listed under [Current limitations](#current-limitations).
 
 ### 1. Data ingestion and profiling
 
@@ -162,9 +162,9 @@ Deterministic, and honest about what it cannot know. It sees three things: the c
 
 ### 3. Schema mapping: AI-assisted, human-approved
 
-This is where the model earns its place. For each source field it sees the field name, the profiler's stats, a small sanitized set of sample values, the target catalog with types, enums, required flags and descriptions, the deterministic comparison result, and the customer's business-rules document. It never sees the dataset.
+This is where the model earns its place. It is asked about one dataset at a time and sees, per column: the inferred type, null and unique rates, distinct count, and then only what the column's kind justifies. Small vocabularies (statuses, tiers, plans, roles, countries, booleans) are sent with their counts because those values are the business meaning. Dates get their formats and range, numbers their range and how many carry symbols, identifiers their shapes and three examples. Emails, phones, urls, people's and companies' names and free text get shapes and counts and no values at all. Alongside: the deterministic comparison for the column, the whole target catalog with types, enums, required flags and descriptions, the target's cross-record rules, the dataset's key and orphan facts, and the customer's business-rules document. It never sees a row.
 
-It proposes, per field, a structured mapping validated by Pydantic before anything is stored:
+It answers in a closed schema that both providers enforce at decoding time, one entry per source field:
 
 ```json
 {
@@ -177,13 +177,15 @@ It proposes, per field, a structured mapping validated by Pydantic before anythi
 }
 ```
 
-The provider sits behind one interface. Anthropic is the default, OpenAI runs behind the same interface, and `LLM_PROVIDER=none` is **manual mode**: every other stage works, only the suggestions are off and the engineer maps by hand from the comparison. A provider without its key falls back to manual mode; the application never fakes a model response.
+What the schema cannot enforce is checked before anything is stored: every source field answered exactly once, no invented fields, every target in the catalog, confidence in 0..1, a question whenever one is required, a rule whenever one is required. Problems are sent back to the model verbatim, up to three attempts in total; then the call is recorded as failed and the API answers 502 with the problems listed. Nothing is written from a rejected answer.
 
-**Human review.** Every mapping carries a status and a decision trail. The engineer can approve, reject, edit the target field, define the transformation, mark the field ignored, or send a question to the customer. High-confidence mappings can be bulk-approved; nothing below the threshold is approved without a person. Low-confidence rows are visually obvious in the workbench.
+The provider sits behind one interface. Anthropic is the default, OpenAI runs behind the same interface, and `LLM_PROVIDER=none` is **manual mode**: the comparison's clear matches become proposals marked `heuristic` with no invented confidence, its ambiguous fields open a templated question, and the engineer decides the rest by hand. A provider without its key falls back to manual mode; the application never fakes a model response.
 
-**Customer clarification.** Unresolved mappings become targeted questions, stored with the project, answered in the tool, and fed back into the mapping: "We found `customer_tier` with values Gold, Silver, Bronze, Strategic and Platinum. Meridian has `account_priority` (operational treatment) and `subscription.plan` (what they pay for). Which does this field represent, and how should Strategic and the retired Platinum be handled?"
+**Human review.** Every mapping is in one of five states (`suggested`, `needs_clarification`, `approved`, `rejected`, `ignored`) and only a person moves it to the last three. The engineer can approve (with the proposed target or a different one), reject, edit the target or the rule, mark the field ignored, ask the customer, or reopen. Who decided what, when and why is stored on the row. Bulk approval acts only on suggested rows with a target at or above the configured high-confidence threshold (0.85), and a caller can raise that bar, never lower it. Low-confidence rows are red in the workbench; the color changes nothing.
 
-**Cost and safety design.** The prompt carries schema, stats and a handful of sanitized samples, never rows. A hash of the prompt inputs skips a second call for the same schema. Malformed structured output is retried a bounded number of times, then surfaces as an error instead of a guess. Model, latency and token usage are logged per call; keys and raw customer records are not.
+**Customer clarification.** Fields the model or the engineer flags become questions stored with the project, with the values seen and the candidate targets as context, answered in the tool. The answer can resolve the mapping on the spot through the same decision path a reviewer uses, or return it to the reviewer's queue with the answer attached. From a real run on the sample: "`customer_tier` has values Silver (326), Gold (239), Bronze (212), Strategic (85), Platinum (25), plus 13.9% blank. Rule 3 says Gold/Silver/Bronze are annual-spend bands, Strategic is an executive designation, and Platinum accounts are now Gold. Meridian has `organization.account_priority` (standard | priority | strategic) and the free-form `organization.tags` list. How should this land?"
+
+**Cost and safety design.** The brief carries statistics, vocabulary and shapes, never rows; the largest thing in it is the customer's rules document. Datasets are asked about in parallel, because one call on a fifteen-column file runs about two minutes. A sha256 over the prompt version, the provider, the model and the brief is the cache key: an unchanged project costs nothing to re-suggest, and the cached run is still logged. Every call is a row with model, attempts, tokens in and out, latency and the provider's request id. Keys are read from the environment and never logged; the prompt is not stored; the structured answer is, because it is the proposal and its reasons.
 
 ### 4. Deterministic transformation and validation
 
@@ -245,6 +247,8 @@ Exported as Markdown for people and JSON for automation.
 - **API service:** one FastAPI process serving the onboarding API under `/api/v1`, the simulated legacy billing source under `/mock/billing/v1`, and the simulated target platform under `/target/v1`. Mounting these in one process keeps the reviewer experience to one `docker compose up`; the loaders and the migration layer still talk to them over HTTP, so the network seam (serialization, status codes, timeouts, retries) is real. The base URLs are configuration, so either mock can be split into its own service without code changes.
 - **Source profiler:** `app/services/profiling`. Loaders, value-level type inference, per-column stats, dataset quality issues, cross-dataset key checks.
 - **Schema comparison:** `app/services/comparison.py`. Deterministic classification of every source field against the target catalog.
+- **AI mapping service:** `app/ai` (provider interface, answer schema, prompt builder) and `app/services/mapping.py` (ask per dataset in parallel, check the answer, retry with feedback, cache by hash, write one row per column).
+- **Human review and clarification:** `app/services/mapping.py` and `app/services/clarifications.py`. Decisions with a trail, questions to the customer, bulk approval with a floor.
 - **Target catalog:** `app/target`. Meridian's data model as Pydantic models; the catalog flattens them into the field list the comparison classifies against and the mapping prompt sees. The JSON schema files under `target_platform/schema` are generated from these models, and a test fails if they drift.
 - **Database:** one PostgreSQL with two schemas. `onboarding` holds this tool's state. `target` holds the fictional platform's tables and is only ever written through the target API, so the migration cannot bypass the interface.
 - **Workbench UI:** Streamlit, talks to the API over HTTP only. `ui/streamlit_app.py` holds navigation and the project selector, `ui/views/` one module per screen.
@@ -260,6 +264,9 @@ Schema `onboarding`:
 | `projects` | one row per customer onboarding: customer, project, source systems, target environment, notes, `stage` |
 | `source_datasets` | one row per source file or feed attached to a project (csv, json, api): where it lives, row and column counts, `profiled_at`, and `quality` (jsonb: duplicate rows, key column with missing and duplicated counts, references into other datasets with orphan counts, the issue list with severities) |
 | `source_fields` | one row per column per profiled dataset: inferred type, null and unique percentages, distinct count, up to five sample values, and `stats` (jsonb: type tag counts, value distribution or a 50-value sample, shapes, case variants, per-type extras such as date formats or malformed examples). Replaced on every re-profile |
+| `field_mappings` | one row per source column per project: proposed target, status, origin (model, heuristic, manual), confidence, reason, whether a rule is needed and which, whether the customer has to be asked, what the comparison said, which model call produced it, and who decided what when |
+| `clarification_questions` | a question for the customer, usually tied to one mapping: the text, the values and candidates it is about, status (open, answered, withdrawn), the answer and the resolution applied |
+| `llm_calls` | every model call: purpose, dataset, provider, model, prompt version, input hash, cached, status, attempts, tokens, latency, request id, and the structured answer |
 
 `stage` is a plain varchar validated by a Python enum rather than a native PostgreSQL enum, so the stage list can change without a migration. Tables are created from the SQLAlchemy metadata at startup; Alembic takes over once the schema stops moving.
 
@@ -275,6 +282,16 @@ Schema `onboarding`:
 | GET / DELETE | `/api/v1/projects/{id}/sources/{dataset_id}` | one source with its per-column profile; detach |
 | POST | `/api/v1/projects/{id}/sources/profile` | load and profile every attached source, check keys across them (502 if a feed is down) |
 | GET | `/api/v1/projects/{id}/schema-comparison` | classify every source field against the target catalog |
+| GET | `/api/v1/sources/documents` | context documents under the document roots (business rules, kickoff notes) |
+| GET | `/api/v1/target-fields` | the target catalog |
+| POST | `/api/v1/projects/{id}/mappings/suggest` | propose a target per source field: the model when configured, the comparison otherwise (502 when the model cannot give a usable answer) |
+| GET | `/api/v1/projects/{id}/mappings` | every mapping in source column order, filter by `dataset` and `status` |
+| GET | `/api/v1/projects/{id}/mappings/summary` | counts by status and dataset, open questions, required-field coverage by approved mapping |
+| POST | `/api/v1/projects/{id}/mappings/bulk-approve` | approve suggested mappings at or above the high-confidence threshold |
+| GET / PATCH | `/api/v1/projects/{id}/mappings/{mapping_id}` | one mapping; PATCH with an action: approve, reject, ignore, edit, clarify, reopen |
+| GET / POST | `/api/v1/projects/{id}/clarifications` | questions for the customer; ask one |
+| GET / PATCH / DELETE | `/api/v1/projects/{id}/clarifications/{question_id}` | one question; record the answer with an optional resolution; withdraw |
+| GET | `/api/v1/projects/{id}/llm-calls` | model calls: model, tokens, latency, cached, errors |
 | GET | `/mock/billing/v1/subscriptions` | the customer's LegacyBill 4.2 api: bearer token, `page`, `page_size`, `has_more` |
 
 Every non-2xx response has one shape, including the framework's own 404/405/422:
@@ -295,7 +312,7 @@ Each risk below, the response, and the mechanism in this codebase. Where the mec
 
 **Incorrect semantic mappings.** Two fields look alike and mean different things. Every mapping carries a confidence, a reason, and a clarification flag; below the threshold nothing is approved without a person. The deterministic comparison runs first and says `AMBIGUOUS` or `UNMAPPED` out loud instead of guessing, so the model's proposal is judged against an honest baseline.
 
-**Model overconfidence.** A confident wrong mapping. Model output is a proposal validated by Pydantic, stored with its reasoning, and reviewed. Downstream, the transformed data is validated deterministically regardless of what the model said. The mapping eval counts incorrect high-confidence suggestions as its own metric.
+**Model overconfidence.** A confident wrong mapping. Model output is a proposal validated by Pydantic, checked against the catalog, stored with its reasoning, and reviewed. Downstream, the transformed data is validated deterministically regardless of what the model said. The mapping eval counts wrong answers at or above the high-confidence threshold as its own metric; on the committed sample that count is zero for both providers measured.
 
 **Bad source data.** The profiler measures it before anything is transformed, from raw values, with counts of cells that failed a stated rule and examples. Source problems are reported separately from transformation or target failures, so the customer's data quality and the tool's behavior are never conflated.
 
@@ -305,7 +322,7 @@ Each risk below, the response, and the mechanism in this codebase. Where the mec
 
 **Target API failure and rate limits.** Transport failures are classified apart from data failures. The migration runner retries with backoff on transient errors, captures every failure with its response, and the mock target can inject 500s, slow responses and malformed bodies so that path is tested.
 
-**Sensitive customer data.** The application handles the customer's data in real life, so the defaults are conservative. Every published port is bound to `127.0.0.1`. Stored samples are capped at five values of at most 60 characters per column; the mapping prompt gets a further sanitized subset; raw rows never leave the database. LLM keys are read from the environment only. No `.env*` file of any kind is ever committed, templates included: `.gitignore` carries `.env*` with no exceptions, the template lives at `deploy/env.template`, and a committed pre-commit hook (`make hooks`) refuses env files and runs gitleaks on the staged diff.
+**Sensitive customer data.** The application handles the customer's data in real life, so the defaults are conservative. Every published port is bound to `127.0.0.1`. Stored samples are capped at five values of at most 60 characters per column. The mapping prompt gets statistics and shapes, values only for small business vocabularies, and nothing at all from email, phone, name and free-text columns; a unit test checks that no email address from the sample can reach a prompt. Raw rows never leave the database. LLM keys are read from the environment only. No `.env*` file of any kind is ever committed, templates included: `.gitignore` carries `.env*` with no exceptions, the template lives at `deploy/env.template`, and a committed pre-commit hook (`make hooks`) refuses env files and runs gitleaks on the staged diff.
 
 **Auditability.** The question is not only "did this record migrate" but "how did we decide what this record should become." Mapping decisions, their reasoning, approval state, clarification answers, validation results and reconciliation output are stored with the project. Profiles are replaced on re-profile; decisions are kept.
 
@@ -317,17 +334,36 @@ Each risk below, the response, and the mechanism in this codebase. Where the mec
 
 ## Evaluation and testing
 
-**Test suites.** pytest, 103 tests across unit and integration. Unit tests need nothing; integration tests run against the compose PostgreSQL in their own database (`onboarding_test`, created by `deploy/postgres-init`) and skip cleanly when it is not up.
+**Test suites.** pytest, 125 tests across unit and integration. Unit tests need nothing; integration tests run against the compose PostgreSQL in their own database (`onboarding_test`, created by `deploy/postgres-init`) and skip cleanly when it is not up. No test calls a model provider: a fake provider that reads the same brief the real model gets answers from the deterministic comparison, and can be told to break the contract so the retry and failure paths are exercised.
 
 - The profiler is pinned to the synthetic generator's own defect manifest. Where a defect maps one to one onto a measurement (missing ids, duplicated ids, missing seat counts) the counts must agree exactly; where duplication copies defective rows the profiler must find at least as many.
 - The schema comparison is judged on the committed sample: it must catch the renames the synonym table covers, refuse to guess at the semantic ones, and read the profiler's stats into the right compatibility notes.
 - The billing feed's 401, its pagination arithmetic, and the "feed is down" path (502, stage untouched) are exercised through the API, not assumed.
 - Path traversal and out-of-root attachments are rejected with 422 in tests.
 - The target schema files are regenerated from the models in a test; drift fails the build.
+- The mapping flow is exercised end to end over HTTP: suggest, cache hit, every review action, bulk approval with the floor, the customer's answer resolving a mapping, manual mode, a model that keeps breaking the contract (502 with the trail), and one bad answer corrected on the second attempt.
+- The prompt builder is tested against the sample: email, phone, name and free-text columns send no values; vocabulary columns send theirs; the cache key is stable and changes with the model.
 
 **Workbench verification.** Every screen is checked in a real headless browser (Chromium via Playwright) before it is committed: page errors, console errors, the content it is supposed to show, and screenshots reviewed by eye. This is a review step, not part of the pytest suite. It exists because jsdom-style assertions passed three layout defects that a real browser caught on the first screen.
 
-**Mapping evaluation.** A golden set of source fields with known correct targets (`evals/`), including fields whose correct answer is "requires clarification." The eval reports top-1 mapping accuracy, unresolved rate, confidence distribution, and the count of incorrect high-confidence mappings. Metrics shown anywhere in this repo come from actual eval runs; none are invented.
+**Mapping evaluation.** `evals/expected_mappings.json` holds the golden set for the committed sample: 41 fields across the four sources, each with the right target or null, alternative answers that also count, one field the customer must be asked about (`customer_tier`, by the customer's own rule 3), and fields where asking is acceptable but not required. `enterprise-onboarding eval-mapping` runs the same prompt path as the API with no database and writes `evals/results/*.json`. Every field gets one outcome: correct, deferred (asked instead of answering), unresolved (no target, no question), wrong, or overconfident (answered where it should have asked).
+
+Measured on 2026-09-30 with prompt version `2026-09-30.2`:
+
+| | claude-opus-5 | gpt-5 |
+|---|---|---|
+| fields correct | 41 / 41 | 41 / 41 |
+| fields with an expected target, correct | 33 / 33 | 33 / 33 |
+| wrong, unresolved, overconfident | 0, 0, 0 | 0, 0, 0 |
+| incorrect at confidence >= 0.85 | 0 | 0 |
+| clarification recall | 1 / 1 | 1 / 1 |
+| asked where the golden set expected no question | 7 | 8 |
+| transformation flag recall | 1.0 | 1.0 |
+| mean confidence on correct answers | 0.85 | 0.887 |
+| tokens in / out, four calls | 39,364 / 22,921 | 25,507 / 27,389 |
+| wall time, calls in parallel | 106 s | 90 s |
+
+Both models over-ask: they raise data-handling questions (blank keys, duplicates, defaults) that the validation stage settles later with the engineer. That count is tracked as a metric and the prompt is tuned against it. This is one customer and 41 fields with lenient alternatives, so it is a regression check for the prompt and the providers, not a benchmark. Metrics shown anywhere in this repo come from the result files; none are invented.
 
 **System metrics vs business claims.** Profiling and comparison timings, counts, and eval scores are measured and reported as such. Business impact (implementation hours saved, avoidable errors) is not measured against real production usage and is labeled as an estimate wherever it appears.
 
@@ -388,7 +424,14 @@ uv run streamlit run ui/streamlit_app.py
 uv run pytest
 ```
 
-Configuration is environment variables with working defaults for everything except the LLM keys; see `deploy/env.template`. `LLM_PROVIDER` is `anthropic`, `openai` or `none`. With `none` the tool runs in manual mode.
+Ask the model about one file, or score it against the golden set, without the API or the database:
+
+```bash
+uv run enterprise-onboarding suggest sample_customer/data/organizations.csv --customer "Apex Equipment Services"
+uv run enterprise-onboarding eval-mapping
+```
+
+Configuration is environment variables with working defaults for everything except the LLM keys; see `deploy/env.template`. `LLM_PROVIDER` is `anthropic`, `openai` or `none`. With `none` the tool runs in manual mode. `MAPPING_HIGH_CONFIDENCE` (0.85) and `MAPPING_LOW_CONFIDENCE` (0.6) steer the review screen and the bulk-approval floor.
 
 ## Project layout
 
@@ -399,7 +442,7 @@ scripts/        synthetic customer data generator, target schema export
 sample_customer/  the fictional customer's exports, business rules, kickoff notes
 target_platform/  the fictional saas platform's schema and documentation
 tests/          unit, integration, e2e
-evals/          golden mapping set for measuring the ai mapping step
+evals/          golden mapping set and measured results for the ai mapping step
 deploy/         env template, postgres init
 docs/           architecture, build log
 ```
@@ -436,7 +479,9 @@ Rules the AWS deployment follows:
 
 ## Current limitations
 
-- **Stages not yet in the codebase:** the AI mapping service and human review, customer clarification questions, the transformation engine, the validation engine, the target platform API, the dry-run migration runner, reconciliation, and the readiness report. Their design is specified above and in `docs/ARCHITECTURE.md`; the `evals/` golden set is empty until the mapping service exists.
+- **Stages not yet in the codebase:** the transformation engine, the validation engine, the target platform API, the dry-run migration runner, reconciliation, and the readiness report. Their design is specified above and in `docs/ARCHITECTURE.md`.
+- **One model call takes one to two minutes** on a fifteen-column file with adaptive thinking. Datasets run in parallel so a project takes as long as its slowest file, and the answer is cached, but the first suggest on a project is a wait.
+- **The mapping eval is one customer.** 41 fields, lenient alternatives, one ambiguous field. Both providers score 100% on it, which says the prompt and the providers handle this sample, not that they handle every customer.
 - **AWS deployment is designed, not deployed.** The storage switch, S3 adapter and `docs/AWS_DEPLOYMENT.md` do not exist yet.
 - **Schema management** is `create_all` at startup, not Alembic migrations.
 - **Profiling is a per-cell Python loop.** About 18 seconds for 92,751 rows. Fine for the demo; vectorized tagging or sampling above a row threshold is the fix for larger customers.

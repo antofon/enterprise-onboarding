@@ -144,3 +144,58 @@ Chronological engineering decisions. Each entry: problem, decision, why, alterna
 - **Problem:** the first cut of the source assessment screen looked fine in the code and was wrong in the browser: a "page not found" modal on the overview (the default page had a url path), a columns table cut off in a half-width column, and an emoji status dot that renders as a box on machines without an emoji font.
 - **Decision:** every screen gets a headless Chromium pass (Playwright) that checks page errors, console errors and the presence of the content it is supposed to show, with screenshots reviewed by eye. Layout is full width and stacked; the status dot is a css character.
 - **Why:** the workbench is what a hiring manager sees in the demo. jsdom-style assertions would have passed all three defects.
+
+## 2026-09-30, Day 3
+
+### The model answers in a schema, and the schema is not enough
+
+- **Problem:** structured output guarantees the shape of the answer, not its sense. A target path that is not in the catalog, a source field answered twice or not at all, `clarification_required` with no question text, `transformation_required` with no rule: all valid JSON, all unusable.
+- **Decision:** two layers. The providers' structured-output modes (`messages.parse` on Anthropic, `responses.parse` on OpenAI) enforce a closed Pydantic schema at decoding time. `check_proposal` then enforces the contract the schema cannot carry, and every problem is phrased so it can go back to the model verbatim ("target_field 'organization.nope' is not in the catalog; use an exact entity.field path or null"). Up to `LLM_MAX_ATTEMPTS` (3) in total, then the call is recorded as failed and the API answers 502 with the problems. Nothing is written from a rejected answer.
+- **Alternatives:** JSON inside free text with regex repair (fragile, and it hides which part was wrong). Trusting the schema alone (an invented target would have landed in `field_mappings` and only failed at transformation time, far from its cause).
+- **Result:** ten real calls across both providers passed the contract on the first attempt. The retry and give-up paths are exercised by a fake provider that misbehaves on purpose, in unit and integration tests.
+
+### The brief is statistics, and a model still misread one
+
+- **Problem:** in the first real run GPT-5 read `null_pct: 1.0` on `contacts.acct_num` as "100% null" and built a customer question around a column that is 1% blank.
+- **Decision:** `null_percent`, `unique_percent`, `iso_percent`, a `null_count` next to the rate, and one sentence in the system prompt: percentages run 0 to 100. Prompt version bumped to `2026-09-30.2`, which invalidates the cache on purpose.
+- **Why:** the model cannot see the data, so every number in the brief has to be unambiguous on its own. A name that a person reads correctly is not enough.
+
+### What the model is allowed to see
+
+- **Decision:** per column the brief carries type, null and unique rates, distinct count, and then only what the column's kind justifies. Small vocabularies (statuses, tiers, plans, roles, countries, booleans) go with their counts, because those values are the meaning. Dates go as formats and a range, numbers as a range and a count of values with symbols, identifiers as shapes plus three examples. Emails, phones, urls, people's and companies' names and free text (notes, descriptions, owners) go as shapes and counts, no values. A unit test asserts that no email address from the sample can appear in a prompt.
+- **Why:** the prompt is the only place customer data would ever leave the box. Account numbers and plan names are not personal data; a contact's email is.
+- **Alternatives:** send the first five rows (what most "AI maps CSV columns" demos do). Rejected: the model does not need the rows to map a column, and the customer would be right to ask why they were sent.
+
+### Questions are for mapping decisions, not data cleanup
+
+- **Problem:** the first Opus 5 run on `organizations.csv` asked nine questions for fifteen columns. Most were about blank keys, duplicate account numbers and defaults for blanks, which the validation stage settles later with the engineer, not the customer.
+- **Decision:** a rule in the system prompt: `clarification_required` is for which target, what a value means, and how to translate a vocabulary the rules do not cover; blank keys, duplicates, malformed values and defaults belong in `observations`. The eval counts questions the golden set did not expect as `clarification_false_positives`.
+- **Result:** with the rule in place, claude-opus-5 still asks on 7 fields the golden set did not mark and gpt-5 on 8 (`company_status`, `industry_code`, `contact_role`, `subscription_level`, `activity_type` for both: enum translations the rules cover only partly). Recorded, not hidden; the eval is the gate for the next prompt change.
+
+### Manual mode proposes from the comparison and invents nothing
+
+- **Problem:** the tool has to work with no model key at all, and "manual mode" cannot mean an empty screen.
+- **Decision:** without a provider, `MATCHED` and `TRANSFORMATION_REQUIRED` fields from the deterministic comparison become suggestions with origin `heuristic` and no confidence; `AMBIGUOUS` fields open a templated question naming the candidates; `UNMAPPED` and `INCOMPATIBLE` wait for a person. Everything downstream is identical.
+- **Alternatives:** fabricate a confidence for heuristic matches (0.7 for a name match, say). Rejected: the review screen would then color a name similarity as if it were a probability, which is exactly the confusion the comparison's own docstring warns against.
+
+### Cache by input hash, kept on the call row
+
+- **Decision:** the cache key is a sha256 over prompt version, system prompt, provider, model and the full brief. A repeat is served from the last successful `llm_calls` row with a response, and the repeat is logged as its own zero-token row with `cached = true`.
+- **Why:** an unchanged project should cost nothing to re-suggest, and the audit trail should still show that someone asked. Re-profiling, a changed rules document, a changed catalog or a prompt edit all change the hash on their own.
+
+### Datasets are asked about in parallel
+
+- **Problem:** one Opus 5 call on `organizations.csv` took 122 seconds (11,150 tokens in, 10,208 out, adaptive thinking). Four datasets in sequence is eight minutes, past the workbench's request timeout and past anyone's patience in a demo.
+- **Decision:** a thread pool over datasets (`LLM_PARALLEL_CALLS`, 4), each thread with a copy of the request's log context so its lines still carry the request id. Database work stays on the request thread. Successful proposals are recorded even when a sibling dataset fails, so a retry only re-asks the failure.
+- **Result:** the full four-dataset eval runs in the time of its slowest call: 106 s for claude-opus-5, 90 s for gpt-5, against 277 s and 263 s of summed call time.
+
+### A question the model raised is not a review
+
+- **Problem:** the first cut moved the project to `in_review` as soon as the model opened a clarification question. The integration test expected `mapped` and was right: nobody had reviewed anything.
+- **Decision:** `mapped` until a person decides something; `in_review` after the first decision; `ready_to_transform` when every field is decided and no question is open; later stages are pulled back only by a reopen.
+
+### The golden set, and the first measured results
+
+- **Decision:** `evals/expected_mappings.json` covers the 41 fields of the committed sample. Each field has the right target or null, an `accept` list of other answers that count, `clarify: true` for the one field the customer must be asked about (`customer_tier`, by the customer's own rule 3), and `clarify_ok` where asking instead of answering is fine. The scorer gives each field one outcome: correct, deferred, unresolved, wrong, overconfident. A unit test checks the golden set against the sample's columns and the catalog so it cannot drift.
+- **Result:** both providers, prompt `2026-09-30.2`, one run each, four parallel calls: 41/41 fields correct, 33/33 fields with an expected target, clarification recall 1/1, 0 wrong, 0 overconfident, 0 wrong at confidence 0.85 or above; mean confidence on correct answers 0.85 (claude-opus-5) and 0.887 (gpt-5). Result files under `evals/results/`.
+- **Caveat, recorded on purpose:** one customer, 41 fields, lenient alternatives. A perfect score says the prompt and both providers handle this sample; it is a regression check for prompt changes, not a claim about other customers. A second dataset with a different shape is the way to make the number mean more.

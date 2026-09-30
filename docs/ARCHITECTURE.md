@@ -50,14 +50,16 @@ customer sources (csv, json, legacy billing api)
 - **mock billing source (implemented):** `/mock/billing/v1/subscriptions`, the customer's LegacyBill 4.2 api: bearer token from `BILLING_API_TOKEN`, `page` and `page_size`, `has_more`, records served from the same `subscriptions.json` the generator writes. The profiler has to authenticate and page like it would against the real thing. A wrong token is a 401 in the standard envelope; a feed failure surfaces as a 502 `source_unavailable` on the profile call and leaves the project's stage alone.
 - **source profiler (implemented):** `app/services/profiling`. Loaders, value-level type inference, per-column stats, dataset quality issues, cross-dataset key checks. Details under "Source profiling".
 - **schema comparison (implemented):** `app/services/comparison.py`. Deterministic classification of every source field against the target catalog. Details under "Schema comparison".
-- **database (implemented, empty):** one PostgreSQL with two schemas. `onboarding` holds this tool's state. `target` holds the fictional platform's tables and is only ever written through the target API.
-- **workbench ui (implemented: overview, source assessment):** Streamlit, talks to the API over HTTP only. `ui/streamlit_app.py` holds the navigation and the project selector, `ui/views/` one module per screen.
-- **cli (implemented: `check`, `generate-data`, `profile`):** Typer. `profile` runs the profiler and, with `--compare`, the schema comparison on one file or feed without the API or the database.
+- **ai mapping service (implemented):** `app/ai` holds the provider interface (Anthropic default, OpenAI behind the same interface, `none` is manual mode), the answer schema, and the prompt builder; `app/services/mapping.py` asks per dataset, checks the answer against the catalog, sends problems back a bounded number of times, caches by input hash, and writes one `field_mappings` row per column. Details under "AI boundaries".
+- **human review + customer clarification (implemented):** `app/services/mapping.py` (decisions) and `app/services/clarifications.py` (questions). Approve, reject, ignore, edit, ask the customer, reopen; bulk approval at or above the configured threshold only; the customer's answer can resolve the mapping on the spot. Details under "Human review".
+- **database (implemented):** one PostgreSQL with two schemas. `onboarding` holds this tool's state. `target` holds the fictional platform's tables and is only ever written through the target API.
+- **workbench ui (implemented: overview, source assessment, mapping review):** Streamlit, talks to the API over HTTP only. `ui/streamlit_app.py` holds the navigation and the project selector, `ui/views/` one module per screen.
+- **cli (implemented: `check`, `generate-data`, `profile`, `suggest`, `eval-mapping`):** Typer. `profile` runs the profiler and, with `--compare`, the schema comparison on one file or feed without the API or the database. `suggest` asks the configured model for one file the same way. `eval-mapping` scores the model against the golden set.
 - **logging (implemented):** structlog, JSON in containers, request id on every line, context fields bound per stage.
 
 ## Data flow
 
-Implemented through schema comparison. The rest is planned and marked.
+Implemented through human review. The rest is planned and marked.
 
 1. **Attach.** `POST /api/v1/projects/{id}/sources` records where each source lives: a csv or json file under one of the configured source roots (`sample_customer/data`, `generated`) or the url of a feed. File paths are checked against the roots before the filesystem is touched; absolute paths and `..` are refused with a 422. Nothing is read yet. `GET /api/v1/sources/available` lists what can be attached so the workbench offers a pick list instead of a text box.
 2. **Load.** `POST /api/v1/projects/{id}/sources/profile` loads every attached source into a dataframe of raw values. csv cells stay the strings that were in the file: pandas is told not to guess types, so zip codes never become floats and blanks stay blank. json and api records keep their json types, so a column that is an integer in 70% of records and a string in the rest is reported as exactly that. The billing feed is paged over http with the bearer token, page size and `has_more` the legacy system uses. The http client is a FastAPI dependency, which is how the tests hand the app its own test client and the loader still speaks http.
@@ -66,7 +68,10 @@ Implemented through schema comparison. The rest is planned and marked.
 5. **Assess.** The profile becomes a list of issues with a severity. **error**: rows will be rejected or cannot be migrated until someone decides (missing or duplicated keys, orphan references, malformed emails or ids). **warning**: a rule or a decision is needed before the dry run (mixed date formats, numeric text, placeholders, high null rates, near-duplicates, inconsistent json types, future dates). **info**: normalization handles it (case variants, whitespace, boolean spellings, urls without a scheme, upper-case emails).
 6. **Store.** One `source_fields` row per column and the dataset-level summary (counts, key facts, references, issues) in `source_datasets.quality`. Re-profiling replaces both. The project moves to `profiled`.
 7. **Compare.** `GET /api/v1/projects/{id}/schema-comparison` rebuilds the profiles from the database and classifies every source field against the target catalog. Computed on request, never stored: it is a pure function of the profile and the catalog. The mapping stage is where decisions get persisted.
-8. **Map, review, transform, validate, dry-run, reconcile, report.** Planned, Days 3 to 5.
+8. **Map.** `POST /api/v1/projects/{id}/mappings/suggest` rebuilds the profiles and the comparison, then asks the model once per dataset with the brief described under "AI boundaries", or, in manual mode, turns the comparison itself into the proposal (origin `heuristic`, no confidence invented). Every column gets a `field_mappings` row: proposed target, confidence, reason, whether a rule is needed and which, whether the customer has to be asked. Rows a person already decided are kept; `force` starts over. Fields the model flags open a `clarification_questions` row. The project moves to `mapped`.
+9. **Review.** `PATCH /api/v1/projects/{id}/mappings/{mapping_id}` with an action: approve (optionally with a different target and a rule), reject, ignore, edit, clarify (opens a question), reopen. Every approved target is checked against the catalog. `POST .../mappings/bulk-approve` approves suggested rows with a target at or above the high-confidence threshold, never below it, and only when a person calls it. The first decision moves the project to `in_review`; when every field is decided and no question is open it moves to `ready_to_transform`; reopening pulls it back.
+10. **Clarify.** `GET/POST /api/v1/projects/{id}/clarifications`, `PATCH .../{question_id}` to record the customer's answer. The answer can carry a resolution (approve with a target and a rule, ignore, reject) that is applied to the mapping through the same decision path a reviewer uses; without one the mapping returns to the reviewer's queue with the answer attached.
+11. **Transform, validate, dry-run, reconcile, report.** Planned.
 
 ## Source profiling
 
@@ -93,9 +98,13 @@ Schema `onboarding` (implemented so far):
 | `source_datasets` | one row per source file or feed attached to a project (csv, json, api): where it lives, row and column counts, `profiled_at`, and `quality` (jsonb: duplicate rows, key column with missing and duplicated counts, references into other datasets with orphan counts, the issue list with severities) |
 | `source_fields` | one row per column per profiled dataset: inferred type, null and unique percentages, distinct count, up to five sample values, and `stats` (jsonb: type tag counts, value distribution or a 50-value sample, shapes, case variants, per-type extras such as date formats or malformed examples). Replaced on every re-profile |
 
+| `field_mappings` | one row per source column per project: proposed `target_path`, `status` (suggested, needs_clarification, approved, rejected, ignored), `origin` (model, heuristic, manual), `confidence`, `reason`, `transformation_required` and the rule in plain English, `clarification_required`, what the comparison said (`comparison_class`, top `candidates`), which model and `llm_calls` row produced it, and who decided what when (`decided_by`, `decided_at`, `decision_note`). Unique per project, dataset and column |
+| `clarification_questions` | a question for the customer, usually tied to one mapping: the text, `context` (values seen, candidate targets, proposed target), `origin`, `status` (open, answered, withdrawn), the `answer`, who gave it, and the `resolution` applied to the mapping |
+| `llm_calls` | every model call: purpose, dataset, provider, model, prompt version, `input_hash`, `cached`, status, attempts, tokens in and out, latency, the provider's request id, and the structured `response` (field names and reasons, never rows). The cache is a lookup on `input_hash` |
+
 `stage` is a plain varchar validated by a Python enum rather than a native PostgreSQL enum, because the stage list moves during the build and native enums cannot be altered by `create_all`.
 
-Coming with later milestones: `field_mappings`, `clarification_questions`, `migration_runs`, `validation_issues`, `reconciliation_results`, `readiness_reports`, `llm_calls`. Schema `target` (the fictional platform) gets `organizations`, `contacts`, `subscriptions` on Day 4.
+Coming with later milestones: `transformation_rules`, `migration_runs`, `validation_issues`, `reconciliation_results`, `readiness_reports`. Schema `target` (the fictional platform) gets `organizations`, `contacts`, `subscriptions` with the target API.
 
 ## API
 
@@ -111,8 +120,16 @@ Coming with later milestones: `field_mappings`, `clarification_questions`, `migr
 | POST | `/api/v1/projects/{id}/sources/profile` | implemented |
 | GET | `/api/v1/projects/{id}/schema-comparison` | implemented |
 | GET | `/mock/billing/v1/subscriptions` | implemented, bearer token, paginated |
-| POST | `/api/v1/projects/{id}/mappings/suggest` | Day 3 |
-| GET / PATCH | `/api/v1/projects/{id}/mappings[/{mapping_id}]` | Day 3 |
+| GET | `/api/v1/sources/documents` | implemented: context documents under the document roots |
+| GET | `/api/v1/target-fields` | implemented: the target catalog |
+| POST | `/api/v1/projects/{id}/mappings/suggest` | implemented; 502 `llm_error` when the model cannot give a usable answer |
+| GET | `/api/v1/projects/{id}/mappings[?dataset=&status=]` | implemented |
+| GET | `/api/v1/projects/{id}/mappings/summary` | implemented: counts, open questions, required-field coverage by approved mapping |
+| POST | `/api/v1/projects/{id}/mappings/bulk-approve` | implemented, floor at the configured high-confidence threshold |
+| GET / PATCH | `/api/v1/projects/{id}/mappings/{mapping_id}` | implemented; PATCH takes an action |
+| GET / POST | `/api/v1/projects/{id}/clarifications` | implemented |
+| GET / PATCH / DELETE | `/api/v1/projects/{id}/clarifications/{question_id}` | implemented; PATCH records the answer, DELETE withdraws |
+| GET | `/api/v1/projects/{id}/llm-calls` | implemented: model, tokens, latency, cached, errors |
 | POST | `/api/v1/projects/{id}/validate` | Day 4 |
 | POST | `/api/v1/projects/{id}/migrations/dry-run` | Day 4 |
 | GET | `/api/v1/projects/{id}/migrations/{run_id}` | Day 4 |
@@ -123,11 +140,39 @@ Every non-2xx response is `{"error": {"type", "message", "details"}}`, including
 
 ## AI boundaries
 
-See "The one rule" above. Details (prompt inputs, schema hashing, caching, retries, usage logging) land on Day 3.
+See "The one rule" above. This is how the mapping step keeps to it.
+
+**One interface, three providers.** `app/ai/provider.py`. `complete(system, user, output=<pydantic model>)` returns an instance of that model plus tokens, latency and the provider's request id. Anthropic uses `messages.parse` with the model as `output_format`; OpenAI uses `responses.parse` with it as `text_format`; both are constrained to the schema at decoding time. `LLM_PROVIDER=none`, or a provider whose key is missing, is `NullProvider`: manual mode, never a faked answer. No provider or model name appears outside configuration. Both SDKs retry 429s and 5xx twice on their own; the application does not add transport retries on top.
+
+**What the model sees.** `app/ai/prompts.py`. One dataset per call. Per column: the inferred type, null and unique rates, distinct count, placeholder and whitespace counts, and then only what the column's kind justifies. Small vocabularies (statuses, tiers, plans, roles, countries, booleans) are sent with their counts, because those values are the business meaning. Dates get their formats and range, numbers their range and how many carry symbols, identifiers and codes their shapes and up to three examples. Emails, phones, urls, people's and companies' names, free text (notes, descriptions, owners) get shapes and counts and no values at all. Alongside: the deterministic comparison for the column (classification, top candidates with name similarity and compatibility notes), the whole target catalog with types, enums, required flags and descriptions, the target's cross-record rules, the dataset's key and orphan facts, the customer's business-rules document (read from a path-checked document root, capped at 24,000 characters), and the project notes. Rows never leave the database; the largest thing in a prompt is the rules document.
+
+**What comes back, and what happens if it is wrong.** `app/ai/schemas.py`. One entry per source field: `target_field` (a catalog path or null), `confidence`, `reason`, `transformation_required` and the rule in plain English, `clarification_required` and the exact question for the customer, plus dataset-level observations. The schema is closed and every field is required so both providers' structured output modes can enforce it. What the schema cannot enforce is checked in `check_proposal`: every source field answered exactly once, no invented fields, every target in the catalog, confidence in 0..1, a question whenever one is required, a rule whenever one is required. Problems are sent back to the model verbatim (`Your previous answer had these problems...`) up to `LLM_MAX_ATTEMPTS` times in total, then the call is recorded as failed and the API answers 502 `llm_error` with the problems listed. Nothing is written to `field_mappings` from a rejected answer.
+
+**Cache.** The input hash is a sha256 over the prompt version, the system prompt, the provider, the model and the full brief. A successful `llm_calls` row for the same project and hash is served instead of a new call and recorded as a cached call with zero tokens. Re-profiling, a changed rules document, a changed catalog or a prompt edit changes the hash. `force` bypasses it.
+
+**Usage logging.** Every call is an `llm_calls` row and a structured log line: provider, model, attempts, input and output tokens, latency, request id, and the outcome. Keys are read from the environment and never logged; the prompt is not stored; the response is stored because it is the proposal and its reasons, which the review screen and the audit trail need.
+
+**Manual mode.** With no provider the suggest endpoint still works: the comparison's `MATCHED` and `TRANSFORMATION_REQUIRED` fields become proposals with origin `heuristic`, `AMBIGUOUS` fields open a templated question naming the candidates, `UNMAPPED` and `INCOMPATIBLE` fields wait for a person. No confidence is invented; the column shows `no confidence`. Everything downstream is the same.
+
+**Measured.** `evals/expected_mappings.json` is the golden set for the committed sample: 41 fields, including one that is genuinely ambiguous by the customer's own rules (`customer_tier`) and several where "not needed" is the right answer. `enterprise-onboarding eval-mapping` runs the same prompt path with no database and writes `evals/results/*.json`: accuracy over all fields, accuracy over fields with an expected target, deferred and unresolved counts, wrong and overconfident counts, clarification recall and false positives, transformation-flag recall, the number of wrong answers at or above the high-confidence threshold, and mean confidence for right versus wrong answers. The README quotes only from those files.
 
 ## Human review
 
-Planned for Day 3.
+Implemented. Every `field_mappings` row is in one of five states, and only a person moves it to the three terminal ones.
+
+- **suggested**: proposed by the model, the comparison, or edited by a person; nobody has decided.
+- **needs_clarification**: at least one open question for the customer.
+- **approved**, **rejected**, **ignored**: a person decided. `decided_by`, `decided_at` and `decision_note` say who, when and why.
+
+Actions (`PATCH .../mappings/{id}`): **approve** (with the proposed target, or a different one from the catalog, and optionally a rule), **reject**, **ignore** (the field is not migrated), **edit** (change target or rule, stays undecided, origin becomes `manual`), **clarify** (opens a question, the row waits), **reopen** (back to suggested, open questions withdrawn). Approving or ignoring withdraws open questions on that row so nothing stays half-asked.
+
+**Bulk approval** is a person's action over suggested rows with a target and a confidence at or above `MAPPING_HIGH_CONFIDENCE` (0.85 by default). A caller may raise the bar, never lower it. Rows that ask a question, have no target, or come from the heuristic (no confidence) are never bulk-approved.
+
+**Thresholds only steer attention.** The workbench colors confidence green at or above the high threshold, red below the low one (0.6), amber between. Nothing changes state because of a color.
+
+**Re-suggesting keeps decisions.** A second suggest run replaces suggested rows and leaves decided rows and rows with an open question alone; the run reports how many it kept. `force` replaces everything and withdraws the open questions, for the case where the inputs changed enough that the old decisions should not survive.
+
+**The customer's answer is a decision path, not a side channel.** Answering a question with a resolution calls the same `decide()` the reviewer uses, with the customer's answer as the note and the answerer as the reviewer. Answering without one puts the row back in the reviewer's queue with the answer attached.
 
 ## Failure recovery
 
