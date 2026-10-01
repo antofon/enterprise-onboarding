@@ -15,8 +15,16 @@ from app.models.project import (
     SourceDataset,
     SourceField,
 )
+from app.models.target import (
+    LIVE_NAMESPACE,
+    TargetActivity,
+    TargetContact,
+    TargetOrganization,
+    TargetSubscription,
+)
 
 __all__ = [
+    "LIVE_NAMESPACE",
     "ClarificationQuestion",
     "DatasetKind",
     "FieldMapping",
@@ -28,4 +36,8 @@ __all__ = [
     "QuestionStatus",
     "SourceDataset",
     "SourceField",
+    "TargetActivity",
+    "TargetContact",
+    "TargetOrganization",
+    "TargetSubscription",
 ]

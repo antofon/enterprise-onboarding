@@ -27,6 +27,25 @@ class Settings(BaseSettings):
     # the migration layer talks to the target platform over http, even though the mock
     # target is served by this same process. that keeps the seam realistic.
     target_api_base_url: str = "http://localhost:8000/target/v1"
+    target_api_token: str = "meridian-staging-demo"
+    target_request_timeout_seconds: float = 20.0
+    # writes carry an id, so a retry after a 5xx, a timeout or a malformed answer is safe
+    target_max_attempts: int = 3
+    target_retry_backoff_seconds: float = 0.25
+
+    # fault injection in the mock target, off by default: a plain run should fail only where the
+    # customer's data is actually bad. deterministic in the record id, so a demo repeats exactly.
+    target_fault_rate: float = Field(default=0.0, ge=0.0, le=1.0)
+    target_fault_modes: str = "server_error,timeout,malformed"
+    target_fault_seed: int = 1337
+    target_fault_timeout_seconds: float = 30.0
+
+    # customer-specific value maps for the transformation stage: reviewed configuration, not code
+    transformation_config: str = "sample_customer/transformation_config.yaml"
+    # how many validation issues one run stores before it keeps counting without storing
+    validation_issue_limit: int = 5000
+    # how many rejected or failed records one dry run stores in full
+    migration_failure_limit: int = 2000
 
     llm_provider: LlmProvider = "none"
     anthropic_api_key: str | None = None
@@ -61,6 +80,10 @@ class Settings(BaseSettings):
     billing_api_token: str = "legacybill-readonly-demo"
     billing_source_file: str = "sample_customer/data/subscriptions.json"
     billing_page_size: int = 200
+
+    @property
+    def target_fault_mode_list(self) -> list[str]:
+        return [m.strip() for m in self.target_fault_modes.split(",") if m.strip()]
 
     @property
     def source_root_paths(self) -> list[str]:
