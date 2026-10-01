@@ -21,6 +21,7 @@ dependencies = [
     "openai>=1.40",
     "faker>=28",
     "python-dateutil>=2.9",
+    "pyyaml>=6",
 ]
 
 [dependency-groups]
@@ -47,6 +48,11 @@ markers = [
     "e2e: runs a whole onboarding flow end to end",
 ]
 addopts = "-q"
+filterwarnings = [
+    # the migration layer sets a per-request timeout, which is right against a real target and
+    # which starlette's in-process TestClient warns about. the warning is about the harness.
+    "ignore:You should not use the 'timeout' argument with the TestClient",
+]
 
 [tool.ruff]
 line-length = 100

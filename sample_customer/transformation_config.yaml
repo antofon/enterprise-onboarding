@@ -1,0 +1,288 @@
+# How Apex Equipment Services' values become Meridian's values.
+#
+# The transformation engine's normalizers live in code (app/services/transform/converters.py) and
+# are chosen from the target field's own type. This file holds the part that is specific to one
+# customer: which of their words mean which of Meridian's, and the policy when a word is not in
+# the list. It is reviewed configuration, not code, and no model writes it.
+#
+# `rule:` cites the numbered rule in sample_customer/business_rules.md that an entry comes from.
+# `unmapped:` says what happens to a value that is not listed:
+#   error    the record is rejected and the value is reported (never guessed)
+#   default  the field is left out so Meridian's own default applies, with a warning
+#   null     the field is left empty, with a warning
+customer: Apex Equipment Services
+version: "2026-10-01.1"
+# every date rule (dormancy, trial age, future dates) is measured from this date, so a run in
+# six months reproduces today's numbers instead of quietly drifting
+as_of: 2026-10-01
+
+# tried in order. the customer's export mixes six date formats and four datetime formats.
+# day-first dates (13/01/2024) do not occur in this export; if they did, this list is where the
+# ambiguity would have to be settled with the customer before a migration.
+date_formats:
+  - "%Y-%m-%d"
+  - "%Y/%m/%d"
+  - "%m/%d/%Y"
+  - "%m/%d/%y"
+  - "%d-%b-%Y"
+  - "%B %d, %Y"
+datetime_formats:
+  - "%Y-%m-%dT%H:%M:%S%z"
+  - "%Y-%m-%d %H:%M:%S%z"
+  - "%Y-%m-%dT%H:%M:%S"
+  - "%Y-%m-%d %H:%M:%S"
+  - "%m/%d/%Y %H:%M"
+  - "%d-%b-%Y %I:%M %p"
+
+# values that mean "nothing here", whatever the column. matched case-insensitively after trimming.
+null_placeholders: ["", "-", "--", "n/a", "na", "n.a.", "none", "null", "unknown", "tbd", "?"]
+
+value_maps:
+  organization.lifecycle_status:
+    rule: 6
+    description: >
+      On Hold is an active account with a billing pause; Closed is churned. `Actve` is a typo
+      that nothing in the rules resolves, so those rows are reported rather than guessed.
+    unmapped: error
+    map:
+      active: active
+      inactive: inactive
+      prospect: prospect
+      churned: churned
+      on hold: active
+      closed: churned
+
+  organization.industry:
+    description: the customer's own industry codes. numeric NAICS-style codes are not in the key.
+    unmapped: default
+    map:
+      mfg: manufacturing
+      const: construction
+      log: logistics
+      tech: technology
+      hc: healthcare
+      enr: energy
+      ps: professional_services
+      oth: other
+
+  organization.billing_country:
+    rule: 5
+    description: >
+      CA is Canada in the billing system. In CRM rows it sometimes meant California, which the
+      ca_country_from_region record rule settles from the state column.
+    unmapped: error
+    map:
+      us: US
+      usa: US
+      u.s.: US
+      u.s.a.: US
+      united states: US
+      united states of america: US
+      ca: CA
+      can: CA
+      canada: CA
+      mx: MX
+      mex: MX
+      mexico: MX
+
+  organization.billing_region:
+    description: state and province names to codes. two-letter codes pass through unchanged.
+    unmapped: "null"
+    map:
+      alabama: AL
+      alaska: AK
+      arizona: AZ
+      arkansas: AR
+      california: CA
+      colorado: CO
+      connecticut: CT
+      delaware: DE
+      district of columbia: DC
+      florida: FL
+      georgia: GA
+      hawaii: HI
+      idaho: ID
+      illinois: IL
+      indiana: IN
+      iowa: IA
+      kansas: KS
+      kentucky: KY
+      louisiana: LA
+      maine: ME
+      maryland: MD
+      massachusetts: MA
+      michigan: MI
+      minnesota: MN
+      mississippi: MS
+      missouri: MO
+      montana: MT
+      nebraska: NE
+      nevada: NV
+      new hampshire: NH
+      new jersey: NJ
+      new mexico: NM
+      new york: NY
+      north carolina: NC
+      north dakota: ND
+      ohio: OH
+      oklahoma: OK
+      oregon: OR
+      pennsylvania: PA
+      rhode island: RI
+      south carolina: SC
+      south dakota: SD
+      tennessee: TN
+      texas: TX
+      utah: UT
+      vermont: VT
+      virginia: VA
+      washington: WA
+      west virginia: WV
+      wisconsin: WI
+      wyoming: WY
+      alberta: AB
+      british columbia: BC
+      manitoba: MB
+      new brunswick: NB
+      newfoundland and labrador: NL
+      nova scotia: NS
+      ontario: "ON"
+      prince edward island: PE
+      quebec: QC
+      saskatchewan: SK
+
+  contact.role:
+    rule: 13
+    description: >
+      CRM roles are free text. Everything the rules do not name (Ops Manager, Purchasing, Main)
+      becomes `other` rather than a guess at seniority.
+    unmapped: default
+    map:
+      primary: primary
+      ceo: primary
+      owner: primary
+      billing: billing
+      billing contact: billing
+      ap: billing
+      accounts payable: billing
+      technical: technical
+      cto: technical
+      it: technical
+      executive: executive
+
+  subscription.plan:
+    rule: 8
+    description: >
+      Rule 8 names the plan aliases. `Legacy Gold` is Enterprise unless it has fewer than ten
+      seats (rule 7, applied by the legacy_gold_seat_split record rule). `Trial` is a status in
+      this export, not a plan, and no rule says which plan a trial becomes.
+    unmapped: error
+    map:
+      starter: starter
+      basic: starter
+      pro: professional
+      professional: professional
+      professional plus: professional
+      enterprise: enterprise
+      enterprise v2: enterprise
+      ent: enterprise
+      legacy gold: enterprise
+
+  subscription.billing_cycle:
+    rule: 9
+    description: quarterly billing was discontinued in 2023 and migrates as monthly.
+    unmapped: error
+    map:
+      m: monthly
+      monthly: monthly
+      a: annual
+      annual: annual
+      yearly: annual
+      q: monthly
+
+  subscription.status:
+    rule: 10
+    description: paused becomes past_due, expired becomes cancelled.
+    unmapped: error
+    map:
+      active: active
+      trialing: trial
+      trial: trial
+      past due: past_due
+      past_due: past_due
+      cancelled: cancelled
+      canceled: cancelled
+      paused: past_due
+      expired: cancelled
+
+  activity.kind:
+    description: >
+      Meridian's activity kinds are a closed list with no `other`. `Call` has no home in it, so
+      those rows are reported as a question for the customer instead of being filed as notes.
+    unmapped: error
+    map:
+      invoice: invoice
+      payment: payment
+      login: login
+      ticket: support_ticket
+      support ticket: support_ticket
+      note: note
+
+# where the target field's type is not enough to pick the normalizer
+field_overrides:
+  contact.first_name:
+    converters: [person_name_split]
+    emits: [contact.first_name, contact.last_name]
+    note: one CRM name column becomes two Meridian columns
+  contact.phone:
+    converters: [phone_e164]
+    note: North American numbers to E.164; anything shorter than ten digits is reported
+  organization.billing_country:
+    converters: [country_code]
+    note: the country map first, then ISO alpha-2 as it stands
+  organization.billing_region:
+    converters: [region_code]
+    note: state and province names to codes; an unknown region is dropped, not rejected
+
+record_rules:
+  ca_country_from_region:
+    enabled: true
+    rule: 5
+    params: {}
+  dormant_account_inactive:
+    enabled: true
+    rule: 2
+    params:
+      months: 18
+      source_field: last_activity_date
+  legacy_gold_seat_split:
+    enabled: true
+    rule: 7
+    params:
+      alias: legacy gold
+      min_seats: 10
+      small_plan: professional
+  drop_dead_trials:
+    enabled: true
+    rule: 11
+    params:
+      max_age_days: 90
+
+cross_dataset_rules:
+  primary_from_account_email:
+    enabled: true
+    rule: 1
+    params:
+      source_dataset: organizations.csv
+      source_field: primary_contact_email
+
+# checks that flag a conflict and change nothing. rule 4 reads a column the customer has not yet
+# agreed to map, which is exactly why it reports instead of rewriting the plan.
+validation_rules:
+  strategic_requires_enterprise:
+    enabled: true
+    rule: 4
+    params:
+      source_field: customer_tier
+      tier: Strategic
+      required_plan: enterprise
