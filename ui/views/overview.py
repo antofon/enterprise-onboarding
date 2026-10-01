@@ -89,10 +89,22 @@ def render() -> None:
                     st.markdown("[Open mapping review →](mappings)")
                 elif project["stage"] == "ready_to_transform":
                     st.write(
-                        "Every field is decided and no question is open. "
-                        "Next: deterministic transformation and validation."
+                        "Every field is decided and no question is open. Next: transform and "
+                        "validate every record, then rehearse the migration against the target."
                     )
-                    st.markdown("[Open mapping review →](mappings)")
+                    st.markdown("[Open dry run →](dry-run)")
+                elif project["stage"] == "validated":
+                    st.write(
+                        "Validation has run. Read what it found, then send the valid records "
+                        "to the target platform with a dry run."
+                    )
+                    st.markdown("[Open dry run →](dry-run)")
+                elif project["stage"] == "dry_run_complete":
+                    st.write(
+                        "The migration has been rehearsed. Next: reconcile source against "
+                        "target and generate the readiness report."
+                    )
+                    st.markdown("[Open dry run →](dry-run)")
                 else:
                     st.write("Continue with the current stage.")
                 if project["stage"] in ("created", "profiled"):
