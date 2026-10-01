@@ -100,9 +100,9 @@ The result is not "import succeeded." It is evidence that lets an implementation
 
 Three ways in:
 
-- **Workbench UI** (Streamlit): create a project, attach sources, profile them, read the quality issues and the schema comparison, get a proposed target for every field, decide each one, answer the customer's questions. Talks to the API over HTTP only.
+- **Workbench UI** (Streamlit): create a project, attach sources, profile them, read the quality issues and the schema comparison, get a proposed target for every field, decide each one, answer the customer's questions, read the transformation plan, validate, and rehearse the migration against the target platform with every refusal explained. Talks to the API over HTTP only.
 - **REST API** (FastAPI): every operation the UI performs, plus the simulated billing source and, in the same process, the simulated target platform.
-- **CLI** (Typer): `check`, `generate-data`, `profile [--compare]`, `suggest`, `eval-mapping`. Profiles a file or feed, asks the model about it, or scores the model against the golden set, all without the API or the database.
+- **CLI** (Typer): `check`, `generate-data`, `profile [--compare]`, `suggest`, `eval-mapping` work on one file or feed without the API or the database; `transformation-plan`, `validate` and `dry-run` run the later stages on a project and print the same counts the workbench shows.
 
 ## The one rule: where AI is and is not allowed
 
@@ -189,27 +189,44 @@ The provider sits behind one interface. Anthropic is the default, OpenAI runs be
 
 ### 4. Deterministic transformation and validation
 
-**Transformation.** Approved mappings drive explicit rules: rename, parse dates in the formats the profiler saw, normalize booleans and phone numbers to E.164, map enums through a table (`Legacy Gold` to `enterprise` unless seats < 10, per rule 7), trim whitespace, split `full_name`, combine fields, apply defaults, and build the target API payload. Rules are application logic and configuration. No generated code is executed. That makes the layer testable, repeatable, reviewable, and safe to run more than once.
+**Transformation.** Approved mappings drive it, and the target decides the normalizer: an enum field gets the value map, a date field gets the date parser, a decimal gets the money parser, an identifier gets the identifier check, and every chain starts by trimming and reading the customer's placeholders (`n/a`, `unknown`, `-`) as empty. Twenty normalizers, all pure functions: dates in six formats, timestamps in four, `$7,050,000` and `12.35M` and `USD 60`, `1200.0` as a count, nine spellings of yes and no, `(699) 445-6029` to `+16994456029`, `COLLINS, JILLIAN` and `Mrs. Dana Munoz MD` into a first and a last name, `www.williams.com` gaining a scheme.
 
-**Validation.** Before any dry run, every transformed record is checked against the target's Pydantic models (types, required fields, enums, patterns such as ISO country codes and E.164 phones), then against the cross-record rules: the parent organization exists, ids are unique per entity, at most one primary contact per organization, email unique within an organization, no active subscription on a churned organization, plus the customer's own rules (dormant accounts become inactive, trials older than 90 days are not migrated).
+What is specific to one customer is configuration, not code: `sample_customer/transformation_config.yaml` holds which of their words mean which of Meridian's values, each map citing the numbered rule in their own document it comes from, and the policy when a word is not on the list. The customer's rules that need more than one column are named functions enabled from the same file: CA is Canada unless the state column says a US state (rule 5), eighteen months without activity is inactive (rule 2), Legacy Gold under ten seats is Professional (rule 7), a trial older than ninety days does not migrate and is counted as skipped (rule 11), the account row's primary contact email flags the primary where the CRM flagged none (rule 1). Every rule leaves its name on the record it touched, so the run can say "469 accounts were set inactive by customer rule 2" and a person can go and check one.
 
-Validation returns reasons, not a boolean:
+Nothing is repaired by guesswork. `lindsey.herrera at wong.com` is reported as a malformed address rather than turned into one, because an address the tool invents reaches a real person. `Trial` as a plan, `Actve` as a status and `Call` as an activity kind are reported with their counts; no rule says what they are, so they go back to the customer. No generated code is executed anywhere.
+
+`GET /api/v1/projects/{id}/transformation-plan` shows what will happen to every column before any row runs, and refuses while any column is undecided.
+
+**Validation.** Every transformed record is checked against the target's Pydantic models (the same contract the target API applies: types, required fields, enums, ISO country codes, E.164 phones, renewal after start), then the batch against the platform's invariants (identifiers unique per entity, every child's organization among the organizations that will migrate, one primary contact and one address per organization, no live subscription under a dormant account, no dates after the migration date) and the customer's own cross-checks (a Strategic account with a non-Enterprise plan is flagged under rule 4, and nothing is changed). An error blocks the record. A warning travels with it.
+
+Validation returns reasons, not a boolean. Each is a row somebody can act on:
 
 ```json
 {
+  "entity": "subscription",
+  "dataset": "subscriptions.json",
+  "source_row": 412,
   "record_id": "SUB-00415",
-  "status": "rejected",
-  "reasons": [
-    "seats is required and is null",
-    "status 'trialing' is not one of trial, active, past_due, cancelled",
-    "renewal_date 2018-11-17 is not after start_date 2017-11-17"
-  ]
+  "field": "status",
+  "error_type": "business_rule_violation",
+  "severity": "error",
+  "message": "organization 10409 migrates as inactive and cannot hold a trial subscription: the account was set inactive by dormant_account_inactive (customer rule 2) rather than by the CRM, and billing still shows the subscription live. Somebody has to decide which system is right",
+  "value": "trial",
+  "rule": "platform rule: no live subscription under a dormant account"
 }
 ```
 
+Two distinctions matter more than the rest. A child whose organization is in the export but cannot migrate is `parent_record_rejected`, with the account's own problems named, because fixing the account releases the children; a child whose organization is not in the export at all is `missing_relationship`, because the customer owes the data. And a subscription refused because its account is dormant says whether the CRM said so or whether the customer's own dormancy rule did: in the second case the conflict is between two of the customer's rules, and a person settles it.
+
+Measured on the committed sample (9,259 rows, configuration `2026-10-01.1`): 7,163 records valid, 2,021 blocked by errors, 75 skipped by rule 11, in about 1.4 seconds. Organizations 889 of 1,030, contacts 1,702 of 2,279, subscriptions 414 of 1,003, activities 4,158 of 4,947. The biggest blocks: 839 children of accounts that failed on their own, 311 subscriptions in the dormancy conflict, 258 values no rule maps (215 of them `Call` activities), 181 required fields that are empty.
+
 ### 5. Migration workflow: dry run and reconciliation
 
-**Dry run.** Validated records are sent to the target platform's REST API (`POST /target/v1/organizations`, `/contacts`, `/subscriptions`), parents before children, with the customer's stable legacy ids as target ids so a re-run is idempotent: same id with the same content is a no-op, same id with different content is a 409. The runner records per record whether the target accepted or rejected it and why, and separates transport failures (timeouts, 500s, malformed bodies) from data failures. The mock target can inject failures on request so the error handling is exercised, not assumed. The source data is never modified.
+**Dry run.** Every valid record goes to the target platform's REST API (`POST /target/v1/organizations`, `/contacts`, `/subscriptions`, `/activities`), one request each with the platform's bearer token, organizations before their children, into a staging namespace named after the run. Namespaces are isolated: a rehearsal cannot touch live data, two runs cannot see each other, and a namespace can be counted, read back and purged in one call. The customer's stable identifiers are the target identifiers, so a repeat of the same record is a 200 and a no-op and the same identifier with different content is a 409 naming the fields that differ. That is what makes a retry safe: a 5xx, a timeout or a 200 with a body that is not a write result is retried; a 409 or a 422 is the target's considered answer and never is. A child whose organization did not land in the namespace is recorded as blocked, with the reason, and not sent. Every refusal is stored with the status, the error type, the target's own message and the request id.
+
+The mock platform enforces what a real one would (organization before children, identifiers unique per entity, one primary contact and one address per organization, no live subscription under a churned account, the field contract) and can be told to misbehave: a 500 that writes nothing, a timeout after the write landed, a 200 with the wrong body. Fault injection is off by default and seeded by record id when it is on, so a demo fails on the same records every time. The source data is never modified.
+
+Measured on the committed sample: 7,163 records sent, 7,163 accepted, 0 refused, 0 blocked, in 55 seconds end to end, sequential, about 7 ms per write. The namespace afterwards holds exactly what the run says it accepted. Validation caught everything the target would have refused, which the target API's own tests check rather than assume.
 
 **Reconciliation.** Counts across every stage, computed by code:
 
@@ -227,10 +244,10 @@ attempted records
       +----> rejected by target
       |
       v
-target records (GET /target/v1/stats)
+target records (GET /target/v1/counts)
 ```
 
-An unexplained difference between any two stages is a finding, not a footnote. A successful HTTP status is not evidence that a migration is correct.
+An unexplained difference between any two stages is a finding, not a footnote. A successful HTTP status is not evidence that a migration is correct. The counts exist on every run already; the reconciliation stage that compares them and names the discrepancies is next.
 
 ### 6. Reporting
 
@@ -249,10 +266,14 @@ Exported as Markdown for people and JSON for automation.
 - **Schema comparison:** `app/services/comparison.py`. Deterministic classification of every source field against the target catalog.
 - **AI mapping service:** `app/ai` (provider interface, answer schema, prompt builder) and `app/services/mapping.py` (ask per dataset in parallel, check the answer, retry with feedback, cache by hash, write one row per column).
 - **Human review and clarification:** `app/services/mapping.py` and `app/services/clarifications.py`. Decisions with a trail, questions to the customer, bulk approval with a floor.
+- **Transformation engine:** `app/services/transform`. Pure converters chosen by the target field's type, the customer's value maps and rule settings from `sample_customer/transformation_config.yaml`, record and cross-dataset rules citing the customer's rule numbers, a plan derived from the approved mappings.
+- **Validation engine:** `app/services/validation.py`. The target's Pydantic contract, the platform's cross-record invariants, the customer's cross-checks. Errors block, warnings travel.
+- **Migration runner:** `app/services/migration.py`. One HTTP request per record against the target API into a per-run namespace, idempotent retries, children blocked when their organization did not land, every refusal stored with the target's answer.
+- **Mock target platform:** `app/api/target.py` and `app/services/target_store.py`. Meridian's write API with the rules a real platform owns, namespaces, and injectable faults.
 - **Target catalog:** `app/target`. Meridian's data model as Pydantic models; the catalog flattens them into the field list the comparison classifies against and the mapping prompt sees. The JSON schema files under `target_platform/schema` are generated from these models, and a test fails if they drift.
 - **Database:** one PostgreSQL with two schemas. `onboarding` holds this tool's state. `target` holds the fictional platform's tables and is only ever written through the target API, so the migration cannot bypass the interface.
 - **Workbench UI:** Streamlit, talks to the API over HTTP only. `ui/streamlit_app.py` holds navigation and the project selector, `ui/views/` one module per screen.
-- **CLI:** Typer. `profile` runs the profiler and, with `--compare`, the schema comparison on one file or feed without the API or the database.
+- **CLI:** Typer. `profile`, `suggest` and `eval-mapping` work without the API or the database; `transformation-plan`, `validate` and `dry-run` run the later stages on a project from the terminal.
 - **Logging:** structlog, JSON in containers and console locally, request id on every line, context fields (project, dataset, stage, counts, durations) bound per pipeline step.
 
 ### Database
@@ -267,6 +288,11 @@ Schema `onboarding`:
 | `field_mappings` | one row per source column per project: proposed target, status, origin (model, heuristic, manual), confidence, reason, whether a rule is needed and which, whether the customer has to be asked, what the comparison said, which model call produced it, and who decided what when |
 | `clarification_questions` | a question for the customer, usually tied to one mapping: the text, the values and candidates it is about, status (open, answered, withdrawn), the answer and the resolution applied |
 | `llm_calls` | every model call: purpose, dataset, provider, model, prompt version, input hash, cached, status, attempts, tokens, latency, request id, and the structured answer |
+| `migration_runs` | one validation pass or one dry run: kind, status, the staging namespace, the configuration version and the whole transformation plan, per-entity counts from source rows through accepted and blocked, issue counts by type, the rules applied, what normalization changed, what the target holds, timings |
+| `validation_issues` | one row per thing wrong with one record: entity, dataset, source row, record id, column, error type, severity, message, the offending value, the rule that found it |
+| `migration_failures` | one row per record the target refused or the run never attempted: stage, attempts, HTTP status, error type, the target's message, request id |
+
+Schema `target` holds the platform's `organizations`, `contacts`, `subscriptions` and `activities`, keyed by `(namespace, id)`, written only through the target API.
 
 `stage` is a plain varchar validated by a Python enum rather than a native PostgreSQL enum, so the stage list can change without a migration. Tables are created from the SQLAlchemy metadata at startup; Alembic takes over once the schema stops moving.
 
@@ -292,7 +318,17 @@ Schema `onboarding`:
 | GET / POST | `/api/v1/projects/{id}/clarifications` | questions for the customer; ask one |
 | GET / PATCH / DELETE | `/api/v1/projects/{id}/clarifications/{question_id}` | one question; record the answer with an optional resolution; withdraw |
 | GET | `/api/v1/projects/{id}/llm-calls` | model calls: model, tokens, latency, cached, errors |
+| GET | `/api/v1/projects/{id}/transformation-plan` | what the approved mappings will do to every column (409 while any column is undecided) |
+| POST | `/api/v1/projects/{id}/validate` | transform and check every record, write nothing |
+| POST | `/api/v1/projects/{id}/migrations/dry-run` | send every valid record to the target API in a staging namespace |
+| GET | `/api/v1/projects/{id}/migrations` | every run, newest first |
+| GET | `/api/v1/projects/{id}/migrations/{run_id}` | one run: counts per entity, issue counts, rules applied, what the target holds |
+| GET | `/api/v1/projects/{id}/migrations/{run_id}/issues` | what validation found, filter by `entity`, `severity`, `error_type` |
+| GET | `/api/v1/projects/{id}/migrations/{run_id}/issue-breakdown` | issue counts by entity, severity and type |
+| GET | `/api/v1/projects/{id}/migrations/{run_id}/failures` | records the target refused, and records never attempted because their organization was |
 | GET | `/mock/billing/v1/subscriptions` | the customer's LegacyBill 4.2 api: bearer token, `page`, `page_size`, `has_more` |
+| POST | `/target/v1/organizations`, `/contacts`, `/subscriptions`, `/activities` | Meridian's write api: bearer token, `X-Meridian-Namespace`, 201 created, 200 unchanged, 409 conflict, 422 refused |
+| GET / DELETE | `/target/v1/counts`, `/target/v1/{entity}`, `/target/v1/namespaces/{id}` | what a namespace holds; purge a staging namespace |
 
 Every non-2xx response has one shape, including the framework's own 404/405/422:
 
@@ -334,7 +370,7 @@ Each risk below, the response, and the mechanism in this codebase. Where the mec
 
 ## Evaluation and testing
 
-**Test suites.** pytest, 125 tests across unit and integration. Unit tests need nothing; integration tests run against the compose PostgreSQL in their own database (`onboarding_test`, created by `deploy/postgres-init`) and skip cleanly when it is not up. No test calls a model provider: a fake provider that reads the same brief the real model gets answers from the deterministic comparison, and can be told to break the contract so the retry and failure paths are exercised.
+**Test suites.** pytest, 296 tests: 251 unit, 44 integration, one end to end. Unit tests need nothing; integration tests run against the compose PostgreSQL in their own database (`onboarding_test`, created by `deploy/postgres-init`) and skip cleanly when it is not up. No test calls a model provider: a fake provider that reads the same brief the real model gets answers from the deterministic comparison, and can be told to break the contract so the retry and failure paths are exercised.
 
 - The profiler is pinned to the synthetic generator's own defect manifest. Where a defect maps one to one onto a measurement (missing ids, duplicated ids, missing seat counts) the counts must agree exactly; where duplication copies defective rows the profiler must find at least as many.
 - The schema comparison is judged on the committed sample: it must catch the renames the synonym table covers, refuse to guess at the semantic ones, and read the profiler's stats into the right compatibility notes.
@@ -343,8 +379,13 @@ Each risk below, the response, and the mechanism in this codebase. Where the mec
 - The target schema files are regenerated from the models in a test; drift fails the build.
 - The mapping flow is exercised end to end over HTTP: suggest, cache hit, every review action, bulk approval with the floor, the customer's answer resolving a mapping, manual mode, a model that keeps breaking the contract (502 with the trail), and one bad answer corrected on the second attempt.
 - The prompt builder is tested against the sample: email, phone, name and free-text columns send no values; vocabulary columns send theirs; the cache key is stable and changes with the model.
+- Every normalizer is tested on values from the customer's own export, including the ones it must refuse to repair. The record rules are tested on both sides of their thresholds, and rule 1 is tested to never invent a contact.
+- The target API is tested on its own: the token, the id contract (identical re-send is a no-op, changed content a 409 naming the fields), parents before children, one primary and one email per organization, the lifecycle rule, namespace isolation and purge, forced faults.
+- The migration client is tested against a stubbed target: a 5xx is retried to the limit, a 409 and a 422 never are, a timeout followed by `unchanged` is an accepted record, a 200 with the wrong body is a failure.
+- The validation pass and the dry run are tested over the whole sample with the counts the sample actually produces, so a change in a converter or a rule shows up as a changed number. A run with every write forced to fail completes, stores each failure with status 500 and a request id, and blocks every child.
+- The end-to-end test takes a project from four source files (three files and the paged billing feed) through profiling, comparison, proposals in manual mode, a full review, validation of all 9,259 rows and a rehearsed slice against the target, with no model key.
 
-**Workbench verification.** Every screen is checked in a real headless browser (Chromium via Playwright) before it is committed: page errors, console errors, the content it is supposed to show, and screenshots reviewed by eye. This is a review step, not part of the pytest suite. It exists because jsdom-style assertions passed three layout defects that a real browser caught on the first screen.
+**Workbench verification.** Every screen is checked in a real headless browser (Chromium via Playwright) before it is committed: page errors, console errors, the content it is supposed to show, and screenshots reviewed by eye. The dry run page was driven through the whole sequence against the live database: open the plan, validate, open the records, run a full dry run. This is a review step, not part of the pytest suite. It exists because jsdom-style assertions passed three layout defects that a real browser caught on the first screen.
 
 **Mapping evaluation.** `evals/expected_mappings.json` holds the golden set for the committed sample: 41 fields across the four sources, each with the right target or null, alternative answers that also count, one field the customer must be asked about (`customer_tier`, by the customer's own rule 3), and fields where asking is acceptable but not required. `enterprise-onboarding eval-mapping` runs the same prompt path as the API with no database and writes `evals/results/*.json`. Every field gets one outcome: correct, deferred (asked instead of answering), unresolved (no target, no question), wrong, or overconfident (answered where it should have asked).
 
@@ -431,7 +472,15 @@ uv run enterprise-onboarding suggest sample_customer/data/organizations.csv --cu
 uv run enterprise-onboarding eval-mapping
 ```
 
-Configuration is environment variables with working defaults for everything except the LLM keys; see `deploy/env.template`. `LLM_PROVIDER` is `anthropic`, `openai` or `none`. With `none` the tool runs in manual mode. `MAPPING_HIGH_CONFIDENCE` (0.85) and `MAPPING_LOW_CONFIDENCE` (0.6) steer the review screen and the bulk-approval floor.
+Once a project's mappings are reviewed, run the later stages from the terminal (the api has to be up for the dry run, because the runner reaches the target platform over http):
+
+```bash
+uv run enterprise-onboarding transformation-plan latest
+uv run enterprise-onboarding validate latest
+uv run enterprise-onboarding dry-run latest --limit 200
+```
+
+Configuration is environment variables with working defaults for everything except the LLM keys; see `deploy/env.template`. `LLM_PROVIDER` is `anthropic`, `openai` or `none`. With `none` the tool runs in manual mode. `MAPPING_HIGH_CONFIDENCE` (0.85) and `MAPPING_LOW_CONFIDENCE` (0.6) steer the review screen and the bulk-approval floor. `TARGET_FAULT_RATE` and `TARGET_FAULT_MODES` make the mock target misbehave on purpose for a rehearsal of the failure paths; both are off by default.
 
 ## Project layout
 
@@ -439,7 +488,7 @@ Configuration is environment variables with working defaults for everything exce
 app/            the service: api, core (config, db, logging, errors, http), models, schemas, services, target
 ui/             streamlit workbench, talks to the api over http
 scripts/        synthetic customer data generator, target schema export
-sample_customer/  the fictional customer's exports, business rules, kickoff notes
+sample_customer/  the fictional customer's exports, business rules, kickoff notes, transformation configuration
 target_platform/  the fictional saas platform's schema and documentation
 tests/          unit, integration, e2e
 evals/          golden mapping set and measured results for the ai mapping step
@@ -479,7 +528,10 @@ Rules the AWS deployment follows:
 
 ## Current limitations
 
-- **Stages not yet in the codebase:** the transformation engine, the validation engine, the target platform API, the dry-run migration runner, reconciliation, and the readiness report. Their design is specified above and in `docs/ARCHITECTURE.md`.
+- **Stages not yet in the codebase:** reconciliation and the readiness report. The counts they need exist on every run; the comparison and the verdict are next.
+- **The dry run is sequential.** One request per record, about 7 ms each in process: 55 seconds for the 7,163 valid records of the sample, and the 10,000-organization customer would take about ten minutes. Batching and parallel writes are on the list, after reconciliation; a sequential run is reproducible, and reproducible is what a rehearsal is for.
+- **One transformation configuration.** The value maps and rule thresholds are written for Apex. A second customer is a second file, which has not been written yet, so the "configuration, not code" claim is a design, not a measured result.
+- **Rule 1 flags nothing on the sample.** The account row's primary contact email never matches a contact on any account that lacks a primary, so the rule reports 127 accounts and flags no contact. That is the data's finding, and it means the rule's flagging path is exercised by its unit tests, not by the sample.
 - **One model call takes one to two minutes** on a fifteen-column file with adaptive thinking. Datasets run in parallel so a project takes as long as its slowest file, and the answer is cached, but the first suggest on a project is a wait.
 - **The mapping eval is one customer.** 41 fields, lenient alternatives, one ambiguous field. Both providers score 100% on it, which says the prompt and the providers handle this sample, not that they handle every customer.
 - **AWS deployment is designed, not deployed.** The storage switch, S3 adapter and `docs/AWS_DEPLOYMENT.md` do not exist yet.

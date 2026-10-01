@@ -46,20 +46,24 @@ customer sources (csv, json, legacy billing api)
   readiness report ----------------------------> READY / READY WITH CONDITIONS / BLOCKED
 ```
 
-- **api service (implemented):** one FastAPI process serving the onboarding API under `/api/v1`, the mock target platform under `/target/v1` (Day 4), and the mock legacy billing source under `/mock/billing/v1`. Mounting these in the same process keeps the reviewer experience to one `docker compose up`; the loaders and the migration layer still talk to them over HTTP so the seam is real.
+- **api service (implemented):** one FastAPI process serving the onboarding API under `/api/v1`, the mock target platform under `/target/v1`, and the mock legacy billing source under `/mock/billing/v1`. Mounting these in the same process keeps the reviewer experience to one `docker compose up`; the loaders and the migration layer still talk to them over HTTP so the seam is real.
 - **mock billing source (implemented):** `/mock/billing/v1/subscriptions`, the customer's LegacyBill 4.2 api: bearer token from `BILLING_API_TOKEN`, `page` and `page_size`, `has_more`, records served from the same `subscriptions.json` the generator writes. The profiler has to authenticate and page like it would against the real thing. A wrong token is a 401 in the standard envelope; a feed failure surfaces as a 502 `source_unavailable` on the profile call and leaves the project's stage alone.
 - **source profiler (implemented):** `app/services/profiling`. Loaders, value-level type inference, per-column stats, dataset quality issues, cross-dataset key checks. Details under "Source profiling".
 - **schema comparison (implemented):** `app/services/comparison.py`. Deterministic classification of every source field against the target catalog. Details under "Schema comparison".
 - **ai mapping service (implemented):** `app/ai` holds the provider interface (Anthropic default, OpenAI behind the same interface, `none` is manual mode), the answer schema, and the prompt builder; `app/services/mapping.py` asks per dataset, checks the answer against the catalog, sends problems back a bounded number of times, caches by input hash, and writes one `field_mappings` row per column. Details under "AI boundaries".
 - **human review + customer clarification (implemented):** `app/services/mapping.py` (decisions) and `app/services/clarifications.py` (questions). Approve, reject, ignore, edit, ask the customer, reopen; bulk approval at or above the configured threshold only; the customer's answer can resolve the mapping on the spot. Details under "Human review".
+- **transformation engine (implemented):** `app/services/transform`. Pure converters chosen from the target field's own type, the customer's value maps and rule settings from `sample_customer/transformation_config.yaml`, record rules and cross-dataset rules as named functions citing the customer's rule numbers, and a plan derived from the approved mappings before any row runs. Details under "Transformation".
+- **validation engine (implemented):** `app/services/validation.py`. The target's pydantic contract, the platform's cross-record invariants, and the customer's own cross-checks, over every transformed record. Errors block a record; warnings travel with it. Details under "Validation".
+- **migration runner (implemented, dry run):** `app/services/migration.py`. One http request per record against the target api, parents before children, into a staging namespace of the run's own; retries that are safe because writes are idempotent; every refusal stored with the status, the target's message and the request id. Details under "Dry run against the target".
+- **mock target platform (implemented):** `app/api/target.py` and `app/services/target_store.py`, Meridian's write api: bearer token, the pydantic models as the field contract, the cross-record rules a real platform owns (organization before its children, ids unique per entity, identical re-send is a no-op and a changed one a 409, one primary contact and one address per organization, no live subscription under a dormant account), namespaces, and injectable faults. Details under "Dry run against the target".
 - **database (implemented):** one PostgreSQL with two schemas. `onboarding` holds this tool's state. `target` holds the fictional platform's tables and is only ever written through the target API.
-- **workbench ui (implemented: overview, source assessment, mapping review):** Streamlit, talks to the API over HTTP only. `ui/streamlit_app.py` holds the navigation and the project selector, `ui/views/` one module per screen.
-- **cli (implemented: `check`, `generate-data`, `profile`, `suggest`, `eval-mapping`):** Typer. `profile` runs the profiler and, with `--compare`, the schema comparison on one file or feed without the API or the database. `suggest` asks the configured model for one file the same way. `eval-mapping` scores the model against the golden set.
+- **workbench ui (implemented: overview, source assessment, mapping review, dry run):** Streamlit, talks to the API over HTTP only. `ui/streamlit_app.py` holds the navigation and the project selector, `ui/views/` one module per screen.
+- **cli (implemented: `check`, `generate-data`, `profile`, `suggest`, `eval-mapping`, `transformation-plan`, `validate`, `dry-run`):** Typer. `profile` runs the profiler and, with `--compare`, the schema comparison on one file or feed without the API or the database. `suggest` asks the configured model for one file the same way. `eval-mapping` scores the model against the golden set. `transformation-plan`, `validate` and `dry-run` run the later stages on a project from the terminal and print the same counts the workbench shows.
 - **logging (implemented):** structlog, JSON in containers, request id on every line, context fields bound per stage.
 
 ## Data flow
 
-Implemented through human review. The rest is planned and marked.
+Implemented through the dry run. Reconciliation and the readiness report are planned and marked.
 
 1. **Attach.** `POST /api/v1/projects/{id}/sources` records where each source lives: a csv or json file under one of the configured source roots (`sample_customer/data`, `generated`) or the url of a feed. File paths are checked against the roots before the filesystem is touched; absolute paths and `..` are refused with a 422. Nothing is read yet. `GET /api/v1/sources/available` lists what can be attached so the workbench offers a pick list instead of a text box.
 2. **Load.** `POST /api/v1/projects/{id}/sources/profile` loads every attached source into a dataframe of raw values. csv cells stay the strings that were in the file: pandas is told not to guess types, so zip codes never become floats and blanks stay blank. json and api records keep their json types, so a column that is an integer in 70% of records and a string in the rest is reported as exactly that. The billing feed is paged over http with the bearer token, page size and `has_more` the legacy system uses. The http client is a FastAPI dependency, which is how the tests hand the app its own test client and the loader still speaks http.
@@ -71,7 +75,11 @@ Implemented through human review. The rest is planned and marked.
 8. **Map.** `POST /api/v1/projects/{id}/mappings/suggest` rebuilds the profiles and the comparison, then asks the model once per dataset with the brief described under "AI boundaries", or, in manual mode, turns the comparison itself into the proposal (origin `heuristic`, no confidence invented). Every column gets a `field_mappings` row: proposed target, confidence, reason, whether a rule is needed and which, whether the customer has to be asked. Rows a person already decided are kept; `force` starts over. Fields the model flags open a `clarification_questions` row. The project moves to `mapped`.
 9. **Review.** `PATCH /api/v1/projects/{id}/mappings/{mapping_id}` with an action: approve (optionally with a different target and a rule), reject, ignore, edit, clarify (opens a question), reopen. Every approved target is checked against the catalog. `POST .../mappings/bulk-approve` approves suggested rows with a target at or above the high-confidence threshold, never below it, and only when a person calls it. The first decision moves the project to `in_review`; when every field is decided and no question is open it moves to `ready_to_transform`; reopening pulls it back.
 10. **Clarify.** `GET/POST /api/v1/projects/{id}/clarifications`, `PATCH .../{question_id}` to record the customer's answer. The answer can carry a resolution (approve with a target and a rule, ignore, reject) that is applied to the mapping through the same decision path a reviewer uses; without one the mapping returns to the reviewer's queue with the answer attached.
-11. **Transform, validate, dry-run, reconcile, report.** Planned.
+11. **Plan.** `GET /api/v1/projects/{id}/transformation-plan` resolves the approved mappings into what will happen to every column, and refuses with a 409 naming the columns while any mapping is undecided or any question is open. Derived, not stored: approved mappings plus the target catalog plus the customer's configuration, so two runs from the same approvals do the same thing and the plan can be read before anything runs.
+12. **Transform.** Every source is loaded read-only the way profiling loads it. For every row, one draft record per entity the dataset emits: each approved column runs through its converter chain, the record rules see the whole record, and the cross-dataset rules see every record. Nothing is written anywhere. What comes out is every record the migration would send, every reason a record cannot go, every note on what normalization changed, and the name of every rule that touched a record. On the sample: 9,259 rows in about one second.
+13. **Validate.** `POST /api/v1/projects/{id}/validate`. Every draft against the target's pydantic contract, then the batch against the platform's invariants and the customer's cross-checks. A `migration_runs` row of kind `validation` keeps the counts per entity, the issue counts by type, the rules applied and the normalizations, and every issue goes to `validation_issues` with the dataset, the row, the record id, the column and the value, so somebody can go and look. The project moves to `validated`. Nothing reaches the target.
+14. **Dry run.** `POST /api/v1/projects/{id}/migrations/dry-run`. The same transform and validate, then every valid record to the target api over http, organizations first, into a namespace named after the run. The run row records attempted, accepted, created, unchanged, rejected, failed, blocked and retries per entity, what the target holds in the namespace afterwards, and every refusal in `migration_failures`. The namespace is kept for inspection and reconciliation unless the caller asks for it to be purged. The project moves to `dry_run_complete`.
+15. **Reconcile, report.** Planned.
 
 ## Source profiling
 
@@ -104,7 +112,15 @@ Schema `onboarding` (implemented so far):
 
 `stage` is a plain varchar validated by a Python enum rather than a native PostgreSQL enum, because the stage list moves during the build and native enums cannot be altered by `create_all`.
 
-Coming with later milestones: `transformation_rules`, `migration_runs`, `validation_issues`, `reconciliation_results`, `readiness_reports`. Schema `target` (the fictional platform) gets `organizations`, `contacts`, `subscriptions` with the target API.
+| `migration_runs` | one validation pass or one dry run: kind, status, the staging `namespace` (null for a validation pass), the configuration version and summary, the options, the whole transformation plan, per-entity `stats` (source rows, built, skipped by rule, valid, invalid, with warnings, attempted, accepted, created, unchanged, rejected, failed, blocked, retries), totals, `issue_counts` by type, `applied_rules`, the top `normalizations`, `target_counts`, timings, truncation flags, the error |
+| `validation_issues` | one row per thing wrong with one record in a run: entity, dataset, source row, record id, column, error type, severity, message, the offending value, the rule that found it |
+| `migration_failures` | one row per record the target refused or the run never attempted: entity, record id, dataset, source row, stage (`target` or `blocked`), attempts, http status, error type, the target's message, request id, an excerpt of the body |
+
+The transformation plan is not a table: it is derived from the approved mappings and stored on the run that used it, the same way the schema comparison is derived from the profiles.
+
+Schema `target` (the fictional platform, written only through its api): `organizations`, `contacts`, `subscriptions`, `activities`, each keyed by `(namespace, <entity>_id)` with the accepted fields as typed columns, a `content_hash` of the accepted payload for the id contract, and the request id that wrote the row. Children carry a composite foreign key to the organization in the same namespace, so purging a namespace cascades.
+
+Coming with later milestones: `reconciliation_results`, `readiness_reports`.
 
 ## API
 
@@ -130,11 +146,18 @@ Coming with later milestones: `transformation_rules`, `migration_runs`, `validat
 | GET / POST | `/api/v1/projects/{id}/clarifications` | implemented |
 | GET / PATCH / DELETE | `/api/v1/projects/{id}/clarifications/{question_id}` | implemented; PATCH records the answer, DELETE withdraws |
 | GET | `/api/v1/projects/{id}/llm-calls` | implemented: model, tokens, latency, cached, errors |
-| POST | `/api/v1/projects/{id}/validate` | Day 4 |
-| POST | `/api/v1/projects/{id}/migrations/dry-run` | Day 4 |
-| GET | `/api/v1/projects/{id}/migrations/{run_id}` | Day 4 |
+| GET | `/api/v1/projects/{id}/transformation-plan` | implemented: what the approved mappings will do to every column; 409 while any column is undecided |
+| POST | `/api/v1/projects/{id}/validate` | implemented: transform and check every record, write nothing |
+| POST | `/api/v1/projects/{id}/migrations/dry-run` | implemented: every valid record through the target api into a staging namespace |
+| GET | `/api/v1/projects/{id}/migrations[?kind=]` | implemented: every run, newest first |
+| GET | `/api/v1/projects/{id}/migrations/{run_id}` | implemented: one run with its counts |
+| GET | `/api/v1/projects/{id}/migrations/{run_id}/issues[?entity=&severity=&error_type=]` | implemented |
+| GET | `/api/v1/projects/{id}/migrations/{run_id}/issue-breakdown` | implemented: counts by entity, severity and type |
+| GET | `/api/v1/projects/{id}/migrations/{run_id}/failures[?entity=&error_type=]` | implemented: refused and blocked records |
 | GET | `/api/v1/projects/{id}/reports/readiness` | Day 5 |
-| POST / GET | `/target/v1/organizations`, `/contacts`, `/subscriptions` | Day 4 |
+| POST | `/target/v1/organizations`, `/contacts`, `/subscriptions`, `/activities` | implemented: bearer token, `X-Meridian-Namespace`, 201 created / 200 unchanged / 409 / 422 / 500 |
+| GET | `/target/v1/counts`, `/target/v1/{entity}`, `/target/v1/{entity}/{id}` | implemented, per namespace |
+| DELETE | `/target/v1/namespaces/{id}` | implemented: purge a staging namespace; the live one is refused |
 
 Every non-2xx response is `{"error": {"type", "message", "details"}}`, including the framework's own 404/405/422.
 
@@ -174,9 +197,79 @@ Actions (`PATCH .../mappings/{id}`): **approve** (with the proposed target, or a
 
 **The customer's answer is a decision path, not a side channel.** Answering a question with a resolution calls the same `decide()` the reviewer uses, with the customer's answer as the note and the answerer as the reviewer. Answering without one puts the row back in the reviewer's queue with the answer attached.
 
+## Transformation
+
+Implemented. `app/services/transform`. The stage that turns the customer's values into Meridian's, and the one where "deterministic" has to mean something specific.
+
+**Converters are code and pure.** `converters.py`. One value and a context in, one value or a reason out, no database, no model, no knowledge of which customer it is. `trim`, `blank_to_null`, `string`, `identifier`, `date`, `datetime`, `money`, `integer`, `boolean`, `email`, `phone_e164`, `url`, `person_name_split`, `enum_map`, `country_code`, `region_code`, `string_list`, `title_case`. A chain runs left to right and stops at the first empty value or the first error. Every conversion that changed the meaning of a value leaves a note on the record (`'Q' mapped to 'monthly' (customer rule 9)`, `date read as %m/%d/%y`, `name split in two`), and the notes are aggregated on the run so a reviewer can see that 1,819 phone numbers were assumed to be +1.
+
+**Nothing is repaired by guesswork.** `lindsey.herrera at wong.com` is reported as a malformed address, not turned into `lindsey.herrera@wong.com`, because an address the tool invents reaches a real person. A plan value the rules do not name (`Trial`), a status that is a typo (`Actve`), an activity kind Meridian has no slot for (`Call`) are reported with the value and the count, which is the customer's to-do list, not the tool's.
+
+**The customer-specific half is configuration.** `sample_customer/transformation_config.yaml`, loaded by `config.py` into a closed pydantic model. Which of the customer's words mean which of Meridian's values, each map citing the numbered rule in `business_rules.md` it comes from; the policy for a word that is not on the list (`error`: reject and report; `default`: leave the field out so Meridian's own default applies, with a note; `null`: leave it empty); the date and timestamp formats to try, in order; the placeholders that mean "nothing here"; converter overrides for the fields whose type cannot choose (one name column into two, a phone format, a country vocabulary); and which record rules are on, with their thresholds. The file is reviewed, read-only at runtime and never written by a model. A second customer is a second file. A converter name that does not exist, or a yaml boolean where a province code was meant (`ON`), is a load-time error with a sentence, not a failure on row 4,000.
+
+**The target's type picks the normalizer.** `plan.py`. An enum field gets `enum_map`, a date gets `date`, a decimal gets `money`, a string with the identifier pattern gets `identifier`, and every chain starts with `trim` and `blank_to_null`. Configuration overrides the chain only where listed. The plan is derived from approved mappings and refuses to exist while any column is undecided.
+
+**A dataset emits an entity only when it maps that entity's identifier.** `organizations.csv` maps `acct_num` to `organization.organization_id`, so it emits organizations. It also maps `primary_contact_email` to `contact.email`, but it maps no `contact.contact_id`, so it does not emit contacts: that value travels as context on the organization draft for the cross-dataset rules. That is the general rule behind rule 1 below, and it is what stops a contact being invented out of an email address.
+
+**Record rules are named, cited and counted.** `record_rules.py`. Each is a function of the whole draft, enabled and parameterised from configuration, and leaves its name on every record it touches: `ca_country_from_region` (rule 5: CA is Canada unless the state column says a US state, and flagged when there is no state to tell), `dormant_account_inactive` (rule 2: no activity in eighteen calendar months, measured from the configured `as_of` date, becomes inactive; churned stays churned), `legacy_gold_seat_split` (rule 7: Legacy Gold under ten seats is Professional; with no seat count the plan is undecidable and the record is reported), `drop_dead_trials` (rule 11: a trial older than ninety days does not migrate; the record is skipped, counted and named, never silently dropped). The cross-dataset rule `primary_from_account_email` (rule 1) flags the contact whose address the account row names, where no contact on the account carries the flag; where the address is not in the contact export the account is flagged for the customer instead. On the sample it flags nobody and reports 127 accounts, which is the finding: the CRM's account-level address does not match the contact export for any account that lacks a primary.
+
+**Dates are measured from a pinned date.** `as_of` in the configuration, not `today()`, so a run in six months reproduces today's numbers and the build log's counts stay true.
+
+## Validation
+
+Implemented. `app/services/validation.py`. Three layers over every transformed record, all deterministic.
+
+- **The contract.** Each draft is validated against the pydantic model in `app/target/schema.py`, which is the same model the target api applies on write. Types, enums, patterns (ISO country codes, E.164, the identifier shape), required fields, renewal after start. Pydantic's error codes are translated into the vocabulary the rest of the run uses (`missing_required`, `invalid_enum_value`, `invalid_format`, `out_of_range`, ...) and the offending value travels with the issue.
+- **The invariants.** Rules that need the whole batch and belong to the platform whatever the customer: identifiers unique per entity (the second occurrence is reported, naming the row of the first); every child's organization among the organizations that will migrate; at most one primary contact per organization; one address per organization; no trial or active subscription under an inactive or churned organization; no customer_since, start_date or occurred_at after the migration date (a warning).
+- **The customer's cross-checks.** From `validation_rules` in the configuration. `strategic_requires_enterprise` (rule 4) flags a subscription whose organization is Strategic in the CRM and whose plan is not Enterprise. It reads the tier column from the source row because that column has no approved target yet, and it changes nothing: rewriting a plan from a column nobody has agreed to map would be exactly the quiet decision this tool exists to prevent.
+
+**Two messages that matter.** A child whose organization is in the export but cannot migrate is reported as `parent_record_rejected`, with the organization's own error types, because fixing the account releases the children; a child whose organization is not in the export at all is `missing_relationship`, because the customer owes the data. On the sample those are 839 and 143 records, and conflating them would hide where the work is. A subscription refused because its account is dormant says whether the CRM said so or whether `dormant_account_inactive` did: in the second case the conflict is between two of the customer's own rules, and 311 of the sample's subscriptions sit in it.
+
+**Severity.** `error`: the record is not sent. `warning`: the record is sent and the warning stays on the run. `info` is reserved. A record skipped by a customer rule is not validated at all, and a record that already failed conversion is not re-reported by the batch checks.
+
+**Measured on the committed sample** (configuration `2026-10-01.1`, as of 2026-10-01): 9,259 rows built, 75 skipped by rule 11, 7,163 valid (308 with warnings), 2,021 blocked by errors. Organizations 889 of 1,030; contacts 1,702 of 2,279; subscriptions 414 of 1,003; activities 4,158 of 4,947. The largest blocks are `parent_record_rejected` (839), the dormant-account conflict (311), values with no mapping (258, of which 215 are `Call` activities) and required fields that are empty (181). Transform and validate together take about 1.3 seconds.
+
+## Dry run against the target
+
+Implemented. `app/services/migration.py` on this side of the seam, `app/api/target.py` and `app/services/target_store.py` on the platform's side. Both live in the same process for the reviewer's convenience; the runner reaches the platform only over http, with the platform's bearer token, one record per request, exactly as it would reach a real one.
+
+**Namespaces.** Every row the platform stores belongs to a namespace. The all-zero uuid is the live data; a dry run writes into a namespace named after its run id. Namespaces are isolated: a child cannot find a parent in another namespace, the same identifier in two namespaces is two records, and the live data is never touched by a rehearsal. A namespace can be read back and counted (`GET /target/v1/counts`, `GET /target/v1/{entity}`) and purged in one call (`DELETE /target/v1/namespaces/{id}`); the live namespace refuses to be purged. By default a run keeps its namespace so it can be inspected and reconciled.
+
+**The id contract.** Writes carry the customer's stable identifier. The platform hashes the accepted payload: the same identifier with identical content is a 200 and a no-op, with different content a 409 `duplicate_identifier` listing the fields that differ. That is what makes a retry safe and what makes a re-run of the same records in the same namespace an audit rather than a double-write.
+
+**What the platform enforces, and what the runner does about it.**
+
+| the target says | status | runner |
+|---|---|---|
+| created | 201 | accepted, created |
+| already there, identical | 200 | accepted, unchanged |
+| duplicate identifier, duplicate primary contact, duplicate email | 409 | rejected, never retried |
+| missing relationship, business rule violation, contract violation | 422 | rejected, never retried |
+| unavailable | 500, 502, 503, 504, 408, 429 | retried with backoff, then failed |
+| answered 200 with a body that is not a write result | 200 | treated as failed and retried |
+| no answer within the timeout, connection failure | none | retried, then failed as `timeout` or `transport_error` |
+
+A 409 or a 422 is the target's considered answer and is never retried. Everything else is retried up to `TARGET_MAX_ATTEMPTS` with a linear backoff, because a repeat of the same record is a no-op.
+
+**No wasted calls.** Organizations are written first. A contact, subscription or activity whose organization is not in the namespace, because the target refused it or because the run never wrote it (a limited run, or a run restricted to one entity), is recorded as blocked with the organization that blocked it and is not sent. On a full run of the sample every one of the 7,163 valid records was accepted and nothing was blocked: validation caught everything the target would have refused, which is checked, not assumed, by the target api's own tests.
+
+**Faults, on purpose.** The mock platform can be told to fail: `TARGET_FAULT_RATE` and `TARGET_FAULT_MODES` draw per record, seeded with the record id so a demo fails on the same records every time, and the `X-Meridian-Fault` header forces one on a single request. `server_error` answers 500 and writes nothing. `malformed` performs the write and answers 200 with the wrong body, so the runner has to notice and the retry has to be a no-op. `timeout` performs the write and then sleeps past the client's timeout, so the retry gets `unchanged`, which is the id contract doing its job. Off by default: a plain run only fails where the customer's data is bad.
+
+**What a run keeps.** `migration_runs`: kind, status, namespace, the configuration version and summary, the options, the whole plan, per-entity stats from source rows through accepted and blocked, totals, issue counts by type, rule counts, the top normalizations, what the target holds, timings, and the error if the run failed. `validation_issues`: every issue, errors first, up to `VALIDATION_ISSUE_LIMIT` with a flag when there were more. `migration_failures`: every refusal and every blocked record with the stage, the attempts, the http status, the error type, the target's message, the request id and an excerpt of the body. The customer's rows are not stored; an issue keeps the identifier, the column and the offending value.
+
+**Measured on the committed sample.** Full dry run, no limit: 7,163 records sent, 7,163 accepted (7,163 created), 0 rejected, 0 failed, 0 blocked, 0 retries; the namespace holds 889 organizations, 1,702 contacts, 414 subscriptions and 4,158 activities, which is exactly what the run says it accepted. 55 seconds end to end in process, about 7 milliseconds per write, sequential. With every write forced to fail (`TARGET_FAULT_RATE=1.0`, `server_error`, two attempts), the run still completes, every organization is failed with status 500, the target's message and the request id, and every child is blocked.
+
 ## Failure recovery
 
-Planned for Day 4.
+Implemented for the migration layer; what the rest of the system does with a failure is listed for completeness.
+
+- **A source is unreachable.** Profiling answers 502 `source_unavailable` and leaves the project's stage alone (Day 2). Transformation loads sources the same way and fails the run the same way: the run row is marked `failed` with the exception, nothing is half-written, and the stage is untouched.
+- **The configuration is wrong.** A missing file, invalid yaml, a converter that does not exist, a yaml boolean in a value map: 500 `transformation_config_invalid` with the reason, before any row is read.
+- **The mappings are not ready.** 409 `invalid_state` naming the undecided columns. Nothing runs.
+- **The target is down, slow, or answers nonsense.** Retried per record, then recorded per record; the run completes with the counts it has and the stage still advances, because a rehearsal that found the target flaky is a rehearsal that did its job. The failures table says which records, with what, so the next run can be compared.
+- **A write landed but the answer was lost.** The retry is a no-op by the id contract; the record is counted as accepted and unchanged, and the run's `retries` count shows it happened.
+- **The run itself crashes.** The run row is marked `failed` with the error, the staging namespace keeps whatever landed for inspection, and the stage is untouched. Re-running starts a new run in a new namespace; nothing has to be cleaned up first.
+- **Partial runs.** `limit_per_entity`, `entities` and `stop_after_failures` exist so a problem can be reproduced on a slice. Children whose organization the slice never wrote are blocked, not attempted, and say so.
 
 ## Local development vs AWS demo
 
@@ -188,7 +281,7 @@ Two deployments of the same code. Local is the build and review environment and 
 laptop or vps
   docker compose
     db   postgres 16, published on 127.0.0.1:5433 only
-    api  fastapi, mock target platform (Day 4), mock billing source, 127.0.0.1:8000
+    api  fastapi, mock target platform, mock billing source, 127.0.0.1:8000
     ui   streamlit workbench, 127.0.0.1:8501
   files
     sample_customer/   the committed 1,000-org customer, mounted read-only

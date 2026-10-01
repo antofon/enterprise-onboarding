@@ -199,3 +199,67 @@ Chronological engineering decisions. Each entry: problem, decision, why, alterna
 - **Decision:** `evals/expected_mappings.json` covers the 41 fields of the committed sample. Each field has the right target or null, an `accept` list of other answers that count, `clarify: true` for the one field the customer must be asked about (`customer_tier`, by the customer's own rule 3), and `clarify_ok` where asking instead of answering is fine. The scorer gives each field one outcome: correct, deferred, unresolved, wrong, overconfident. A unit test checks the golden set against the sample's columns and the catalog so it cannot drift.
 - **Result:** both providers, prompt `2026-09-30.2`, one run each, four parallel calls: 41/41 fields correct, 33/33 fields with an expected target, clarification recall 1/1, 0 wrong, 0 overconfident, 0 wrong at confidence 0.85 or above; mean confidence on correct answers 0.85 (claude-opus-5) and 0.887 (gpt-5). Result files under `evals/results/`.
 - **Caveat, recorded on purpose:** one customer, 41 fields, lenient alternatives. A perfect score says the prompt and both providers handle this sample; it is a regression check for prompt changes, not a claim about other customers. A second dataset with a different shape is the way to make the number mean more.
+
+## 2026-10-01, Day 4
+
+### The customer-specific half is a file, and no model writes it
+
+- **Problem:** the transformation stage has to know that `Legacy Gold` is Enterprise, that `Q` billing is monthly now, that `On Hold` is active. That knowledge is one customer's, it changes when the customer's rules change, and the spec rightly forbids executing anything a model generated.
+- **Alternatives:** a rule DSL interpreted at runtime (a second language to document and test, and a model would be tempted to write it); value maps hardcoded in Python per customer (a second customer means a code change and a deploy); letting the model's `transformation` text drive the engine (prose is not a program).
+- **Decision:** converters are code and pure. What is specific to one customer lives in `sample_customer/transformation_config.yaml`: value maps citing the numbered rule each entry comes from, the policy for an unmapped word, date formats in order, placeholders, converter overrides for the four fields whose type cannot choose, record rules with thresholds. Loaded into a closed pydantic model, read-only at runtime. The model's `transformation` text from Day 3 is kept on the mapping as the reviewer's note and never executed.
+- **Result:** a second customer is a second file. A converter name that does not exist fails at load time with the list of known ones. `ontario: ON` was the first thing the loader caught: yaml reads `ON` as a boolean, and the error now says so in a sentence instead of failing two hundred lines in.
+
+### The target's type picks the normalizer
+
+- **Problem:** forty-odd approved mappings, each needing the right chain of normalizers, and a reviewer should not have to pick them.
+- **Decision:** the catalog's own type and constraints choose: enum gets `enum_map`, date gets `date`, decimal gets `money`, a string with the identifier pattern gets `identifier`, everything starts with `trim` and `blank_to_null`. Configuration overrides only where a type cannot know: one name column into two, a phone format, a country vocabulary, a region vocabulary. Four overrides for the whole customer.
+- **Result:** `GET .../transformation-plan` shows the chain for every column before any row runs, and the plan refuses to exist while any column is undecided.
+
+### Nothing is repaired by guesswork
+
+- **Problem:** the export has 139 addresses like `lindsey.herrera at wong.com`. Turning ` at ` into `@` is a one-line fix and almost always right.
+- **Decision:** reported, not repaired. An address the tool invents reaches a real person; the customer gets a list of 106 contacts (after deduplication) with the exact value. The same stance for `Trial` as a plan (27 subscriptions, no rule says which plan a trial becomes), `Actve` as a status (16 accounts, a typo nothing resolves), and `Call` as an activity kind (215 rows, Meridian's list has no slot for it). Each is a line in the readiness report with a count, which is the customer's to-do list, not the tool's.
+
+### A dataset emits an entity only when it maps that entity's identifier
+
+- **Problem:** `organizations.csv` maps `primary_contact_email` to `contact.email`. Taken literally that is a contact record per account row, with no name, which Meridian refuses.
+- **Decision:** a dataset emits records for an entity only when that entity's id field has an approved mapping. Everything else mapped across entities travels as context on the draft, for cross-dataset rules. Rule 1 reads it to flag the primary contact; no contact is invented.
+- **Result:** on the sample the rule flags zero contacts and reports 127 accounts whose named address is not in the contact export. That is the finding, and it is a better finding than 127 invented contacts.
+
+### Dates are measured from a pinned date
+
+- **Decision:** `as_of` in the configuration, not `today()`. Dormancy (rule 2), dead trials (rule 11) and future-date warnings all measure from it, and a run in six months reproduces the numbers in this log. Eighteen months is calendar months, clamped to the end of the month, because thirty-day arithmetic drifts.
+
+### Validation tells you where the work is
+
+- **Problem:** the first full validation pass reported 982 `missing_relationship` errors. Only 143 of those child records point at accounts that are not in the export at all; the other 839 point at accounts that are in the export but failed validation themselves, and the two need different people to fix them.
+- **Decision:** two error types. `parent_record_rejected` names the organization and its own error types, because fixing the account releases the children. `missing_relationship` means the account is not in the export at all, because the customer owes the data. On the sample: 839 and 143.
+- **Result:** the dormant-account conflict is reported the same way. 311 subscriptions are refused because the account is dormant, and the message says whether the CRM said so or whether `dormant_account_inactive` did. In the second case the conflict is between two of the customer's own rules (rule 2 against the billing export), and no amount of engineering settles that; a person does.
+
+### A dry run is a rehearsal, not a simulation
+
+- **Problem:** "dry run" could mean validate and stop. The spec asks for a migration into a staging environment with real failure handling, and a simulation would prove nothing about the target's rules or the runner's retries.
+- **Alternatives:** write into the live target tables and roll back (one transaction across seven thousand http requests is not how the real thing works); a separate database for staging (a second compose service for a demo); a flag on each row (works, but the live data and the staging data share uniqueness constraints and parent lookups).
+- **Decision:** namespaces. Every row in the target schema belongs to one; the all-zero uuid is live, a dry run writes into a namespace named after its run id. Keys are `(namespace, id)`, parents are looked up in the same namespace, the composite foreign key cascades on purge, and the live namespace refuses to be purged. A run keeps its namespace for inspection and reconciliation unless asked to throw it away.
+- **Result:** two runs of the same five records are two sets of creates, not a conflict. Zero live rows after every test. The reconciliation stage on Day 5 has a namespace to count.
+
+### Retries are safe because writes carry their identifier
+
+- **Decision:** the platform hashes the accepted payload. Same id, identical content: 200 and a no-op. Same id, different content: 409 listing the fields that differ. The runner retries 5xx, 408, 429, timeouts, transport failures and a 200 whose body is not a write result; it never retries a 409 or a 422, because those are the target's considered answer. The `timeout` fault lets the write land and then sleeps, so the retry gets `unchanged`, which is the id contract doing its job.
+- **Result:** with every write forced to fail (`TARGET_FAULT_RATE=1.0`, `server_error`, two attempts), the run completes, every organization is recorded with status 500, the target's message and a request id, and every child is blocked rather than attempted. With the `malformed` fault the write lands, the runner reports it as failed, and the target's count shows it is there, which is exactly why a retry has to be a no-op.
+
+### Children are not attempted when their organization did not land
+
+- **Problem:** a limited run (first 120 organizations) sent 321 children at the target and got 321 honest 422s for organizations the run never wrote.
+- **Decision:** organizations first, and a child whose organization is not in the namespace is recorded as blocked with the reason (refused, or never written by this run) and not sent. The same rule covers organizations the target refused in a full run.
+- **Result:** the limited run reports 159 accepted and 321 blocked, every one with the organization that blocked it, and makes 321 fewer calls.
+
+### Measured
+
+- Transformation: 9,259 rows across four sources in 1.0 seconds. A validation pass, including storing every issue, 1.4 seconds.
+- Validation on the committed sample (configuration `2026-10-01.1`, as of 2026-10-01): 7,163 valid, 2,021 blocked by errors, 75 skipped by rule 11, 308 valid records carrying a warning. By entity: organizations 889 of 1,030, contacts 1,702 of 2,279, subscriptions 414 of 1,003, activities 4,158 of 4,947.
+- Rules applied: dormancy 469 accounts, dead trials 75, CA-from-region 35, Legacy Gold seat split 6. Rule 1 flagged no contact and reported 127 accounts.
+- Full dry run, no limit: 7,163 sent, 7,163 accepted, 0 rejected, 0 failed, 0 blocked, 0 retries; the namespace holds exactly what the run says it accepted. 55 seconds in process, sequential, about 7 ms per write. Batching and parallel writes are on the list for the scaling pass, not before: a sequential run is reproducible, and reproducible is what a rehearsal is for.
+- The entity table came back from the api in jsonb's order, not write order (postgres sorts jsonb keys by length). Fixed in the workbench and the cli; the run row is still jsonb because nothing else reads it in order.
+- Workbench: the Dry run page was driven in headless Chromium against the live database (select the project, open the plan, validate, open the records, full dry run) with screenshots reviewed by eye. Two defects in the checker itself (the page's uppercase labels) and none in the page.
+- 235 unit tests, 24 integration tests, 1 end-to-end test, all green without a model key. The end-to-end test creates a project, attaches three files and the billing feed, profiles, compares, proposes in manual mode, reviews every column (the reviewer supplies the identifiers the heuristic cannot see, through the same edit action the workbench uses), validates all 9,259 rows and rehearses a slice against the target.
