@@ -249,5 +249,138 @@ def eval_mapping(
             )
 
 
+# --- transformation and migration ---------------------------------------------------------------
+
+
+def _open_project(project_ref: str):
+    """a project by id, or the newest one with `latest`. needs the database."""
+    import uuid
+
+    from app.core.db import get_session_factory
+    from app.services.projects import get_project, list_projects
+
+    session = get_session_factory()()
+    if project_ref == "latest":
+        projects = list_projects(session)
+        if not projects:
+            typer.echo("no projects yet; create one in the workbench or with the api", err=True)
+            raise typer.Exit(code=1)
+        return session, projects[0]
+    try:
+        project_id = uuid.UUID(project_ref)
+    except ValueError as exc:
+        raise typer.BadParameter("PROJECT is a uuid, or `latest`") from exc
+    return session, get_project(session, project_id)
+
+
+def _print_run(run) -> None:
+    typer.echo(
+        f"{run.kind.value} {run.id} {run.status.value}, {(run.duration_ms or 0) / 1000:.1f}s, "
+        f"configuration {run.config_version} as of {run.as_of}"
+    )
+    columns = ["source_rows", "built", "skipped_by_rule", "valid", "invalid", "with_warnings"]
+    if run.kind.value == "dry_run":
+        columns += ["attempted", "accepted", "rejected", "failed", "blocked", "retries"]
+    header = f"{'entity':<14}" + "".join(f"{c.replace('_', ' '):>17}" for c in columns)
+    typer.echo(header)
+    from app.models.target import WRITE_ORDER
+
+    entities = [e for e in WRITE_ORDER if e in run.stats]
+    for entity in entities:
+        stats = run.stats[entity]
+        typer.echo(f"{entity:<14}" + "".join(f"{stats.get(c, 0):>17,}" for c in columns))
+    if run.issue_counts:
+        typer.echo("")
+        typer.echo("what validation found:")
+        for error_type, count in list(run.issue_counts.items())[:15]:
+            typer.echo(f"  {count:>6}  {error_type}")
+    if run.applied_rules:
+        typer.echo("")
+        typer.echo("customer rules applied:")
+        for rule, count in run.applied_rules.items():
+            typer.echo(f"  {count:>6}  {rule}")
+    if run.kind.value == "dry_run":
+        typer.echo("")
+        counts = ", ".join(f"{k} {v:,}" for k, v in (run.target_counts or {}).items())
+        typer.echo(f"target namespace {run.namespace}: {counts or 'purged'}")
+
+
+@app.command("transformation-plan")
+def transformation_plan(
+    project: str = typer.Argument("latest", help="project id, or `latest`"),
+) -> None:
+    """what the approved mappings will do to every column, before any row runs."""
+    from app.services.transform import build_plan
+
+    configure_logging()
+    session, found = _open_project(project)
+    plan = build_plan(session, found)
+    typer.echo(
+        f"{plan.customer}, configuration {plan.config_version}, dates measured from "
+        f"{plan.as_of}; entities {', '.join(plan.entities)}"
+    )
+    typer.echo(f"record rules: {', '.join(plan.record_rules + plan.cross_dataset_rules)}")
+    for dataset in plan.datasets:
+        typer.echo("")
+        typer.echo(f"{dataset.dataset}  emits {', '.join(dataset.emits) or 'nothing'}")
+        for rule in dataset.field_rules:
+            chain = " > ".join(rule.converters)
+            typer.echo(f"  {rule.source_field:<24} -> {', '.join(rule.emits):<40} {chain}")
+        for rule in dataset.context_rules:
+            typer.echo(f"  {rule.source_field:<24} -> {rule.target_path:<40} (context only)")
+        for dropped in dataset.dropped:
+            typer.echo(f"  {dropped.source_field:<24}    not migrated: {dropped.why}")
+    session.close()
+
+
+@app.command()
+def validate(
+    project: str = typer.Argument("latest", help="project id, or `latest`"),
+    limit: int | None = typer.Option(None, help="records per entity, for a quick look"),
+) -> None:
+    """transform and check every record, write nothing. prints what validation found."""
+    import httpx
+
+    from app.services.migration import RunOptions, run_validation
+
+    configure_logging()
+    session, found = _open_project(project)
+    with httpx.Client(timeout=30) as http:
+        run = run_validation(
+            session, found, http_client=http, options=RunOptions(limit_per_entity=limit)
+        )
+    _print_run(run)
+    session.close()
+
+
+@app.command("dry-run")
+def dry_run(
+    project: str = typer.Argument("latest", help="project id, or `latest`"),
+    limit: int | None = typer.Option(None, help="records per entity, for a quick look"),
+    purge: bool = typer.Option(False, help="throw the staging namespace away afterwards"),
+    stop_after: int | None = typer.Option(None, help="give up on an entity after N refusals"),
+) -> None:
+    """rehearse the migration: every valid record through the target api, in its own namespace."""
+    import httpx
+
+    from app.services.migration import RunOptions, run_dry_run
+
+    configure_logging()
+    settings = get_settings()
+    session, found = _open_project(project)
+    typer.echo(f"target {settings.target_api_base_url}")
+    with httpx.Client(timeout=settings.target_request_timeout_seconds) as http:
+        run = run_dry_run(
+            session,
+            found,
+            http_client=http,
+            options=RunOptions(
+                limit_per_entity=limit, purge_namespace_after=purge, stop_after_failures=stop_after
+            ),
+        )
+    _print_run(run)
+    session.close()
+
+
 if __name__ == "__main__":
     app()
