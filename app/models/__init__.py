@@ -8,6 +8,14 @@ from app.models.mapping import (
     MappingStatus,
     QuestionStatus,
 )
+from app.models.migration import (
+    FailureStage,
+    MigrationFailure,
+    MigrationRun,
+    RunKind,
+    RunStatus,
+    ValidationIssueRow,
+)
 from app.models.project import (
     DatasetKind,
     OnboardingProject,
@@ -26,6 +34,12 @@ from app.models.target import (
 __all__ = [
     "LIVE_NAMESPACE",
     "ClarificationQuestion",
+    "FailureStage",
+    "MigrationFailure",
+    "MigrationRun",
+    "RunKind",
+    "RunStatus",
+    "ValidationIssueRow",
     "DatasetKind",
     "FieldMapping",
     "LlmCall",
