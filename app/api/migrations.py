@@ -19,7 +19,7 @@ from app.core.db import DbSession
 from app.core.errors import NotFoundError
 from app.core.http import HttpClient
 from app.models.migration import RunKind
-from app.schemas.common import ErrorEnvelope
+from app.schemas.common import ErrorEnvelope, Responses
 from app.schemas.migration import (
     DryRunRequest,
     FailureRead,
@@ -39,8 +39,8 @@ from app.services.transform import build_plan
 
 router = APIRouter(tags=["transformation and migration"])
 
-NOT_FOUND = {404: {"model": ErrorEnvelope}}
-RUN_ERRORS = {
+NOT_FOUND: Responses = {404: {"model": ErrorEnvelope}}
+RUN_ERRORS: Responses = {
     404: {"model": ErrorEnvelope, "description": "no such project"},
     409: {
         "model": ErrorEnvelope,

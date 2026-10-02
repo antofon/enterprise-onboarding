@@ -7,6 +7,8 @@ anything else in the database is not ours to migrate.
 
 from __future__ import annotations
 
+from typing import Any
+
 from alembic import context
 from sqlalchemy import Connection, create_engine, text
 from sqlalchemy.pool import NullPool
@@ -24,7 +26,7 @@ def include_name(name: str | None, type_: str, parent_names: object) -> bool:
     return True
 
 
-def configure(**kwargs: object) -> None:
+def configure(**kwargs: Any) -> None:
     context.configure(
         target_metadata=Base.metadata,
         include_schemas=True,

@@ -6,7 +6,7 @@ from fastapi import APIRouter, Response, status
 
 from app.core.db import DbSession
 from app.core.http import HttpClient
-from app.schemas.common import ErrorEnvelope
+from app.schemas.common import ErrorEnvelope, Responses
 from app.schemas.mapping import AvailableDocument
 from app.schemas.project import SourceDatasetRead
 from app.schemas.sources import (
@@ -21,13 +21,13 @@ from app.services.projects import get_project
 
 router = APIRouter(tags=["sources"])
 
-NOT_FOUND = {404: {"model": ErrorEnvelope}}
-ATTACH_ERRORS = {
+NOT_FOUND: Responses = {404: {"model": ErrorEnvelope}}
+ATTACH_ERRORS: Responses = {
     404: {"model": ErrorEnvelope, "description": "no such project or file"},
     409: {"model": ErrorEnvelope, "description": "a source with that name is already attached"},
     422: {"model": ErrorEnvelope, "description": "location outside the source roots"},
 }
-PROFILE_ERRORS = {
+PROFILE_ERRORS: Responses = {
     404: {"model": ErrorEnvelope},
     409: {"model": ErrorEnvelope, "description": "nothing attached yet"},
     502: {"model": ErrorEnvelope, "description": "a source file or feed could not be read"},

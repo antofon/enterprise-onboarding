@@ -397,10 +397,12 @@ def _candidates(
     return out
 
 
-def _classify(field: FieldProfile, dataset: str, entity: str | None, catalog: list[TargetField]):
+def _classify(
+    field: FieldProfile, dataset: str, entity: str | None, catalog: list[TargetField]
+) -> FieldComparison:
     candidates = _candidates(field, entity, catalog)
     in_entity = [c for c in candidates if c.in_entity]
-    base = dict(
+    base: dict[str, Any] = dict(
         dataset=dataset,
         entity=entity,
         source_field=field.name,

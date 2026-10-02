@@ -8,7 +8,7 @@ from fastapi import APIRouter, Query
 from app.ai.provider import LlmProviderDep
 from app.core.db import DbSession
 from app.models.mapping import MappingStatus
-from app.schemas.common import ErrorEnvelope
+from app.schemas.common import ErrorEnvelope, Responses
 from app.schemas.mapping import (
     BulkApproveRequest,
     BulkApproveResult,
@@ -24,14 +24,14 @@ from app.services.projects import get_project
 
 router = APIRouter(tags=["mappings"])
 
-NOT_FOUND = {404: {"model": ErrorEnvelope}}
-SUGGEST_ERRORS = {
+NOT_FOUND: Responses = {404: {"model": ErrorEnvelope}}
+SUGGEST_ERRORS: Responses = {
     404: {"model": ErrorEnvelope, "description": "no such project, dataset or rules document"},
     409: {"model": ErrorEnvelope, "description": "sources are not profiled yet"},
     422: {"model": ErrorEnvelope, "description": "rules document outside the document roots"},
     502: {"model": ErrorEnvelope, "description": "the model could not give a usable proposal"},
 }
-DECIDE_ERRORS = {
+DECIDE_ERRORS: Responses = {
     404: {"model": ErrorEnvelope},
     422: {"model": ErrorEnvelope, "description": "missing or unknown target field"},
 }

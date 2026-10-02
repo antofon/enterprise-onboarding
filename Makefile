@@ -1,4 +1,4 @@
-.PHONY: up down logs ps seed migrate test lint fmt shell hooks
+.PHONY: up down logs ps seed migrate test lint typecheck fmt shell hooks
 
 up:            ## build and start postgres, api, ui
 	docker compose up --build -d
@@ -23,6 +23,9 @@ test:          ## run the test suite locally (integration tests need `make up`)
 
 lint:
 	uv run ruff check .
+
+typecheck:
+	uv run mypy
 
 fmt:
 	uv run ruff format .

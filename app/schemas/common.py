@@ -17,3 +17,7 @@ class ErrorEnvelope(BaseModel):
     """what every non-2xx response looks like."""
 
     error: ErrorBody
+
+
+# the type fastapi wants for a route's `responses=`
+Responses = dict[int | str, dict[str, Any]]

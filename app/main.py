@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import time
 import uuid
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
 import structlog
@@ -73,7 +73,9 @@ def create_app() -> FastAPI:
     )
 
     @app.middleware("http")
-    async def request_context(request: Request, call_next) -> Response:  # type: ignore[no-untyped-def]
+    async def request_context(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         offered = request.headers.get("x-request-id") or ""
         request_id = offered if _REQUEST_ID.fullmatch(offered) else uuid.uuid4().hex[:12]
         structlog.contextvars.clear_contextvars()

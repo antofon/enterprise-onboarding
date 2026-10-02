@@ -5,13 +5,13 @@ import uuid
 from fastapi import APIRouter, status
 
 from app.core.db import DbSession
-from app.schemas.common import ErrorEnvelope
+from app.schemas.common import ErrorEnvelope, Responses
 from app.schemas.project import ProjectCreate, ProjectRead, ProjectSummary
 from app.services import projects as project_service
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
-NOT_FOUND = {404: {"model": ErrorEnvelope, "description": "no project with that id"}}
+NOT_FOUND: Responses = {404: {"model": ErrorEnvelope, "description": "no project with that id"}}
 
 
 @router.post(

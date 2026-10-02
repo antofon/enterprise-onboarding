@@ -17,14 +17,14 @@ from fastapi.responses import PlainTextResponse, Response
 from app.ai.provider import LlmProviderDep
 from app.core.db import DbSession
 from app.models.report import ReadinessReport, ReadinessStatus
-from app.schemas.common import ErrorEnvelope
+from app.schemas.common import ErrorEnvelope, Responses
 from app.schemas.report import ReportListRow, ReportRead, ReportRequest
 from app.services import readiness as readiness_service
 from app.services.projects import get_project
 
 router = APIRouter(tags=["readiness report"])
 
-NOT_FOUND = {404: {"model": ErrorEnvelope}}
+NOT_FOUND: Responses = {404: {"model": ErrorEnvelope}}
 Format = Annotated[Literal["json", "markdown"], Query(alias="format")]
 
 

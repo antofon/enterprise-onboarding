@@ -274,6 +274,6 @@ def purge_namespace(session: Session, namespace: uuid.UUID) -> dict[str, int]:
     for entity in reversed(WRITE_ORDER):
         table = TARGET_TABLES[entity]
         result = session.execute(delete(table).where(table.namespace == namespace))
-        removed[entity] = int(result.rowcount or 0)
+        removed[entity] = int(getattr(result, "rowcount", 0) or 0)
     session.flush()
     return removed

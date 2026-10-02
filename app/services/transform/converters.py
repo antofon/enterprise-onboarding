@@ -304,6 +304,7 @@ def as_datetime(value: Any, ctx: ConverterContext) -> Conversion:
             parsed = datetime.strptime(cleaned, fmt)
         except ValueError:
             continue
+        note: str | None
         if parsed.tzinfo is None:
             # a timestamp with no zone is read as UTC, and the record says so
             parsed = parsed.replace(tzinfo=UTC)

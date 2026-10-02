@@ -7,15 +7,15 @@ from fastapi import APIRouter, Query, Response, status
 
 from app.core.db import DbSession
 from app.models.mapping import QuestionStatus
-from app.schemas.common import ErrorEnvelope
+from app.schemas.common import ErrorEnvelope, Responses
 from app.schemas.mapping import ClarificationQuestionRead, QuestionAnswer, QuestionCreate
 from app.services import clarifications as service
 from app.services.projects import get_project
 
 router = APIRouter(tags=["clarifications"])
 
-NOT_FOUND = {404: {"model": ErrorEnvelope}}
-ANSWER_ERRORS = {
+NOT_FOUND: Responses = {404: {"model": ErrorEnvelope}}
+ANSWER_ERRORS: Responses = {
     404: {"model": ErrorEnvelope},
     409: {"model": ErrorEnvelope, "description": "the question is not open"},
     422: {"model": ErrorEnvelope, "description": "resolution names an unknown target"},

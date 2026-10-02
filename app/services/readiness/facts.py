@@ -77,7 +77,7 @@ def _issue_groups(session: Session, run: MigrationRun) -> list[dict[str, Any]]:
             rules[key][rule] += 1
         if error_type in VOCABULARY_TYPES and value is not None:
             values[key][value] += 1
-    groups = []
+    groups: list[dict[str, Any]] = []
     for key, members in records.items():
         entity, severity, error_type = key
         groups.append(
