@@ -196,8 +196,13 @@ def _entity_table(run: dict) -> None:
             f"what the target platform holds in namespace `{run['namespace']}`: {counts}. "
             f"{(run['duration_ms'] or 0) / 1000:.1f}s end to end."
         )
-    elif is_dry:
+    elif is_dry and (run.get("options") or {}).get("purge_namespace_after"):
         st.caption(f"staging namespace `{run['namespace']}` was purged when the run finished.")
+    elif is_dry:
+        st.caption(
+            f"the target could not be read back for namespace `{run['namespace']}`, so what it "
+            "holds is unknown; the reconciliation says the same."
+        )
     if is_dry:
         _reconciliation_line(run)
 
