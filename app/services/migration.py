@@ -18,6 +18,13 @@ What makes the rehearsal worth running:
   nothing silent      every refusal is stored with the status, the error type, the target's own
                       message and the request id, so a person can find the one record in a run
                       of ten thousand.
+  knows when to stop  a target that fails record after record is down, not flaky. After
+                      TARGET_BREAKER_THRESHOLD records in a row fail their retries the run stops
+                      writing, counts what it did not reach, and fails with the reason, instead of
+                      spending an hour retrying into a dead endpoint.
+  never left running  a run that raises is marked failed whatever state the session was in, and
+                      a run whose process died is found by its stale heartbeat and marked failed
+                      when the api starts or the project's next run begins.
 """
 
 from __future__ import annotations
@@ -26,16 +33,18 @@ import re
 import time
 import uuid
 from collections import Counter, defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
-from sqlalchemy import select
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings, get_settings
 from app.core.errors import NotFoundError
+from app.core.http import retry_after_seconds
 from app.core.logging import get_logger, stage
 from app.models.migration import (
     FailureStage,
@@ -101,6 +110,8 @@ class WriteResult:
     message: str | None = None
     request_id: str | None = None
     body: str | None = None
+    # what the target asked us to wait before trying again, when it said
+    retry_after: float | None = None
 
 
 @dataclass
@@ -144,12 +155,14 @@ class TargetClient:
         settings: Settings,
         namespace: uuid.UUID,
         request_prefix: str,
+        sleep: Callable[[float], None] = time.sleep,
     ) -> None:
         self.client = client
         self.settings = settings
         self.namespace = namespace
         self.request_prefix = request_prefix
         self.base_url = settings.target_api_base_url.rstrip("/")
+        self._sleep = sleep
 
     def _headers(self, record_id: str) -> dict[str, str]:
         return {
@@ -194,8 +207,15 @@ class TargetClient:
                 if last.outcome != "failed":
                     return last
             if attempts < self.settings.target_max_attempts:
-                time.sleep(self.settings.target_retry_backoff_seconds * attempts)
+                self._sleep(self._delay(last, attempts))
         return last
+
+    def _delay(self, last: WriteResult, attempts: int) -> float:
+        """what the target asked for when it said (a 429 or 503 with Retry-After), capped so one
+        record cannot stall the run; a linear backoff when it did not."""
+        if last.retry_after is not None:
+            return min(last.retry_after, self.settings.target_retry_max_wait_seconds)
+        return self.settings.target_retry_backoff_seconds * attempts
 
     def _read(self, response: httpx.Response, attempts: int, request_id: str) -> WriteResult:
         status = response.status_code
@@ -237,6 +257,7 @@ class TargetClient:
                 message=message,
                 request_id=request_id,
                 body=response.text[:500],
+                retry_after=retry_after_seconds(response),
             )
         return WriteResult(
             outcome="rejected",
@@ -285,11 +306,12 @@ class TargetClient:
             offset += page_size
 
     def purge(self) -> None:
-        self.client.delete(
+        response = self.client.delete(
             f"{self.base_url}/namespaces/{self.namespace}",
             headers={"Authorization": f"Bearer {self.settings.target_api_token}"},
             timeout=self.settings.target_request_timeout_seconds,
         )
+        response.raise_for_status()
 
 
 # --- what a run records -------------------------------------------------------------------------
@@ -409,6 +431,7 @@ def _start_run(
         config_version=config.version,
         config=config.summary(),
         options=options.as_dict(),
+        heartbeat_at=datetime.now(UTC),
     )
     session.add(run)
     session.commit()
@@ -483,6 +506,92 @@ def _ledgers(
     return ledgers
 
 
+# --- runs that stop, crash or are abandoned -----------------------------------------------------
+
+
+class Heartbeat:
+    """touches the run's heartbeat as the runner makes progress, at most every `every` seconds,
+    so a run that is alive is never mistaken for one whose process died."""
+
+    def __init__(self, session: Session, run_id: uuid.UUID, every: float = 30.0) -> None:
+        self.session = session
+        self.run_id = run_id
+        self.every = every
+        self._last = time.monotonic()
+
+    def __call__(self, *, force: bool = False) -> None:
+        now = time.monotonic()
+        if not force and now - self._last < self.every:
+            return
+        self.session.execute(
+            update(MigrationRun)
+            .where(MigrationRun.id == self.run_id)
+            .values(heartbeat_at=datetime.now(UTC))
+        )
+        self.session.commit()
+        self._last = now
+
+
+def _fail_run(session: Session, run_id: uuid.UUID, started: float, exc: BaseException) -> None:
+    """mark the run failed after an exception, whatever state the exception left the session in.
+    The rollback also undoes anything half-written by the run, including a stage change. If even
+    this cannot reach the database, the heartbeat sweep finds the run later."""
+    error = f"{exc.__class__.__name__}: {exc}"[:1000]
+    try:
+        session.rollback()
+        run = session.get(MigrationRun, run_id)
+        if run is not None and run.status is RunStatus.running:
+            _finish(session, run, status=RunStatus.failed, started=started, error=error)
+    except Exception as nested:  # noqa: BLE001 - the original exception is the one to raise
+        log.error(
+            "run_state_unrecorded",
+            migration_run_id=str(run_id),
+            error_type=nested.__class__.__name__,
+            error=str(nested)[:300],
+            original=error[:300],
+        )
+
+
+def sweep_stalled_runs(
+    session: Session,
+    settings: Settings | None = None,
+    *,
+    project_id: uuid.UUID | None = None,
+    now: datetime | None = None,
+) -> list[uuid.UUID]:
+    """runs left `running` by a process that stopped (killed, out of memory, restarted mid-run)
+    are marked failed, so nothing waits on them and nobody reads them as live. A run counts as
+    stalled when its last heartbeat, or its start when it never beat, is older than
+    RUN_STALE_AFTER_SECONDS."""
+    settings = settings or get_settings()
+    now = now or datetime.now(UTC)
+    cutoff = now - timedelta(seconds=settings.run_stale_after_seconds)
+    last_sign = func.coalesce(MigrationRun.heartbeat_at, MigrationRun.started_at)
+    stmt = select(MigrationRun).where(MigrationRun.status == RunStatus.running, last_sign < cutoff)
+    if project_id is not None:
+        stmt = stmt.where(MigrationRun.project_id == project_id)
+    stalled = list(session.execute(stmt).scalars())
+    for run in stalled:
+        seen = run.heartbeat_at or run.started_at
+        run.status = RunStatus.failed
+        run.finished_at = now
+        run.error = (
+            f"interrupted: no sign of progress since {seen.isoformat(timespec='seconds')}, "
+            f"{settings.run_stale_after_seconds:g}s without a heartbeat. The process running it "
+            "most likely stopped. Whatever landed stays in the staging namespace; rehearse again."
+        )
+        log.warning(
+            "run_marked_interrupted",
+            migration_run_id=str(run.id),
+            project_id=str(run.project_id),
+            kind=run.kind.value,
+            last_heartbeat=seen.isoformat(),
+        )
+    if stalled:
+        session.commit()
+    return [run.id for run in stalled]
+
+
 # --- validation ---------------------------------------------------------------------------------
 
 
@@ -499,6 +608,7 @@ def run_validation(
     settings = settings or get_settings()
     config = config or get_config()
     options = options or RunOptions()
+    sweep_stalled_runs(session, settings, project_id=project.id)
     started = time.perf_counter()
     run = _start_run(
         session, project, RunKind.validation, config=config, options=options, namespace=None
@@ -509,29 +619,24 @@ def run_validation(
                 session, project, config=config, settings=settings, http_client=http_client
             )
             outcome = validate(result, config=config)
-        except Exception as exc:
-            _finish(
-                session,
-                run,
-                status=RunStatus.failed,
-                started=started,
-                error=f"{exc.__class__.__name__}: {exc}"[:1000],
+            run.plan = result.plan.as_dict()
+            run.stats = _entity_stats(outcome, {}, _source_rows_by_entity(result))
+            run.totals = _totals(run.stats)
+            run.issue_counts = outcome.issue_counts()
+            run.applied_rules = _rule_counts(result)
+            run.normalizations = _normalization_counts(result)
+            run.issues_truncated = _store_issues(
+                session, run, outcome.issues, settings.validation_issue_limit
             )
+            if project.stage in (ProjectStage.ready_to_transform, ProjectStage.validated):
+                project.stage = ProjectStage.validated
+            run = _finish(session, run, status=RunStatus.completed, started=started)
+        except Exception as exc:
+            _fail_run(session, run.id, started, exc)
             raise
-        run.plan = result.plan.as_dict()
-        run.stats = _entity_stats(outcome, {}, _source_rows_by_entity(result))
-        run.totals = _totals(run.stats)
-        run.issue_counts = outcome.issue_counts()
-        run.applied_rules = _rule_counts(result)
-        run.normalizations = _normalization_counts(result)
-        run.issues_truncated = _store_issues(
-            session, run, outcome.issues, settings.validation_issue_limit
-        )
-        if project.stage in (ProjectStage.ready_to_transform, ProjectStage.validated):
-            project.stage = ProjectStage.validated
         report.record_count = run.totals["built"]
         report.note(valid=run.totals["valid"], invalid=run.totals["invalid"])
-        return _finish(session, run, status=RunStatus.completed, started=started)
+        return run
 
 
 # --- the dry run --------------------------------------------------------------------------------
@@ -550,6 +655,7 @@ def run_dry_run(
     settings = settings or get_settings()
     config = config or get_config()
     options = options or RunOptions()
+    sweep_stalled_runs(session, settings, project_id=project.id)
     started = time.perf_counter()
     run = _start_run(
         session,
@@ -567,22 +673,28 @@ def run_dry_run(
         migration_run_id=str(run.id),
         namespace=str(namespace),
     ) as report:
-        run = _rehearse(
-            session,
-            project,
-            run,
-            http_client=http_client,
-            settings=settings,
-            config=config,
-            options=options,
-            started=started,
-        )
+        try:
+            run = _rehearse(
+                session,
+                project,
+                run,
+                http_client=http_client,
+                settings=settings,
+                config=config,
+                options=options,
+                started=started,
+            )
+        except Exception as exc:
+            _fail_run(session, run.id, started, exc)
+            raise
         report.record_count = run.totals["attempted"]
         report.note(
+            status=run.status.value,
             accepted=run.totals["accepted"],
             rejected=run.totals["rejected"],
             failed=run.totals["failed"],
             blocked=run.totals["blocked"],
+            not_attempted=run.totals["not_attempted"],
         )
         return run
 
@@ -606,21 +718,20 @@ def _rehearse(
         namespace=namespace,
         request_prefix=f"dryrun-{str(run.id)[:8]}",
     )
-    try:
-        result = transform_project(
-            session, project, config=config, settings=settings, http_client=http_client
-        )
-        outcome = validate(result, config=config)
-        tallies, failures = _write_records(target, outcome, options)
-    except Exception as exc:
-        _finish(
-            session,
-            run,
-            status=RunStatus.failed,
-            started=started,
-            error=f"{exc.__class__.__name__}: {exc}"[:1000],
-        )
-        raise
+    heartbeat = Heartbeat(session, run.id)
+    result = transform_project(
+        session, project, config=config, settings=settings, http_client=http_client
+    )
+    outcome = validate(result, config=config)
+    heartbeat(force=True)
+    tallies, state = _write_records(
+        target,
+        outcome,
+        options,
+        breaker_threshold=settings.target_breaker_threshold,
+        heartbeat=heartbeat,
+    )
+    heartbeat(force=True)
 
     run.plan = result.plan.as_dict()
     run.stats = _entity_stats(outcome, tallies, _source_rows_by_entity(result))
@@ -631,6 +742,7 @@ def _rehearse(
     run.issues_truncated = _store_issues(
         session, run, outcome.issues, settings.validation_issue_limit
     )
+    failures = state.failures
     kept = failures[: settings.migration_failure_limit]
     run.failures_truncated = len(failures) > len(kept)
     for failure in kept:
@@ -650,31 +762,68 @@ def _rehearse(
         ledgers=ledgers,
         target_ids=read_target_ids(target, [ledger.entity for ledger in ledgers]),
     )
+    notes: list[str] = []
     if options.purge_namespace_after:
-        target.purge()
-        run.target_counts = {}
+        try:
+            target.purge()
+            run.target_counts = {}
+        except httpx.HTTPError as exc:
+            log.warning("staging_purge_failed", error=str(exc)[:200])
+            notes.append(
+                f"the staging namespace could not be purged ({exc.__class__.__name__}); purge it "
+                f"with DELETE /target/v1/namespaces/{namespace}"
+            )
     else:
         log.info("staging_kept", namespace=str(namespace), counts=run.target_counts)
+
+    if state.stopped:
+        # nothing was rehearsed past the point the target went away; the stage stays where it was
+        return _finish(
+            session,
+            run,
+            status=RunStatus.failed,
+            started=started,
+            error="; ".join([state.stopped, *notes]),
+        )
     if project.stage in (
         ProjectStage.ready_to_transform,
         ProjectStage.validated,
         ProjectStage.dry_run_complete,
     ):
         project.stage = ProjectStage.dry_run_complete
-    return _finish(session, run, status=RunStatus.completed, started=started)
+    return _finish(
+        session, run, status=RunStatus.completed, started=started, error="; ".join(notes) or None
+    )
+
+
+@dataclass
+class WriteState:
+    """what the write loop carries from one entity to the next."""
+
+    breaker_threshold: int
+    heartbeat: Callable[[], None] = lambda: None
+    failures: list[MigrationFailure] = field(default_factory=list)
+    # a child can only be written where its organization already landed in this namespace
+    accepted_organizations: set[str] = field(default_factory=set)
+    refused_organizations: dict[str, str] = field(default_factory=dict)
+    # records in a row that failed after their retries. an accepted or a refused record resets
+    # it: a target that answers, even with a no, is up
+    consecutive_failed: int = 0
+    # why the run stopped writing, once the breaker opened
+    stopped: str | None = None
 
 
 def _write_records(
-    target: TargetClient, outcome: ValidationOutcome, options: RunOptions
-) -> tuple[dict[str, EntityTally], list[MigrationFailure]]:
+    target: TargetClient,
+    outcome: ValidationOutcome,
+    options: RunOptions,
+    *,
+    breaker_threshold: int = 10,
+    heartbeat: Callable[[], None] | None = None,
+) -> tuple[dict[str, EntityTally], WriteState]:
     """write in dependency order, and do not attempt a record whose organization was refused."""
     tallies: dict[str, EntityTally] = {}
-    failures: list[MigrationFailure] = []
-    # a child can only be written where its organization already landed in this namespace. an
-    # organization that was refused, or that this run never attempted, blocks its children the
-    # same way, and the message says which it was.
-    accepted_organizations: set[str] = set()
-    refused_organizations: dict[str, str] = {}
+    state = WriteState(breaker_threshold=breaker_threshold, heartbeat=heartbeat or (lambda: None))
     entities = tuple(e for e in WRITE_ORDER if e in outcome.valid)
     if options.entities:
         entities = tuple(e for e in entities if e in options.entities)
@@ -683,19 +832,10 @@ def _write_records(
         tally = EntityTally()
         tallies[entity] = tally
         with stage("write", entity=entity) as report:
-            _write_entity(
-                target,
-                entity,
-                outcome.valid.get(entity, []),
-                options,
-                tally=tally,
-                failures=failures,
-                accepted_organizations=accepted_organizations,
-                refused_organizations=refused_organizations,
-            )
+            _write_entity(target, entity, outcome.valid.get(entity, []), options, tally, state)
             report.record_count = tally.attempted
             report.note(**{k: v for k, v in tally.as_dict().items() if k != "attempted"})
-    return tallies, failures
+    return tallies, state
 
 
 def _write_entity(
@@ -703,26 +843,27 @@ def _write_entity(
     entity: str,
     records: list[RecordDraft],
     options: RunOptions,
-    *,
     tally: EntityTally,
-    failures: list[MigrationFailure],
-    accepted_organizations: set[str],
-    refused_organizations: dict[str, str],
+    state: WriteState,
 ) -> None:
     if options.limit_per_entity is not None:
         tally.not_attempted = max(0, len(records) - options.limit_per_entity)
         records = records[: options.limit_per_entity]
+    if state.stopped:
+        tally.not_attempted += len(records)
+        return
     for position, draft in enumerate(records):
+        state.heartbeat()
         record_id = draft.record_id or ""
         parent = draft.payload.get("organization_id")
         if entity != "organization" and parent is not None:
-            if str(parent) not in accepted_organizations:
-                refusal = refused_organizations.get(str(parent))
+            if str(parent) not in state.accepted_organizations:
+                refusal = state.refused_organizations.get(str(parent))
                 why = (
                     f"the target refused it ({refusal})" if refusal else "this run did not write it"
                 )
                 tally.blocked += 1
-                failures.append(
+                state.failures.append(
                     _failure(
                         draft,
                         entity,
@@ -738,24 +879,27 @@ def _write_entity(
         answer = target.write(entity, draft.payload, record_id)
         tally.retries += max(0, answer.attempts - 1)
         if answer.outcome == "accepted":
+            state.consecutive_failed = 0
             tally.accepted += 1
             tally.accepted_ids.append(record_id)
             if entity == "organization":
-                accepted_organizations.add(record_id)
+                state.accepted_organizations.add(record_id)
             if answer.created:
                 tally.created += 1
             else:
                 tally.unchanged += 1
             continue
         if entity == "organization":
-            refused_organizations[record_id] = answer.error_type or "refused"
+            state.refused_organizations[record_id] = answer.error_type or "refused"
         tally.refused_ids.append(record_id)
         tally.refusals[answer.error_type or "unknown"] += 1
         if answer.outcome == "rejected":
+            state.consecutive_failed = 0
             tally.rejected += 1
         else:
+            state.consecutive_failed += 1
             tally.failed += 1
-        failures.append(
+        state.failures.append(
             _failure(
                 draft,
                 entity,
@@ -768,11 +912,27 @@ def _write_entity(
                 body=answer.body,
             )
         )
+        remaining = len(records) - position - 1
+        if state.consecutive_failed >= state.breaker_threshold:
+            tally.not_attempted += remaining
+            state.stopped = (
+                f"stopped writing: the target failed {state.consecutive_failed} records in a row "
+                f"after their retries (last: {answer.error_type}: {answer.message}). The "
+                "records not reached are counted as such; rehearse again once the target answers"
+            )
+            log.error(
+                "dry_run_breaker_open",
+                entity=entity,
+                consecutive_failed=state.consecutive_failed,
+                error_type=answer.error_type,
+                not_attempted=remaining,
+            )
+            break
         if (
             options.stop_after_failures is not None
             and tally.rejected + tally.failed >= options.stop_after_failures
         ):
-            tally.not_attempted += len(records) - position - 1
+            tally.not_attempted += remaining
             log.warning(
                 "dry_run_stopped_early",
                 entity=entity,
@@ -912,9 +1072,11 @@ def issue_breakdown(session: Session, run: MigrationRun) -> list[dict[str, Any]]
 
 __all__ = [
     "EntityTally",
+    "Heartbeat",
     "RunOptions",
     "TargetClient",
     "WriteResult",
+    "WriteState",
     "get_run",
     "issue_breakdown",
     "latest_run",
@@ -923,4 +1085,5 @@ __all__ = [
     "run_failures",
     "run_issues",
     "run_validation",
+    "sweep_stalled_runs",
 ]

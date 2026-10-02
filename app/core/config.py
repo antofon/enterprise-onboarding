@@ -32,6 +32,11 @@ class Settings(BaseSettings):
     # writes carry an id, so a retry after a 5xx, a timeout or a malformed answer is safe
     target_max_attempts: int = 3
     target_retry_backoff_seconds: float = 0.25
+    # a 429 or 503 that says Retry-After is waited out, up to this long per retry
+    target_retry_max_wait_seconds: float = 10.0
+    # this many records in a row that failed after their retries means the target is down, not
+    # flaky: the run stops writing, counts the rest as not reached and says why
+    target_breaker_threshold: int = Field(default=10, ge=1)
 
     # fault injection in the mock target, off by default: a plain run should fail only where the
     # customer's data is actually bad. deterministic in the record id, so a demo repeats exactly.
@@ -39,6 +44,11 @@ class Settings(BaseSettings):
     target_fault_modes: str = "server_error,timeout,malformed"
     target_fault_seed: int = 1337
     target_fault_timeout_seconds: float = 30.0
+    # 0: a record drawn for a fault fails on every attempt. n: only its first n attempts fail,
+    # which is what a transient fault (a blip, a rate limit) looks like to a client that retries
+    target_fault_attempts: int = Field(default=0, ge=0)
+    # what the rate_limited fault puts in Retry-After
+    target_fault_retry_after_seconds: int = Field(default=1, ge=0)
 
     # customer-specific value maps for the transformation stage: reviewed configuration, not code
     transformation_config: str = "sample_customer/transformation_config.yaml"
@@ -46,6 +56,9 @@ class Settings(BaseSettings):
     validation_issue_limit: int = 5000
     # how many rejected or failed records one dry run stores in full
     migration_failure_limit: int = 2000
+    # a run still `running` with no heartbeat for this long belongs to a process that stopped;
+    # it is marked failed when the api starts and before the project's next run
+    run_stale_after_seconds: float = Field(default=600.0, gt=0)
 
     # readiness policy: an entity where fewer than this share of in-scope records landed in the
     # rehearsal blocks go-live. anything short of all of them is a condition the customer signs
@@ -84,6 +97,15 @@ class Settings(BaseSettings):
     billing_api_token: str = "legacybill-readonly-demo"
     billing_source_file: str = "sample_customer/data/subscriptions.json"
     billing_page_size: int = 200
+    # the loader's side: a 429 or a 5xx is retried, waiting what Retry-After says (capped) or a
+    # short linear backoff, before the profile step gives up on the feed
+    billing_max_attempts: int = Field(default=4, ge=1)
+    billing_retry_backoff_seconds: float = 0.5
+    billing_retry_max_wait_seconds: float = 10.0
+    # the mock feed's side: LegacyBill allows this many requests per window and answers 429 with
+    # Retry-After past it. 0 is no limit, the default, so a plain profile is not slowed down
+    billing_rate_limit: int = Field(default=0, ge=0)
+    billing_rate_window_seconds: float = Field(default=1.0, gt=0)
 
     @property
     def target_fault_mode_list(self) -> list[str]:

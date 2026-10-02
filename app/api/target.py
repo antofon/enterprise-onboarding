@@ -9,16 +9,19 @@ Two things make it useful as a rehearsal target rather than a stub:
   namespaces      `X-Meridian-Namespace: <uuid>` writes into an isolated staging area instead of
                   the live data. A dry run uses its own run id, so nothing it does can touch
                   production, and it can be inspected afterwards and purged.
-  faults          the platform can be told to misbehave (500, timeout, malformed body) so the
-                  migration's retry and reporting paths are exercised on purpose. Off by
-                  default: a plain run should only fail where the customer's data is bad.
+  faults          the platform can be told to misbehave (500, 429 with Retry-After, timeout,
+                  malformed body), on every attempt or only the first few, so the migration's
+                  retry, back-off and reporting paths are exercised on purpose. Off by default:
+                  a plain run should only fail where the customer's data is bad.
 """
 
 from __future__ import annotations
 
 import random
+import threading
 import time
 import uuid
+from collections import OrderedDict
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Header, Query, Response, status
@@ -27,7 +30,7 @@ from pydantic import BaseModel, Field
 
 from app.core.config import get_settings
 from app.core.db import DbSession
-from app.core.errors import NotFoundError, UnauthorizedError
+from app.core.errors import NotFoundError, RateLimitedError, UnauthorizedError
 from app.core.logging import get_logger
 from app.models.target import ID_COLUMN, LIVE_NAMESPACE, TARGET_TABLES
 from app.schemas.common import ErrorEnvelope
@@ -43,6 +46,7 @@ WRITE_RESPONSES: dict[int | str, dict[str, Any]] = {
     401: {"model": ErrorEnvelope},
     409: {"model": ErrorEnvelope, "description": "id taken, duplicate primary contact or email"},
     422: {"model": ErrorEnvelope, "description": "missing relationship or rule violation"},
+    429: {"model": ErrorEnvelope, "description": "over the rate limit; see Retry-After"},
     500: {"model": ErrorEnvelope, "description": "the platform failed; the write can be retried"},
 }
 
@@ -57,7 +61,8 @@ Fault = Annotated[
     str | None,
     Header(
         alias="X-Meridian-Fault",
-        description="force a fault on this request: server_error, timeout or malformed",
+        description="force a fault on this request: server_error, rate_limited, timeout or "
+        "malformed",
     ),
 ]
 
@@ -112,21 +117,55 @@ def _namespace(value: uuid.UUID | None) -> uuid.UUID:
     return value or LIVE_NAMESPACE
 
 
-def _chosen_fault(entity: str, record_id: str, forced: str | None) -> str | None:
+FAULT_MODES = ("server_error", "rate_limited", "timeout", "malformed")
+
+
+class _AttemptCounter:
+    """how many times each request id has been seen, so a fault can be transient: the first n
+    attempts of a record fail and the retry gets through. bounded, oldest forgotten first."""
+
+    def __init__(self, keep: int = 100_000) -> None:
+        self._lock = threading.Lock()
+        self._seen: OrderedDict[str, int] = OrderedDict()
+        self._keep = keep
+
+    def next(self, key: str) -> int:
+        with self._lock:
+            count = self._seen.pop(key, 0) + 1
+            self._seen[key] = count
+            while len(self._seen) > self._keep:
+                self._seen.popitem(last=False)
+            return count
+
+    def reset(self) -> None:
+        with self._lock:
+            self._seen.clear()
+
+
+attempts_seen = _AttemptCounter()
+
+
+def _chosen_fault(
+    entity: str, record_id: str, forced: str | None, request_id: str | None = None
+) -> str | None:
     """a forced fault, or one drawn deterministically from the configured rate. the draw is
-    seeded with the record id so the same run fails on the same records every time."""
+    seeded with the record id so the same run fails on the same records every time. with
+    TARGET_FAULT_ATTEMPTS=n a drawn fault only hits the first n attempts of a request."""
     settings = get_settings()
     modes = settings.target_fault_mode_list
     if forced:
-        if forced not in modes and forced not in ("server_error", "timeout", "malformed"):
-            return None
-        return forced
+        return forced if forced in modes or forced in FAULT_MODES else None
     if settings.target_fault_rate <= 0 or not modes:
         return None
     draw = random.Random(f"{settings.target_fault_seed}:{entity}:{record_id}")
     if draw.random() >= settings.target_fault_rate:
         return None
-    return draw.choice(modes)
+    mode = draw.choice(modes)
+    if settings.target_fault_attempts:
+        attempt = attempts_seen.next(request_id or f"{entity}:{record_id}")
+        if attempt > settings.target_fault_attempts:
+            return None
+    return mode
 
 
 MALFORMED_BODY = {"ok": "probably", "note": "this is not the documented write response"}
@@ -143,7 +182,15 @@ def _write(
 ) -> Any:
     ns = _namespace(namespace)
     record_id = getattr(record, ID_COLUMN[entity])
-    fault = _chosen_fault(entity, record_id, forced_fault)
+    fault = _chosen_fault(entity, record_id, forced_fault, request_id)
+    if fault == "rate_limited":
+        # nothing is written: the platform turned the request away before looking at it
+        log.warning("target_fault", mode=fault, entity=entity, record_id=record_id)
+        raise RateLimitedError(
+            f"{PLATFORM_NAME}: too many requests",
+            retry_after=get_settings().target_fault_retry_after_seconds,
+            details={"entity": entity, "record_id": record_id, "injected": True},
+        )
     if fault == "server_error":
         log.warning("target_fault", mode=fault, entity=entity, record_id=record_id)
         raise target_store.TargetUnavailableError(

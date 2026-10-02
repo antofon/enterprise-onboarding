@@ -37,16 +37,31 @@ The customer and the target platform are fictional. The data is synthetic.
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     configure_logging()
     settings = get_settings()
-    init_db()
+    revision = init_db()
+    _sweep_stalled_runs()
     log.info(
         "startup",
         version=__version__,
         env=settings.app_env,
+        schema_revision=revision,
         llm_provider=settings.effective_llm_provider,
         llm_model=settings.llm_model,
     )
     yield
     log.info("shutdown")
+
+
+def _sweep_stalled_runs() -> None:
+    """runs the previous process left `running` when it stopped are marked failed now, rather
+    than shown as live forever. a failure here is logged, never a reason not to start."""
+    from app.core.db import get_session_factory
+    from app.services.migration import sweep_stalled_runs
+
+    try:
+        with get_session_factory()() as session:
+            sweep_stalled_runs(session)
+    except Exception as exc:  # noqa: BLE001
+        log.error("stalled_run_sweep_failed", error_type=exc.__class__.__name__, error=str(exc))
 
 
 def create_app() -> FastAPI:

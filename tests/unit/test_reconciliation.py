@@ -115,3 +115,17 @@ def test_the_reason_a_record_is_excluded_is_its_first_error() -> None:
         "malformed_email": 1,
         "parent_record_rejected": 1,
     }
+
+
+def test_a_target_that_could_not_be_read_is_a_discrepancy_even_when_nothing_was_accepted() -> None:
+    """zero accepted and zero read back would otherwise agree. an unread target is not empty."""
+    nothing = organizations(
+        attempted=0, not_attempted=7, accepted=0, rejected=0, accepted_ids=[], refused_ids=[]
+    )
+    nothing.refusals_by_type = {}
+    result = compare([nothing], {"organization": None})
+    assert result.status is ReconciliationStatus.discrepancies
+    failed = [c["check"] for c in result.checks if not c["ok"]]
+    assert failed == ["target_readable"]
+    assert [d["kind"] for d in result.discrepancies] == ["target_unreadable"]
+    assert result.entities["organization"]["in_target"] == 0

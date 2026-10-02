@@ -9,6 +9,10 @@ customer's subscriptions.json, so the api and the file agree.
 from __future__ import annotations
 
 import json
+import math
+import threading
+import time
+from collections import deque
 from pathlib import Path
 from typing import Any
 
@@ -16,7 +20,7 @@ from fastapi import APIRouter, Header, Query
 from pydantic import BaseModel
 
 from app.core.config import get_settings
-from app.core.errors import SourceUnavailableError, UnauthorizedError
+from app.core.errors import RateLimitedError, SourceUnavailableError, UnauthorizedError
 from app.schemas.common import ErrorEnvelope
 
 router = APIRouter(prefix="/mock/billing/v1", tags=["mock billing source"])
@@ -54,6 +58,35 @@ def _load_export(path: str) -> dict[str, Any]:
     return export
 
 
+class _Window:
+    """LegacyBill's rate limit: at most `limit` requests in any `window` seconds, per process.
+    Past it, a 429 whose Retry-After says when the oldest request in the window expires."""
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._seen: deque[float] = deque()
+
+    def admit(self, limit: int, window: float) -> int | None:
+        """None when the request may go ahead, otherwise the seconds to wait."""
+        if limit <= 0:
+            return None
+        now = time.monotonic()
+        with self._lock:
+            while self._seen and now - self._seen[0] >= window:
+                self._seen.popleft()
+            if len(self._seen) < limit:
+                self._seen.append(now)
+                return None
+            return max(1, math.ceil(window - (now - self._seen[0])))
+
+    def reset(self) -> None:
+        with self._lock:
+            self._seen.clear()
+
+
+rate_window = _Window()
+
+
 def _require_token(authorization: str | None) -> None:
     expected = f"Bearer {get_settings().billing_api_token}"
     if authorization != expected:
@@ -67,7 +100,11 @@ def _require_token(authorization: str | None) -> None:
     "/subscriptions",
     response_model=BillingPage,
     summary="paginated subscription records, bearer token required",
-    responses={401: {"model": ErrorEnvelope}, 502: {"model": ErrorEnvelope}},
+    responses={
+        401: {"model": ErrorEnvelope},
+        429: {"model": ErrorEnvelope, "description": "over the rate limit; see Retry-After"},
+        502: {"model": ErrorEnvelope},
+    },
 )
 def list_subscriptions(
     page: int = Query(1, ge=1),
@@ -75,7 +112,15 @@ def list_subscriptions(
     authorization: str | None = Header(default=None),
 ) -> BillingPage:
     _require_token(authorization)
-    export = _load_export(get_settings().billing_source_file)
+    settings = get_settings()
+    wait = rate_window.admit(settings.billing_rate_limit, settings.billing_rate_window_seconds)
+    if wait is not None:
+        raise RateLimitedError(
+            f"LegacyBill: more than {settings.billing_rate_limit} requests in "
+            f"{settings.billing_rate_window_seconds:g}s",
+            retry_after=wait,
+        )
+    export = _load_export(settings.billing_source_file)
     records = export["data"]
     start = (page - 1) * page_size
     chunk = records[start : start + page_size]

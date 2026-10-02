@@ -8,7 +8,7 @@ anything else in the database is not ours to migrate.
 from __future__ import annotations
 
 from alembic import context
-from sqlalchemy import Connection, create_engine
+from sqlalchemy import Connection, create_engine, text
 from sqlalchemy.pool import NullPool
 
 import app.models  # noqa: F401  registers every table on Base.metadata
@@ -36,6 +36,10 @@ def configure(**kwargs: object) -> None:
 
 
 def run_online(connection: Connection) -> None:
+    # the version table lives in the onboarding schema, and alembic creates it before the first
+    # revision runs, so on an empty database the schemas have to exist first
+    for schema in sorted(SCHEMAS):
+        connection.execute(text(f'create schema if not exists "{schema}"'))
     configure(connection=connection)
     with context.begin_transaction():
         context.run_migrations()

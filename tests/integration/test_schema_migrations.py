@@ -83,12 +83,14 @@ def test_migrating_twice_changes_nothing_the_second_time(scratch) -> None:
 
 
 def test_a_database_from_before_migrations_is_stamped_and_keeps_its_rows(scratch) -> None:
-    """what happened to the live database: tables made by create_all, data in them."""
+    """what happened to the live database: tables made by create_all, data in them, no version
+    table. The baseline is byte for byte what create_all built when alembic took over, so the
+    baseline revision without its version table is that database."""
+    from alembic import command
+
     with scratch.begin() as conn:
-        for schema in (ONBOARDING_SCHEMA, TARGET_SCHEMA):
-            conn.execute(text(f'create schema "{schema}"'))
-    # the baseline is what create_all built; later revisions are applied on top of it
-    Base.metadata.create_all(scratch)
+        command.upgrade(alembic_config(conn), BASELINE_REVISION)
+        conn.execute(text("drop table onboarding.alembic_version"))
     project_id = uuid.uuid4()
     with scratch.begin() as conn:
         conn.execute(

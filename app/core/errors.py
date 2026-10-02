@@ -33,6 +33,7 @@ class AppError(Exception):
         status_code: int | None = None,
         error_type: str | None = None,
         details: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> None:
         super().__init__(message)
         self.message = message
@@ -41,9 +42,12 @@ class AppError(Exception):
         if error_type is not None:
             self.error_type = error_type
         self.details = details or {}
+        self.headers = headers
 
     def to_response(self) -> JSONResponse:
-        return error_response(self.status_code, self.error_type, self.message, self.details)
+        return error_response(
+            self.status_code, self.error_type, self.message, self.details, headers=self.headers
+        )
 
 
 def current_request_id() -> str | None:
@@ -118,6 +122,20 @@ class SourceUnavailableError(AppError):
 
     status_code = 502
     error_type = "source_unavailable"
+
+
+class RateLimitedError(AppError):
+    """too many requests; Retry-After says when to come back."""
+
+    status_code = 429
+    error_type = "rate_limited"
+
+    def __init__(self, message: str, *, retry_after: int, details: dict[str, Any] | None = None):
+        super().__init__(
+            message,
+            details={**(details or {}), "retry_after_seconds": retry_after},
+            headers={"Retry-After": str(retry_after)},
+        )
 
 
 class InvalidStateError(AppError):

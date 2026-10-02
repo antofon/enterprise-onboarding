@@ -100,6 +100,9 @@ class MigrationRun(Base):
     error: Mapped[str | None] = mapped_column(Text)
 
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # the runner touches this as it makes progress. a run still `running` whose heartbeat is
+    # older than RUN_STALE_AFTER_SECONDS belongs to a process that stopped, and is marked failed
+    heartbeat_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     duration_ms: Mapped[float | None] = mapped_column(Float)
 

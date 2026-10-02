@@ -119,17 +119,45 @@ def _check(
     }
 
 
-def compare(ledgers: list[EntityLedger], target_ids: dict[str, set[str]]) -> Comparison:
+def compare(ledgers: list[EntityLedger], target_ids: dict[str, set[str] | None]) -> Comparison:
     """the whole reconciliation, as a pure function of what the run knew and what the target
-    holds. no database, no http: the unit tests drive it directly."""
+    holds. no database, no http: the unit tests drive it directly.
+
+    `None` for an entity means the target could not be read back. That is its own failed check,
+    never an empty namespace: a run that accepted nothing and a target that did not answer would
+    otherwise agree that zero equals zero."""
     checks: list[dict[str, Any]] = []
     discrepancies: list[dict[str, Any]] = []
     entities: dict[str, dict[str, Any]] = {}
 
     for ledger in ledgers:
         e = ledger.entity
-        held = target_ids.get(e, set())
+        read = target_ids.get(e, set())
+        held = read if read is not None else set()
         accepted = set(ledger.accepted_ids)
+        if read is None:
+            checks.append(
+                {
+                    "entity": e,
+                    "check": "target_readable",
+                    "label": "the target could be read back",
+                    "expected": 1,
+                    "actual": 0,
+                    "ok": False,
+                    "detail": "the target's read api did not answer, so nothing below about what "
+                    "it holds is known",
+                }
+            )
+            discrepancies.append(
+                {
+                    "entity": e,
+                    "kind": "target_unreadable",
+                    "count": ledger.accepted,
+                    "sample_ids": [],
+                    "explanation": "the target could not be read back for this entity. What it "
+                    "holds is unknown until a re-check succeeds.",
+                }
+            )
         in_scope = ledger.built - ledger.skipped_by_rule
         checks.extend(
             [
@@ -239,7 +267,11 @@ def compare(ledgers: list[EntityLedger], target_ids: dict[str, set[str]]) -> Com
         }
 
     for check in checks:
-        if not check["ok"] and check["check"] not in ("target_count", "target_ids"):
+        if not check["ok"] and check["check"] not in (
+            "target_count",
+            "target_ids",
+            "target_readable",
+        ):
             discrepancies.append(
                 {
                     "entity": check["entity"],
@@ -324,13 +356,13 @@ def reconcile_run(
     run: MigrationRun,
     *,
     ledgers: list[EntityLedger],
-    target_ids: dict[str, set[str]],
+    target_ids: dict[str, set[str] | None],
     trigger: str = TRIGGER_RUN,
 ) -> ReconciliationResult:
     """called by the dry run as it finishes, with what it knows and what the target holds."""
     with stage("reconcile", migration_run_id=str(run.id), trigger=trigger) as report:
         comparison = compare(ledgers, target_ids)
-        counts = {entity: len(ids) for entity, ids in target_ids.items()}
+        counts = {entity: len(ids) for entity, ids in target_ids.items() if ids is not None}
         report.record_count = sum(counts.values())
         report.note(
             status=comparison.status.value,
@@ -428,7 +460,7 @@ def recheck(session: Session, run: MigrationRun, *, target: Any) -> Reconciliati
         for entity in WRITE_ORDER
         if entity in original.entities
     ]
-    target_ids = {ledger.entity: target.list_ids(ledger.entity) for ledger in ledgers}
+    target_ids = read_target_ids(target, [ledger.entity for ledger in ledgers])
     result = reconcile_run(
         session, run, ledgers=ledgers, target_ids=target_ids, trigger=TRIGGER_RECHECK
     )
@@ -449,16 +481,17 @@ def first_errors(drafts: list[Any]) -> dict[str, int]:
     return dict(counter.most_common())
 
 
-def read_target_ids(target: Any, entities: list[str]) -> dict[str, set[str]]:
-    """every identifier in the namespace, per entity. an unreachable target is an empty answer
-    and the checks then say so, rather than the run failing after every write landed."""
-    out: dict[str, set[str]] = {}
+def read_target_ids(target: Any, entities: list[str]) -> dict[str, set[str] | None]:
+    """every identifier in the namespace, per entity. an entity the target would not give back
+    is None, and the reconciliation fails it by name rather than the run failing after every
+    write already landed."""
+    out: dict[str, set[str] | None] = {}
     for entity in entities:
         try:
             out[entity] = target.list_ids(entity)
         except httpx.HTTPError as exc:
             log.warning("target_ids_unavailable", entity=entity, error=str(exc)[:200])
-            out[entity] = set()
+            out[entity] = None
     return out
 
 

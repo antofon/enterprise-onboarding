@@ -150,7 +150,10 @@ def _headline(run: dict) -> None:
             c5, "Accepted by target", n(totals["accepted"]), f"of {n(totals['attempted'])} sent"
         )
         refused = totals["rejected"] + totals["failed"]
-        _metric(c6, "Refused or failed", n(refused), f"{n(totals['blocked'])} never attempted")
+        never = f"{n(totals['blocked'])} blocked"
+        if totals.get("not_attempted"):
+            never += f", {n(totals['not_attempted'])} not reached"
+        _metric(c6, "Refused or failed", n(refused), never)
     else:
         _metric(c5, "Sent to target", "–", "validation writes nothing")
         _metric(c6, "Duration", f"{(run['duration_ms'] or 0) / 1000:.1f}s", "transform and check")
@@ -440,8 +443,16 @@ def render() -> None:
 
     kind = "Dry run" if run["kind"] == "dry_run" else "Validation pass"
     st.markdown(f"### {kind} · {esc(run['started_at'][:19].replace('T', ' '))} UTC")
-    if run["status"] != "completed":
-        st.error(f"this run {run['status']}: {esc(run.get('error') or 'no detail')}")
+    if run["status"] == "running":
+        st.info("this run is still running; its counts appear when it finishes")
+    elif run["status"] != "completed":
+        st.error(f"this run {run['status']}: {run.get('error') or 'no detail'}")
+    elif run.get("error"):
+        st.warning(run["error"])
+    if not run.get("totals"):
+        # it stopped before it had counted anything; the error above is the whole story
+        _history(project_id, runs, current)
+        return
     _headline(run)
     st.markdown("")
     _entity_table(run)
