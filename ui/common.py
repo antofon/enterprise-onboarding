@@ -25,7 +25,7 @@ STAGES = [
 CSS = """
 <style>
 .chip{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;
-  letter-spacing:.02em;white-space:nowrap;line-height:18px}
+  letter-spacing:.02em;word-spacing:.12em;white-space:nowrap;line-height:18px}
 .chip-error{background:#FEE2E2;color:#991B1B}
 .chip-warning{background:#FEF3C7;color:#92400E}
 .chip-info{background:#E0F2FE;color:#075985}
@@ -52,6 +52,16 @@ table.q td.dim{color:#64748B}
 .kv{color:#64748B;font-size:12.5px}
 .big{font-size:28px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
 .label{color:#64748B;font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.status-banner{border-radius:10px;padding:16px 20px;margin:6px 0 14px;border:1px solid}
+.status-word{font-size:26px;font-weight:800;letter-spacing:.04em;line-height:1.1}
+.status-head{font-size:15px;margin-top:4px}
+.status-blocked{background:#FEF2F2;border-color:#FECACA;color:#991B1B}
+.status-conditions{background:#FFFBEB;border-color:#FDE68A;color:#92400E}
+.status-ready{background:#ECFDF5;border-color:#A7F3D0;color:#065F46}
+.status-head{color:#1E293B}
+.explain{font-size:14px;margin:4px 0 8px;line-height:1.5}
+ol.questions{padding-left:20px;margin:4px 0 12px}
+ol.questions li{margin-bottom:6px;font-size:14px;line-height:1.45}
 </style>
 """
 

@@ -15,6 +15,34 @@ def _metric(col, label: str, value: str, sub: str | None = None) -> None:
     )
 
 
+STATUS_KIND = {"READY": "ready", "READY WITH CONDITIONS": "conditions", "BLOCKED": "blocked"}
+
+
+def _readiness_card(project_id: str) -> None:
+    """the current readiness state: the latest stored report, or the status computed now."""
+    ok, report = api_json("GET", f"/api/v1/projects/{project_id}/reports/readiness")
+    if not ok:
+        return
+    status = report["status"]
+    content = report["content"]
+    when = (
+        f"report of {report['created_at'][:16].replace('T', ' ')} UTC"
+        if report["stored"]
+        else "computed now, no report generated yet"
+    )
+    blockers = len(content["blockers"])
+    questions = len(content["customer_questions"])
+    st.markdown(
+        f'<div class="status-banner status-{STATUS_KIND.get(status, "blocked")}">'
+        f'<div class="label">Current readiness</div>'
+        f'<div class="status-word">{esc(status)}</div>'
+        f'<div class="status-head">{n(blockers)} blocker{"" if blockers == 1 else "s"} · '
+        f"{n(questions)} customer question{'' if questions == 1 else 's'}"
+        f" · {esc(when)}</div></div>",
+        unsafe_allow_html=True,
+    )
+
+
 def render() -> None:
     project_id = st.session_state.get("project_id")
     project = load_project(project_id) if project_id else None
@@ -56,6 +84,7 @@ def render() -> None:
                     )
                     st.markdown(f"- `{d['name']}` · {d['kind']} · {state}")
         with right:
+            _readiness_card(project["id"])
             with st.container(border=True):
                 st.markdown("**Next step**")
                 if not datasets:
@@ -101,10 +130,16 @@ def render() -> None:
                     st.markdown("[Open dry run →](dry-run)")
                 elif project["stage"] == "dry_run_complete":
                     st.write(
-                        "The migration has been rehearsed. Next: reconcile source against "
-                        "target and generate the readiness report."
+                        "The migration has been rehearsed and reconciled against the target. "
+                        "Next: generate the readiness report."
                     )
-                    st.markdown("[Open dry run →](dry-run)")
+                    st.markdown("[Open readiness →](readiness)")
+                elif project["stage"] == "reported":
+                    st.write(
+                        "A readiness report exists. Send the customer its questions and record "
+                        "lists; rehearse again when the corrected export arrives."
+                    )
+                    st.markdown("[Open readiness →](readiness)")
                 else:
                     st.write("Continue with the current stage.")
                 if project["stage"] in ("created", "profiled"):

@@ -195,6 +195,29 @@ def _entity_table(run: dict) -> None:
         )
     elif is_dry:
         st.caption(f"staging namespace `{run['namespace']}` was purged when the run finished.")
+    if is_dry:
+        _reconciliation_line(run)
+
+
+def _reconciliation_line(run: dict) -> None:
+    ok, rec = api_json(
+        "GET", f"/api/v1/projects/{run['project_id']}/migrations/{run['id']}/reconciliation"
+    )
+    if not ok:
+        return
+    passed = sum(1 for c in rec["checks"] if c["ok"])
+    balanced = rec["status"] == "balanced"
+    text = (
+        "every source row accounted for, the target holds exactly the accepted records"
+        if balanced
+        else f"{n(len(rec['discrepancies']))} discrepancies"
+    )
+    st.markdown(
+        chip(f"reconciliation {rec['status']}", "MATCHED" if balanced else "error")
+        + f' <span class="kv">{n(passed)} of {n(len(rec["checks"]))} checks · {esc(text)} · '
+        '<a href="readiness" target="_self">open readiness</a></span>',
+        unsafe_allow_html=True,
+    )
 
 
 def _issues_section(project_id: str, run: dict) -> None:
