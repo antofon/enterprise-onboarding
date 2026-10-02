@@ -1,0 +1,22 @@
+# the build context is only what the image needs. secrets, git history, local environments and
+# caches stay out, so the image can be pushed to a registry without carrying a key or a
+# developer's machine. runtime configuration arrives as environment (compose env_file), never
+# baked into a layer.
+.env*
+.git
+.githooks
+.github
+.venv
+**/__pycache__
+**/*.py[cod]
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.coverage
+htmlcov
+generated
+docs/private
+tests
+.vscode
+.idea
+.DS_Store
