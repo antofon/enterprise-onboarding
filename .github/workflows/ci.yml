@@ -1,0 +1,47 @@
+# every push to main and every pull request: lint, format, types, then the whole test suite
+# against a real postgres. no model key anywhere: the tests use a fake provider, and manual mode
+# is a supported way to run the tool.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: onboarding
+          POSTGRES_PASSWORD: onboarding
+          POSTGRES_DB: onboarding_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U onboarding -d onboarding_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://onboarding:onboarding@localhost:5433/onboarding_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: lint
+        run: uv run ruff check .
+      - name: format
+        run: uv run ruff format --check .
+      - name: types
+        run: uv run mypy
+      - name: tests
+        run: uv run pytest -o addopts="" -q --cov=app --cov-report=term:skip-covered

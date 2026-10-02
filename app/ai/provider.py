@@ -15,14 +15,18 @@ import time
 from collections.abc import Iterator
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Annotated, Any, Protocol, TypeVar
+from typing import TYPE_CHECKING, Annotated, Any, Protocol, TypeVar
 
 from fastapi import Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from app.core.config import Settings, get_settings
 from app.core.errors import AppError
 from app.core.logging import get_logger
+
+if TYPE_CHECKING:
+    # both sdks ship on httpx2, their own fork of httpx; a test hands them a mock transport
+    import httpx2
 
 log = get_logger(__name__)
 
@@ -74,14 +78,35 @@ class NullProvider:
         )
 
 
+def _unreadable(provider: str, exc: ValidationError) -> LlmError:
+    """the sdk tried to read the answer into the schema and could not: usually an answer cut off
+    mid-json, sometimes a malformed one. a 502 the caller can retry, not a crash."""
+    problems = exc.errors()
+    return LlmError(
+        "the model's answer could not be read as the requested structure (often an answer cut "
+        "off before it finished)",
+        details={"provider": provider, "problem": problems[0]["msg"][:200] if problems else ""},
+    )
+
+
 class AnthropicProvider:
     name = "anthropic"
 
-    def __init__(self, api_key: str, model: str, timeout: float) -> None:
+    def __init__(
+        self,
+        api_key: str,
+        model: str,
+        timeout: float,
+        *,
+        http_client: httpx2.Client | None = None,
+        max_retries: int = 2,
+    ) -> None:
         import anthropic
 
         self.model = model
-        self._client = anthropic.Anthropic(api_key=api_key, timeout=timeout, max_retries=2)
+        self._client = anthropic.Anthropic(
+            api_key=api_key, timeout=timeout, max_retries=max_retries, http_client=http_client
+        )
 
     def complete(
         self, *, system: str, user: str, output: type[T], max_tokens: int
@@ -115,6 +140,8 @@ class AnthropicProvider:
                 f"anthropic unreachable: {exc.__class__.__name__}",
                 details={"provider": self.name},
             ) from exc
+        except ValidationError as exc:
+            raise _unreadable(self.name, exc) from exc
         latency_ms = round((time.perf_counter() - started) * 1000, 1)
 
         if response.stop_reason == "refusal":
@@ -148,11 +175,21 @@ class AnthropicProvider:
 class OpenAIProvider:
     name = "openai"
 
-    def __init__(self, api_key: str, model: str, timeout: float) -> None:
+    def __init__(
+        self,
+        api_key: str,
+        model: str,
+        timeout: float,
+        *,
+        http_client: httpx2.Client | None = None,
+        max_retries: int = 2,
+    ) -> None:
         import openai
 
         self.model = model
-        self._client = openai.OpenAI(api_key=api_key, timeout=timeout, max_retries=2)
+        self._client = openai.OpenAI(
+            api_key=api_key, timeout=timeout, max_retries=max_retries, http_client=http_client
+        )
 
     def complete(
         self, *, system: str, user: str, output: type[T], max_tokens: int
@@ -183,6 +220,8 @@ class OpenAIProvider:
             raise LlmError(
                 f"openai unreachable: {exc.__class__.__name__}", details={"provider": self.name}
             ) from exc
+        except ValidationError as exc:
+            raise _unreadable(self.name, exc) from exc
         latency_ms = round((time.perf_counter() - started) * 1000, 1)
 
         if getattr(response, "status", None) == "incomplete":

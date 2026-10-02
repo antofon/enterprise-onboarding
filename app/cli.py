@@ -2,12 +2,22 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+from contextlib import AbstractContextManager, contextmanager
+from typing import TYPE_CHECKING
+
 import typer
 
 from app import __version__
 from app.core.config import get_settings
 from app.core.db import check_db
 from app.core.logging import configure_logging
+
+if TYPE_CHECKING:
+    import httpx
+    from sqlalchemy.orm import Session
+
+    from app.models.project import OnboardingProject
 
 app = typer.Typer(
     help="enterprise-onboarding: profile, map, dry-run and report from the terminal.",
@@ -21,10 +31,23 @@ def main() -> None:
     """enterprise-onboarding command line."""
 
 
+def _logging() -> None:
+    """log lines go to stderr; stdout is the command's answer, which may be piped to a file."""
+    configure_logging(force=True, to="stderr")
+
+
+def _http_client(timeout: float) -> AbstractContextManager[httpx.Client]:
+    """the http client the runs use to reach the target and the billing feed. one function, so
+    the tests can hand the commands the app in process instead of a network."""
+    import httpx
+
+    return httpx.Client(timeout=timeout)
+
+
 @app.command()
 def check() -> None:
     """show the resolved config and whether postgres answers."""
-    configure_logging()
+    _logging()
     settings = get_settings()
     db_ok = check_db()
     typer.echo(f"version        {__version__}")
@@ -46,7 +69,7 @@ def check() -> None:
 def migrate() -> None:
     """bring the database schema to the newest revision. the api does this at startup; in a
     production deployment this is the release step that runs before the new version starts."""
-    configure_logging()
+    _logging()
     from app.core.db import get_engine
     from app.core.migrations import head_revision, upgrade
 
@@ -169,7 +192,7 @@ def suggest(
     from app.services.sources import read_document
     from app.target.catalog import target_field_catalog
 
-    configure_logging()
+    _logging()
     provider = _require_provider()
     if kind is None:
         kind = location.rsplit(".", 1)[-1].lower()
@@ -226,7 +249,7 @@ def eval_mapping(
 
     from app.services.evaluation import run_mapping_eval
 
-    configure_logging()
+    _logging()
     provider = _require_provider()
     report = run_mapping_eval(
         provider, golden_path=Path(golden), out_dir=Path(out) if out else None
@@ -271,25 +294,31 @@ def eval_mapping(
 # --- transformation and migration ---------------------------------------------------------------
 
 
-def _open_project(project_ref: str):
-    """a project by id, or the newest one with `latest`. needs the database."""
+@contextmanager
+def _project(project_ref: str) -> Iterator[tuple[Session, OnboardingProject]]:
+    """a session and a project by id, or the newest one with `latest`. the session is closed on
+    the way out, error or not: one left open holds its locks until the process exits."""
     import uuid
 
     from app.core.db import get_session_factory
     from app.services.projects import get_project, list_projects
 
     session = get_session_factory()()
-    if project_ref == "latest":
-        projects = list_projects(session)
-        if not projects:
-            typer.echo("no projects yet; create one in the workbench or with the api", err=True)
-            raise typer.Exit(code=1)
-        return session, projects[0]
     try:
-        project_id = uuid.UUID(project_ref)
-    except ValueError as exc:
-        raise typer.BadParameter("PROJECT is a uuid, or `latest`") from exc
-    return session, get_project(session, project_id)
+        if project_ref == "latest":
+            projects = list_projects(session)
+            if not projects:
+                typer.echo("no projects yet; create one in the workbench or with the api", err=True)
+                raise typer.Exit(code=1)
+            yield session, projects[0]
+            return
+        try:
+            project_id = uuid.UUID(project_ref)
+        except ValueError as exc:
+            raise typer.BadParameter("PROJECT is a uuid, or `latest`") from exc
+        yield session, get_project(session, project_id)
+    finally:
+        session.close()
 
 
 def _print_run(run) -> None:
@@ -331,25 +360,24 @@ def transformation_plan(
     """what the approved mappings will do to every column, before any row runs."""
     from app.services.transform import build_plan
 
-    configure_logging()
-    session, found = _open_project(project)
-    plan = build_plan(session, found)
-    typer.echo(
-        f"{plan.customer}, configuration {plan.config_version}, dates measured from "
-        f"{plan.as_of}; entities {', '.join(plan.entities)}"
-    )
-    typer.echo(f"record rules: {', '.join(plan.record_rules + plan.cross_dataset_rules)}")
-    for dataset in plan.datasets:
-        typer.echo("")
-        typer.echo(f"{dataset.dataset}  emits {', '.join(dataset.emits) or 'nothing'}")
-        for rule in dataset.field_rules:
-            chain = " > ".join(rule.converters)
-            typer.echo(f"  {rule.source_field:<24} -> {', '.join(rule.emits):<40} {chain}")
-        for rule in dataset.context_rules:
-            typer.echo(f"  {rule.source_field:<24} -> {rule.target_path:<40} (context only)")
-        for dropped in dataset.dropped:
-            typer.echo(f"  {dropped.source_field:<24}    not migrated: {dropped.why}")
-    session.close()
+    _logging()
+    with _project(project) as (session, found):
+        plan = build_plan(session, found)
+        typer.echo(
+            f"{plan.customer}, configuration {plan.config_version}, dates measured from "
+            f"{plan.as_of}; entities {', '.join(plan.entities)}"
+        )
+        typer.echo(f"record rules: {', '.join(plan.record_rules + plan.cross_dataset_rules)}")
+        for dataset in plan.datasets:
+            typer.echo("")
+            typer.echo(f"{dataset.dataset}  emits {', '.join(dataset.emits) or 'nothing'}")
+            for rule in dataset.field_rules:
+                chain = " > ".join(rule.converters)
+                typer.echo(f"  {rule.source_field:<24} -> {', '.join(rule.emits):<40} {chain}")
+            for rule in dataset.context_rules:
+                typer.echo(f"  {rule.source_field:<24} -> {rule.target_path:<40} (context only)")
+            for dropped in dataset.dropped:
+                typer.echo(f"  {dropped.source_field:<24}    not migrated: {dropped.why}")
 
 
 @app.command()
@@ -358,18 +386,15 @@ def validate(
     limit: int | None = typer.Option(None, help="records per entity, for a quick look"),
 ) -> None:
     """transform and check every record, write nothing. prints what validation found."""
-    import httpx
-
     from app.services.migration import RunOptions, run_validation
 
-    configure_logging()
-    session, found = _open_project(project)
-    with httpx.Client(timeout=30) as http:
-        run = run_validation(
-            session, found, http_client=http, options=RunOptions(limit_per_entity=limit)
-        )
-    _print_run(run)
-    session.close()
+    _logging()
+    with _project(project) as (session, found):
+        with _http_client(30) as http:
+            run = run_validation(
+                session, found, http_client=http, options=RunOptions(limit_per_entity=limit)
+            )
+        _print_run(run)
 
 
 @app.command("dry-run")
@@ -380,25 +405,24 @@ def dry_run(
     stop_after: int | None = typer.Option(None, help="give up on an entity after N refusals"),
 ) -> None:
     """rehearse the migration: every valid record through the target api, in its own namespace."""
-    import httpx
-
     from app.services.migration import RunOptions, run_dry_run
 
-    configure_logging()
+    _logging()
     settings = get_settings()
-    session, found = _open_project(project)
-    typer.echo(f"target {settings.target_api_base_url}")
-    with httpx.Client(timeout=settings.target_request_timeout_seconds) as http:
-        run = run_dry_run(
-            session,
-            found,
-            http_client=http,
-            options=RunOptions(
-                limit_per_entity=limit, purge_namespace_after=purge, stop_after_failures=stop_after
-            ),
-        )
-    _print_run(run)
-    session.close()
+    with _project(project) as (session, found):
+        typer.echo(f"target {settings.target_api_base_url}")
+        with _http_client(settings.target_request_timeout_seconds) as http:
+            run = run_dry_run(
+                session,
+                found,
+                http_client=http,
+                options=RunOptions(
+                    limit_per_entity=limit,
+                    purge_namespace_after=purge,
+                    stop_after_failures=stop_after,
+                ),
+            )
+        _print_run(run)
 
 
 def _print_reconciliation(result) -> None:
@@ -446,42 +470,44 @@ def reconcile(
     """source against target for a dry run: every count accounted for, every id compared."""
     import uuid
 
-    import httpx
-
     from app.models.migration import RunKind
+    from app.models.report import ReconciliationResult
     from app.services import migration as migration_service
     from app.services import reconciliation as reconciliation_service
 
-    configure_logging()
+    _logging()
     settings = get_settings()
-    session, found = _open_project(project)
-    if run:
-        chosen = migration_service.get_run(session, found, uuid.UUID(run))
-    else:
-        chosen = migration_service.latest_run(session, found, kind=RunKind.dry_run)
+    with _project(project) as (session, found):
+        chosen = (
+            migration_service.get_run(session, found, uuid.UUID(run))
+            if run
+            else migration_service.latest_run(session, found, kind=RunKind.dry_run)
+        )
         if chosen is None:
             typer.echo("no dry run on this project yet; run `dry-run` first", err=True)
             raise typer.Exit(code=1)
-    if recheck:
-        assert chosen.namespace is not None
-        with httpx.Client(timeout=settings.target_request_timeout_seconds) as http:
-            target = migration_service.TargetClient(
-                http,
-                settings=settings,
-                namespace=chosen.namespace,
-                request_prefix=f"recheck-{str(chosen.id)[:8]}",
-            )
-            result = reconciliation_service.recheck(session, chosen, target=target)
-    else:
-        result = reconciliation_service.latest_for_run(session, chosen)
-        if result is None:
-            typer.echo(
-                "this run has no reconciliation; it predates reconciliation or is not a dry run",
-                err=True,
-            )
-            raise typer.Exit(code=1)
-    _print_reconciliation(result)
-    session.close()
+        if recheck:
+            assert chosen.namespace is not None
+            with _http_client(settings.target_request_timeout_seconds) as http:
+                target = migration_service.TargetClient(
+                    http,
+                    settings=settings,
+                    namespace=chosen.namespace,
+                    request_prefix=f"recheck-{str(chosen.id)[:8]}",
+                )
+                result: ReconciliationResult | None = reconciliation_service.recheck(
+                    session, chosen, target=target
+                )
+        else:
+            result = reconciliation_service.latest_for_run(session, chosen)
+            if result is None:
+                typer.echo(
+                    "this run has no reconciliation; it predates reconciliation or is not a "
+                    "dry run",
+                    err=True,
+                )
+                raise typer.Exit(code=1)
+        _print_reconciliation(result)
 
 
 @app.command("readiness-report")
@@ -502,25 +528,24 @@ def readiness_report(
 
     if fmt not in ("markdown", "json"):
         raise typer.BadParameter("--format is markdown or json")
-    configure_logging()
-    session, found = _open_project(project)
-    report = generate_report(
-        session, found, provider=build_provider(), use_model=model, generated_by="cli"
-    )
-    text = (
-        report.markdown
-        if fmt == "markdown"
-        else json.dumps(report.content, indent=2, ensure_ascii=False, default=str)
-    )
-    if out:
-        Path(out).write_text(text + "\n", encoding="utf-8")
-        typer.echo(
-            f"{report.status.value}: report {report.id} written to {out} "
-            f"(summary: {report.summary_origin})"
+    _logging()
+    with _project(project) as (session, found):
+        report = generate_report(
+            session, found, provider=build_provider(), use_model=model, generated_by="cli"
         )
-    else:
-        typer.echo(text)
-    session.close()
+        text = (
+            report.markdown
+            if fmt == "markdown"
+            else json.dumps(report.content, indent=2, ensure_ascii=False, default=str)
+        )
+        if out:
+            Path(out).write_text(text + "\n", encoding="utf-8")
+            typer.echo(
+                f"{report.status.value}: report {report.id} written to {out} "
+                f"(summary: {report.summary_origin})"
+            )
+        else:
+            typer.echo(text)
 
 
 if __name__ == "__main__":

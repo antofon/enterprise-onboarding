@@ -22,7 +22,32 @@ from app.core.config import get_settings
 _configured = False
 
 
-def configure_logging(force: bool = False, *, stream: TextIO | None = None) -> None:
+class _StandardStream(logging.StreamHandler):
+    """writes to whatever sys.stdout or sys.stderr is when the line is logged, not what it was
+    when logging was configured, so a swapped stream (a test runner's capture) is never written
+    to after it has been closed."""
+
+    def __init__(self, name: str) -> None:
+        self._stream_name = name
+        super().__init__()
+
+    @property
+    def stream(self) -> TextIO:
+        return getattr(sys, self._stream_name)
+
+    @stream.setter
+    def stream(self, _: TextIO) -> None:
+        pass
+
+
+def configure_logging(
+    force: bool = False,
+    *,
+    stream: TextIO | None = None,
+    to: str = "stdout",
+) -> None:
+    """`to` is stdout for the api (one stream per container, the docker convention) and stderr
+    for the cli, whose stdout is data: a json report piped to a file must not carry log lines."""
     global _configured
     if _configured and not force:
         return
@@ -56,7 +81,9 @@ def configure_logging(force: bool = False, *, stream: TextIO | None = None) -> N
         foreign_pre_chain=shared_processors,
         processors=[structlog.stdlib.ProcessorFormatter.remove_processors_meta, *renderers],
     )
-    handler = logging.StreamHandler(stream or sys.stdout)
+    handler: logging.Handler = (
+        logging.StreamHandler(stream) if stream is not None else _StandardStream(to)
+    )
     handler.setFormatter(formatter)
 
     root = logging.getLogger()
