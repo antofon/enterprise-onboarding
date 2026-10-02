@@ -1,18 +1,23 @@
 """one error shape for the whole api:
 
-{"error": {"type": "not_found", "message": "...", "details": {...}}}
+{"error": {"type": "not_found", "message": "...", "details": {...}, "request_id": "..."}}
+
+the request id is the one on every log line of the request and in the x-request-id header, so
+whoever sees the error can hand over the one string that finds the logs.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
+import structlog
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import DBAPIError, OperationalError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.core.logging import get_logger
+from app.core.logging import error_type_of, get_logger
 
 log = get_logger(__name__)
 
@@ -38,16 +43,59 @@ class AppError(Exception):
         self.details = details or {}
 
     def to_response(self) -> JSONResponse:
-        return JSONResponse(
-            status_code=self.status_code,
-            content={
-                "error": {
-                    "type": self.error_type,
-                    "message": self.message,
-                    "details": self.details,
-                }
-            },
+        return error_response(self.status_code, self.error_type, self.message, self.details)
+
+
+def current_request_id() -> str | None:
+    value = structlog.contextvars.get_contextvars().get("request_id")
+    return None if value is None else str(value)
+
+
+def error_response(
+    status_code: int,
+    error_type: str,
+    message: str,
+    details: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "error": {
+                "type": error_type,
+                "message": message,
+                "details": details or {},
+                "request_id": current_request_id(),
+            }
+        },
+        headers=headers,
+    )
+
+
+def unhandled_error_response(exc: Exception) -> JSONResponse:
+    """the answer for an exception nothing else handled. the database being down is a 503 the
+    caller can wait out; anything else is a 500 that names no internals, only the request id,
+    and leaves the traceback in the log where the id finds it."""
+    if isinstance(exc, OperationalError) or (
+        isinstance(exc, DBAPIError) and exc.connection_invalidated
+    ):
+        log.error("database_unavailable", error_type=error_type_of(exc), error=str(exc)[:300])
+        return error_response(
+            503,
+            "database_unavailable",
+            "the database is not reachable; nothing was changed by this request",
         )
+    log.error(
+        "unhandled_error",
+        error_type=error_type_of(exc),
+        error=str(exc)[:300],
+        exc_info=not getattr(exc, "_stage_logged", False),
+    )
+    return error_response(
+        500,
+        "internal_error",
+        "the server hit an unexpected error; quote the request id when reporting it",
+    )
 
 
 class NotFoundError(AppError):
@@ -90,10 +138,8 @@ def install_error_handlers(app: FastAPI) -> None:
         """fastapi's own 404/405/etc, rewrapped so every error has the same shape."""
         names = {404: "not_found", 405: "method_not_allowed"}
         error_type = names.get(exc.status_code, "http_error")
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={"error": {"type": error_type, "message": str(exc.detail), "details": {}}},
-            headers=getattr(exc, "headers", None),
+        return error_response(
+            exc.status_code, error_type, str(exc.detail), headers=getattr(exc, "headers", None)
         )
 
     @app.exception_handler(RequestValidationError)
@@ -103,13 +149,9 @@ def install_error_handlers(app: FastAPI) -> None:
             {"loc": list(e.get("loc", ())), "msg": e.get("msg"), "type": e.get("type")}
             for e in exc.errors()
         ]
-        return JSONResponse(
-            status_code=422,
-            content={
-                "error": {
-                    "type": "validation_error",
-                    "message": "request did not match the expected shape",
-                    "details": {"errors": errors},
-                }
-            },
+        return error_response(
+            422,
+            "validation_error",
+            "request did not match the expected shape",
+            {"errors": errors},
         )

@@ -21,7 +21,7 @@ import pandas as pd
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings, get_settings
-from app.core.logging import get_logger
+from app.core.logging import get_logger, stage
 from app.models.project import OnboardingProject
 from app.models.target import ID_COLUMN
 from app.services.profiling.loaders import load_source
@@ -138,6 +138,27 @@ def transform_project(
     settings: Settings | None = None,
     http_client: httpx.Client | None = None,
     plan: TransformationPlan | None = None,
+) -> TransformResult:
+    with stage("transform", project_id=str(project.id)) as report:
+        result = _transform_project(
+            session, project, config=config, settings=settings, http_client=http_client, plan=plan
+        )
+        report.record_count = sum(len(drafts) for drafts in result.records.values())
+        report.note(
+            source_rows=sum(d.source_rows for d in result.datasets),
+            config_version=result.plan.config_version,
+        )
+        return result
+
+
+def _transform_project(
+    session: Session,
+    project: OnboardingProject,
+    *,
+    config: TransformationConfig | None,
+    settings: Settings | None,
+    http_client: httpx.Client | None,
+    plan: TransformationPlan | None,
 ) -> TransformResult:
     settings = settings or get_settings()
     config = config or get_config()

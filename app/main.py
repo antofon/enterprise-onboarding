@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import time
 import uuid
 from collections.abc import AsyncIterator
@@ -12,10 +13,14 @@ from app import __version__
 from app.api.router import api_router
 from app.core.config import get_settings
 from app.core.db import init_db
-from app.core.errors import install_error_handlers
+from app.core.errors import install_error_handlers, unhandled_error_response
 from app.core.logging import configure_logging, get_logger
 
 log = get_logger(__name__)
+
+# a caller may bring its own request id (the migration runner does, per record); anything that
+# does not look like one is replaced, so a header cannot write arbitrary text into the logs
+_REQUEST_ID = re.compile(r"[A-Za-z0-9._:-]{1,100}")
 
 DESCRIPTION = """
 Internal implementation tool for onboarding a new enterprise customer's data into the platform.
@@ -54,15 +59,21 @@ def create_app() -> FastAPI:
 
     @app.middleware("http")
     async def request_context(request: Request, call_next) -> Response:  # type: ignore[no-untyped-def]
-        request_id = request.headers.get("x-request-id") or uuid.uuid4().hex[:12]
+        offered = request.headers.get("x-request-id") or ""
+        request_id = offered if _REQUEST_ID.fullmatch(offered) else uuid.uuid4().hex[:12]
         structlog.contextvars.clear_contextvars()
         structlog.contextvars.bind_contextvars(
             request_id=request_id, method=request.method, path=request.url.path
         )
         started = time.perf_counter()
-        response = await call_next(request)
+        try:
+            response = await call_next(request)
+        except Exception as exc:  # noqa: BLE001 - turned into the error envelope, logged there
+            # anything the routers' handlers did not answer ends here rather than in
+            # starlette's plain-text 500, so it keeps the envelope, the header and the log line
+            response = unhandled_error_response(exc)
         response.headers["x-request-id"] = request_id
-        if request.url.path != "/health":
+        if request.url.path != "/health" or response.status_code != 200:
             log.info(
                 "request",
                 status_code=response.status_code,

@@ -16,7 +16,6 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-import structlog
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -30,7 +29,7 @@ from app.ai.provider import LlmError, LlmProvider, StructuredResult
 from app.ai.schemas import MappingProposal, SuggestedMapping
 from app.core.config import Settings, get_settings
 from app.core.errors import AppError, InvalidStateError, NotFoundError
-from app.core.logging import get_logger
+from app.core.logging import get_logger, stage
 from app.models.mapping import (
     ClarificationQuestion,
     FieldMapping,
@@ -418,6 +417,27 @@ def suggest_mappings(
     body: SuggestRequest,
     settings: Settings | None = None,
 ) -> SuggestRunRead:
+    with stage("mapping", project_id=str(project.id), provider=provider.name) as report:
+        result = _suggest_mappings(
+            session, project, provider=provider, body=body, settings=settings
+        )
+        report.record_count = sum(d.written for d in result.datasets)
+        report.note(
+            datasets=len(result.datasets),
+            cached=sum(1 for d in result.datasets if d.cached),
+            questions=sum(d.questions for d in result.datasets),
+        )
+        return result
+
+
+def _suggest_mappings(
+    session: Session,
+    project: OnboardingProject,
+    *,
+    provider: LlmProvider,
+    body: SuggestRequest,
+    settings: Settings | None,
+) -> SuggestRunRead:
     settings = settings or get_settings()
     started = time.perf_counter()
     profiles = stored_profiles(session, project)
@@ -432,7 +452,6 @@ def suggest_mappings(
     if unknown:
         raise NotFoundError("no profiled dataset with that name", details={"datasets": unknown})
 
-    structlog.contextvars.bind_contextvars(project_id=str(project.id), stage="mapping")
     report = compare(profiles)  # every dataset together, so entity coverage is whole-project
     by_dataset = field_comparison_dict(report)
     catalog = target_field_catalog()

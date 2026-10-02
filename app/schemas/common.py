@@ -9,6 +9,8 @@ class ErrorBody(BaseModel):
     type: str
     message: str
     details: dict[str, Any] = {}
+    # the id on every log line of the request, and in the x-request-id header
+    request_id: str | None = None
 
 
 class ErrorEnvelope(BaseModel):

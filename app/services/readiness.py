@@ -31,7 +31,6 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-import structlog
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -40,7 +39,7 @@ from app.ai.report_prompt import REPORT_PROMPT_VERSION, build_summary_prompt
 from app.ai.schemas import ReadinessSummary
 from app.core.config import Settings, get_settings
 from app.core.errors import AppError, NotFoundError
-from app.core.logging import get_logger
+from app.core.logging import get_logger, stage
 from app.models.mapping import ClarificationQuestion, LlmCall, QuestionStatus
 from app.models.migration import MigrationRun, RunKind, RunStatus, ValidationIssueRow
 from app.models.project import OnboardingProject, ProjectStage
@@ -1303,9 +1302,30 @@ def generate_report(
     generated_by: str | None = None,
     settings: Settings | None = None,
 ) -> ReadinessReport:
+    with stage("readiness", project_id=str(project.id)) as log_report:
+        report = _generate_report(
+            session,
+            project,
+            provider=provider,
+            use_model=use_model,
+            generated_by=generated_by,
+            settings=settings,
+        )
+        log_report.note(status=report.status.value, summary_origin=report.summary_origin)
+        return report
+
+
+def _generate_report(
+    session: Session,
+    project: OnboardingProject,
+    *,
+    provider: LlmProvider,
+    use_model: bool,
+    generated_by: str | None,
+    settings: Settings | None,
+) -> ReadinessReport:
     settings = settings or get_settings()
     started = time.perf_counter()
-    structlog.contextvars.bind_contextvars(project_id=str(project.id), stage="readiness")
     content = build_content(session, project, settings)
     outcome = draft_summary(
         session, project, content, provider=provider, use_model=use_model, settings=settings

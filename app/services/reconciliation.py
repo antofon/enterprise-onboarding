@@ -32,7 +32,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.errors import InvalidStateError, NotFoundError
-from app.core.logging import get_logger
+from app.core.logging import get_logger, stage
 from app.models.migration import MigrationRun, RunKind, RunStatus
 from app.models.project import OnboardingProject
 from app.models.report import ReconciliationResult, ReconciliationStatus
@@ -328,16 +328,22 @@ def reconcile_run(
     trigger: str = TRIGGER_RUN,
 ) -> ReconciliationResult:
     """called by the dry run as it finishes, with what it knows and what the target holds."""
-    comparison = compare(ledgers, target_ids)
-    counts = {entity: len(ids) for entity, ids in target_ids.items()}
-    return _store(
-        session,
-        run,
-        trigger=trigger,
-        comparison=comparison,
-        ledgers=ledgers,
-        target_counts=counts,
-    )
+    with stage("reconcile", migration_run_id=str(run.id), trigger=trigger) as report:
+        comparison = compare(ledgers, target_ids)
+        counts = {entity: len(ids) for entity, ids in target_ids.items()}
+        report.record_count = sum(counts.values())
+        report.note(
+            status=comparison.status.value,
+            failed_checks=sum(1 for c in comparison.checks if not c["ok"]),
+        )
+        return _store(
+            session,
+            run,
+            trigger=trigger,
+            comparison=comparison,
+            ledgers=ledgers,
+            target_counts=counts,
+        )
 
 
 def latest_for_run(session: Session, run: MigrationRun) -> ReconciliationResult | None:

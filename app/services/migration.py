@@ -31,13 +31,12 @@ from datetime import UTC, datetime
 from typing import Any
 
 import httpx
-import structlog
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings, get_settings
 from app.core.errors import NotFoundError
-from app.core.logging import get_logger
+from app.core.logging import get_logger, stage
 from app.models.migration import (
     FailureStage,
     MigrationFailure,
@@ -504,35 +503,35 @@ def run_validation(
     run = _start_run(
         session, project, RunKind.validation, config=config, options=options, namespace=None
     )
-    structlog.contextvars.bind_contextvars(
-        migration_run_id=str(run.id), project_id=str(project.id), stage="validation"
-    )
-    try:
-        result = transform_project(
-            session, project, config=config, settings=settings, http_client=http_client
+    with stage("validation", project_id=str(project.id), migration_run_id=str(run.id)) as report:
+        try:
+            result = transform_project(
+                session, project, config=config, settings=settings, http_client=http_client
+            )
+            outcome = validate(result, config=config)
+        except Exception as exc:
+            _finish(
+                session,
+                run,
+                status=RunStatus.failed,
+                started=started,
+                error=f"{exc.__class__.__name__}: {exc}"[:1000],
+            )
+            raise
+        run.plan = result.plan.as_dict()
+        run.stats = _entity_stats(outcome, {}, _source_rows_by_entity(result))
+        run.totals = _totals(run.stats)
+        run.issue_counts = outcome.issue_counts()
+        run.applied_rules = _rule_counts(result)
+        run.normalizations = _normalization_counts(result)
+        run.issues_truncated = _store_issues(
+            session, run, outcome.issues, settings.validation_issue_limit
         )
-        outcome = validate(result, config=config)
-    except Exception as exc:
-        _finish(
-            session,
-            run,
-            status=RunStatus.failed,
-            started=started,
-            error=f"{exc.__class__.__name__}: {exc}"[:1000],
-        )
-        raise
-    run.plan = result.plan.as_dict()
-    run.stats = _entity_stats(outcome, {}, _source_rows_by_entity(result))
-    run.totals = _totals(run.stats)
-    run.issue_counts = outcome.issue_counts()
-    run.applied_rules = _rule_counts(result)
-    run.normalizations = _normalization_counts(result)
-    run.issues_truncated = _store_issues(
-        session, run, outcome.issues, settings.validation_issue_limit
-    )
-    if project.stage in (ProjectStage.ready_to_transform, ProjectStage.validated):
-        project.stage = ProjectStage.validated
-    return _finish(session, run, status=RunStatus.completed, started=started)
+        if project.stage in (ProjectStage.ready_to_transform, ProjectStage.validated):
+            project.stage = ProjectStage.validated
+        report.record_count = run.totals["built"]
+        report.note(valid=run.totals["valid"], invalid=run.totals["invalid"])
+        return _finish(session, run, status=RunStatus.completed, started=started)
 
 
 # --- the dry run --------------------------------------------------------------------------------
@@ -562,12 +561,45 @@ def run_dry_run(
     )
     namespace = run.namespace
     assert namespace is not None
-    structlog.contextvars.bind_contextvars(
-        migration_run_id=str(run.id),
+    with stage(
+        "dry_run",
         project_id=str(project.id),
-        stage="dry_run",
+        migration_run_id=str(run.id),
         namespace=str(namespace),
-    )
+    ) as report:
+        run = _rehearse(
+            session,
+            project,
+            run,
+            http_client=http_client,
+            settings=settings,
+            config=config,
+            options=options,
+            started=started,
+        )
+        report.record_count = run.totals["attempted"]
+        report.note(
+            accepted=run.totals["accepted"],
+            rejected=run.totals["rejected"],
+            failed=run.totals["failed"],
+            blocked=run.totals["blocked"],
+        )
+        return run
+
+
+def _rehearse(
+    session: Session,
+    project: OnboardingProject,
+    run: MigrationRun,
+    *,
+    http_client: httpx.Client,
+    settings: Settings,
+    config: TransformationConfig,
+    options: RunOptions,
+    started: float,
+) -> MigrationRun:
+    namespace = run.namespace
+    assert namespace is not None
     target = TargetClient(
         http_client,
         settings=settings,
@@ -650,84 +682,104 @@ def _write_records(
     for entity in entities:
         tally = EntityTally()
         tallies[entity] = tally
-        records: list[RecordDraft] = outcome.valid.get(entity, [])
-        if options.limit_per_entity is not None:
-            tally.not_attempted = max(0, len(records) - options.limit_per_entity)
-            records = records[: options.limit_per_entity]
-        for position, draft in enumerate(records):
-            record_id = draft.record_id or ""
-            parent = draft.payload.get("organization_id")
-            if entity != "organization" and parent is not None:
-                if str(parent) not in accepted_organizations:
-                    refusal = refused_organizations.get(str(parent))
-                    why = (
-                        f"the target refused it ({refusal})"
-                        if refusal
-                        else "this run did not write it"
-                    )
-                    tally.blocked += 1
-                    failures.append(
-                        _failure(
-                            draft,
-                            entity,
-                            stage=FailureStage.blocked,
-                            error_type="parent_not_in_target",
-                            message=f"organization {parent} is not in the target namespace: "
-                            f"{why}, so this {entity} was not attempted",
-                            attempts=0,
-                        )
-                    )
-                    continue
-            tally.attempted += 1
-            answer = target.write(entity, draft.payload, record_id)
-            tally.retries += max(0, answer.attempts - 1)
-            if answer.outcome == "accepted":
-                tally.accepted += 1
-                tally.accepted_ids.append(record_id)
-                if entity == "organization":
-                    accepted_organizations.add(record_id)
-                if answer.created:
-                    tally.created += 1
-                else:
-                    tally.unchanged += 1
-                continue
-            if entity == "organization":
-                refused_organizations[record_id] = answer.error_type or "refused"
-            tally.refused_ids.append(record_id)
-            tally.refusals[answer.error_type or "unknown"] += 1
-            if answer.outcome == "rejected":
-                tally.rejected += 1
-                stage = FailureStage.target
-            else:
-                tally.failed += 1
-                stage = FailureStage.target
-            failures.append(
-                _failure(
-                    draft,
-                    entity,
-                    stage=stage,
-                    error_type=answer.error_type or "unknown",
-                    message=answer.message or "the target refused the record",
-                    attempts=answer.attempts,
-                    http_status=answer.http_status,
-                    request_id=answer.request_id,
-                    body=answer.body,
-                )
+        with stage("write", entity=entity) as report:
+            _write_entity(
+                target,
+                entity,
+                outcome.valid.get(entity, []),
+                options,
+                tally=tally,
+                failures=failures,
+                accepted_organizations=accepted_organizations,
+                refused_organizations=refused_organizations,
             )
-            if (
-                options.stop_after_failures is not None
-                and tally.rejected + tally.failed >= options.stop_after_failures
-            ):
-                tally.not_attempted += len(records) - position - 1
-                log.warning(
-                    "dry_run_stopped_early",
-                    entity=entity,
-                    failures=tally.rejected + tally.failed,
-                    limit=options.stop_after_failures,
-                )
-                break
-        log.info("entity_written", entity=entity, **tally.as_dict())
+            report.record_count = tally.attempted
+            report.note(**{k: v for k, v in tally.as_dict().items() if k != "attempted"})
     return tallies, failures
+
+
+def _write_entity(
+    target: TargetClient,
+    entity: str,
+    records: list[RecordDraft],
+    options: RunOptions,
+    *,
+    tally: EntityTally,
+    failures: list[MigrationFailure],
+    accepted_organizations: set[str],
+    refused_organizations: dict[str, str],
+) -> None:
+    if options.limit_per_entity is not None:
+        tally.not_attempted = max(0, len(records) - options.limit_per_entity)
+        records = records[: options.limit_per_entity]
+    for position, draft in enumerate(records):
+        record_id = draft.record_id or ""
+        parent = draft.payload.get("organization_id")
+        if entity != "organization" and parent is not None:
+            if str(parent) not in accepted_organizations:
+                refusal = refused_organizations.get(str(parent))
+                why = (
+                    f"the target refused it ({refusal})" if refusal else "this run did not write it"
+                )
+                tally.blocked += 1
+                failures.append(
+                    _failure(
+                        draft,
+                        entity,
+                        stage=FailureStage.blocked,
+                        error_type="parent_not_in_target",
+                        message=f"organization {parent} is not in the target namespace: "
+                        f"{why}, so this {entity} was not attempted",
+                        attempts=0,
+                    )
+                )
+                continue
+        tally.attempted += 1
+        answer = target.write(entity, draft.payload, record_id)
+        tally.retries += max(0, answer.attempts - 1)
+        if answer.outcome == "accepted":
+            tally.accepted += 1
+            tally.accepted_ids.append(record_id)
+            if entity == "organization":
+                accepted_organizations.add(record_id)
+            if answer.created:
+                tally.created += 1
+            else:
+                tally.unchanged += 1
+            continue
+        if entity == "organization":
+            refused_organizations[record_id] = answer.error_type or "refused"
+        tally.refused_ids.append(record_id)
+        tally.refusals[answer.error_type or "unknown"] += 1
+        if answer.outcome == "rejected":
+            tally.rejected += 1
+        else:
+            tally.failed += 1
+        failures.append(
+            _failure(
+                draft,
+                entity,
+                stage=FailureStage.target,
+                error_type=answer.error_type or "unknown",
+                message=answer.message or "the target refused the record",
+                attempts=answer.attempts,
+                http_status=answer.http_status,
+                request_id=answer.request_id,
+                body=answer.body,
+            )
+        )
+        if (
+            options.stop_after_failures is not None
+            and tally.rejected + tally.failed >= options.stop_after_failures
+        ):
+            tally.not_attempted += len(records) - position - 1
+            log.warning(
+                "dry_run_stopped_early",
+                entity=entity,
+                failures=tally.rejected + tally.failed,
+                limit=options.stop_after_failures,
+            )
+            break
 
 
 def _failure(

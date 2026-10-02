@@ -91,8 +91,12 @@ def api_json(method: str, path: str, **kwargs: Any) -> tuple[bool, Any]:
 
 
 def error_text(body: Any) -> str:
+    """the api's error in one line, with the request id that finds its log lines."""
     err = (body or {}).get("error", {}) if isinstance(body, dict) else {}
-    return f"{err.get('type', 'error')}: {err.get('message', 'request failed')}"
+    text = f"{err.get('type', 'error')}: {err.get('message', 'request failed')}"
+    if err.get("request_id"):
+        text += f" (request id {err['request_id']})"
+    return text
 
 
 @st.cache_data(ttl=5)

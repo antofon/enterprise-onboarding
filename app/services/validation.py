@@ -26,7 +26,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from app.core.logging import get_logger
+from app.core.logging import get_logger, stage
 from app.models.target import ID_COLUMN, WRITE_ORDER
 from app.services.profiling.types import Severity
 from app.services.transform.config import TransformationConfig
@@ -346,6 +346,21 @@ CUSTOMER_CHECKS = {"strategic_requires_enterprise": _check_strategic_plan}
 
 def validate(
     transformed: TransformResult, *, config: TransformationConfig | None = None
+) -> ValidationOutcome:
+    with stage("validate") as report:
+        outcome = _validate(transformed, config=config)
+        report.record_count = sum(c["built"] for c in outcome.counts.values())
+        report.note(
+            valid=sum(c["valid"] for c in outcome.counts.values()),
+            invalid=sum(c["invalid"] for c in outcome.counts.values()),
+            errors=outcome.error_count,
+            warnings=outcome.warning_count,
+        )
+        return outcome
+
+
+def _validate(
+    transformed: TransformResult, *, config: TransformationConfig | None
 ) -> ValidationOutcome:
     started = time.perf_counter()
     records = transformed.records

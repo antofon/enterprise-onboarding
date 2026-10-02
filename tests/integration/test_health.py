@@ -16,7 +16,14 @@ def test_health_reports_database_ok(client) -> None:
 def test_unknown_route_uses_error_envelope_shape(client) -> None:
     r = client.get("/api/v1/does-not-exist")
     assert r.status_code == 404
-    assert r.json() == {"error": {"type": "not_found", "message": "Not Found", "details": {}}}
+    assert r.json() == {
+        "error": {
+            "type": "not_found",
+            "message": "Not Found",
+            "details": {},
+            "request_id": r.headers["x-request-id"],
+        }
+    }
 
     r = client.post("/health")
     assert r.status_code == 405

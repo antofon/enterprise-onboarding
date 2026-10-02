@@ -8,13 +8,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import httpx
-import structlog
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.config import Settings, get_settings
 from app.core.errors import AppError, ConflictError, InvalidStateError, NotFoundError
-from app.core.logging import get_logger
+from app.core.logging import get_logger, stage
 from app.models.project import (
     DatasetKind,
     OnboardingProject,
@@ -173,13 +172,26 @@ def profile_project(
     settings: Settings | None = None,
 ) -> ProfileRunRead:
     """load and profile every attached source, then check keys across them. re-runnable."""
+    with stage("profile", project_id=str(project.id)) as report:
+        result = _profile_project(session, project, http_client=http_client, settings=settings)
+        report.record_count = sum(d.row_count for d in result.datasets)
+        report.note(datasets=len(result.datasets))
+        return result
+
+
+def _profile_project(
+    session: Session,
+    project: OnboardingProject,
+    *,
+    http_client: httpx.Client | None,
+    settings: Settings | None,
+) -> ProfileRunRead:
     settings = settings or get_settings()
     if not project.datasets:
         raise InvalidStateError(
             "attach at least one source before profiling", details={"project_id": str(project.id)}
         )
     started = time.perf_counter()
-    structlog.contextvars.bind_contextvars(project_id=str(project.id), stage="profile")
     frames = {}
     profiles: dict[str, DatasetProfile] = {}
     for dataset in project.datasets:
