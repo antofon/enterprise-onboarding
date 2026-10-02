@@ -378,3 +378,41 @@ def test_a_model_that_does_not_answer_never_holds_up_the_readiness_report(client
     report = response.json()
     assert report["summary_origin"] == "template"
     assert "unreachable" in report["content"]["summary"]["note"]
+
+
+# --- the customer's configuration ---------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("breakage", "named"),
+    [
+        (('ontario: "ON"', "ontario: ON"), "boolean"),
+        (("converters: [phone_e164]", "converters: [phone_e165]"), "phone_e165"),
+    ],
+)
+def test_a_broken_configuration_fails_before_any_row_is_read(
+    client, ready, monkeypatch, tmp_path, breakage, named
+) -> None:
+    """a yaml boolean where a province code was meant, a converter that does not exist: a 500
+    that names the problem, before a run is even recorded."""
+    from pathlib import Path
+
+    from app.services.transform.config import get_config
+
+    original = Path("sample_customer/transformation_config.yaml").read_text()
+    old, new = breakage
+    assert old in original
+    broken = tmp_path / "transformation_config.yaml"
+    broken.write_text(original.replace(old, new))
+    monkeypatch.setattr(get_settings(), "transformation_config", str(broken))
+    get_config.cache_clear()
+    try:
+        response = client.post(f"/api/v1/projects/{ready.id}/validate", json={})
+    finally:
+        get_config.cache_clear()
+    assert response.status_code == 500
+    error = response.json()["error"]
+    assert error["type"] == "transformation_config_invalid"
+    assert named in error["message"] + str(error["details"])
+    assert client.get(f"/api/v1/projects/{ready.id}/migrations").json() == []
+    assert stage_of(client, ready) == "ready_to_transform"

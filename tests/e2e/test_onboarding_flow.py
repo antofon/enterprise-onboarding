@@ -42,7 +42,12 @@ def test_a_customer_goes_from_four_source_files_to_a_readiness_report(client) ->
         assert project.json()["stage"] == "created"
 
         # 2. the sources: three files and one api
-        available = {s["name"]: s for s in client.get("/api/v1/sources/available").json()}
+        # the committed sample, by location: a generated customer has files with the same names
+        available = {
+            s["name"]: s
+            for s in client.get("/api/v1/sources/available").json()
+            if s["location"].startswith("sample_customer/")
+        }
         for name in ("organizations.csv", "contacts.csv", "activity.csv"):
             source = available[name]
             attached = client.post(

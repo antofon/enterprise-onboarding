@@ -30,7 +30,8 @@ def _attach(client, pid: str, name: str, kind: str, location: str):
 def test_available_sources_list_the_sample_and_the_billing_feed(client) -> None:
     r = client.get("/api/v1/sources/available")
     assert r.status_code == 200
-    by_name = {s["name"]: s for s in r.json()}
+    sources = r.json()
+    by_name = {s["name"]: s for s in sources if not s["location"].startswith("generated/")}
     assert by_name["organizations.csv"]["location"] == "sample_customer/data/organizations.csv"
     assert by_name["organizations.csv"]["kind"] == "csv"
     assert "manifest.json" not in by_name

@@ -52,7 +52,13 @@ def seed_project(
             source_systems=["Legacy CRM", "LegacyBill 4.2"],
         ),
     )
-    catalog = {d.name: d for d in source_service.available_sources()}
+    # the committed sample by its location: a generated customer under generated/ has files
+    # with the same names, and the tests are about the sample
+    catalog = {
+        d.name: d
+        for d in source_service.available_sources()
+        if d.kind.value == "api" or d.location.startswith("sample_customer/")
+    }
     for name in datasets:
         available = catalog[name]
         source_service.attach_source(
