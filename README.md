@@ -100,9 +100,9 @@ The result is not "import succeeded." It is evidence that lets an implementation
 
 Three ways in:
 
-- **Workbench UI** (Streamlit): create a project, attach sources, profile them, read the quality issues and the schema comparison, get a proposed target for every field, decide each one, answer the customer's questions, read the transformation plan, validate, and rehearse the migration against the target platform with every refusal explained. Talks to the API over HTTP only.
+- **Workbench UI** (Streamlit): create a project, attach sources, profile them, read the quality issues and the schema comparison, get a proposed target for every field, decide each one, answer the customer's questions, read the transformation plan, validate, rehearse the migration against the target platform with every refusal explained, reconcile source against target, and read the readiness report with its blockers, customer questions and next steps. Talks to the API over HTTP only.
 - **REST API** (FastAPI): every operation the UI performs, plus the simulated billing source and, in the same process, the simulated target platform.
-- **CLI** (Typer): `check`, `generate-data`, `profile [--compare]`, `suggest`, `eval-mapping` work on one file or feed without the API or the database; `transformation-plan`, `validate` and `dry-run` run the later stages on a project and print the same counts the workbench shows.
+- **CLI** (Typer): `check`, `generate-data`, `profile [--compare]`, `suggest`, `eval-mapping` work on one file or feed without the API or the database; `transformation-plan`, `validate`, `dry-run`, `reconcile` and `readiness-report` run the later stages on a project and print the same counts the workbench shows.
 
 ## The one rule: where AI is and is not allowed
 
@@ -118,7 +118,7 @@ The transformation engine never executes model-generated Python. A model suggest
 
 ## End-to-end workflow
 
-Profiling, schema comparison, AI-assisted mapping, human review and customer clarification are in the codebase today. The stages after them are specified here as designed and listed under [Current limitations](#current-limitations).
+Every stage below runs in the codebase, with or without a model key. What each one cannot do yet is listed under [Current limitations](#current-limitations).
 
 ### 1. Data ingestion and profiling
 
@@ -228,34 +228,36 @@ The mock platform enforces what a real one would (organization before children, 
 
 Measured on the committed sample: 7,163 records sent, 7,163 accepted, 0 refused, 0 blocked, in 55 seconds end to end, sequential, about 7 ms per write. The namespace afterwards holds exactly what the run says it accepted. Validation caught everything the target would have refused, which the target API's own tests check rather than assume.
 
-**Reconciliation.** Counts across every stage, computed by code:
+**Reconciliation.** Every dry run reconciles itself as it finishes, before any purge, and the result is stored. Two kinds of check, all arithmetic:
 
 ```text
-source records
-      |
-      v
-transformed records
-      |
-      v
-attempted records
-      |
-      +----> accepted by target
-      |
-      +----> rejected by target
-      |
-      v
-target records (GET /target/v1/counts)
+source rows ---------> records built            one record per row, per entity the dataset emits
+records built -------> skipped by a customer rule + excluded by validation + valid
+excluded ------------> sum of excluded records by their first error
+valid ---------------> sent + blocked behind a refused organization + not reached (a partial run)
+sent ----------------> accepted + refused + failed
+accepted ------------> records in the namespace, counted by the target
+accepted ids --------> ids in the namespace, read back page by page over GET /target/v1/{entity}
 ```
 
-An unexplained difference between any two stages is a finding, not a footnote. A successful HTTP status is not evidence that a migration is correct. The counts exist on every run already; the reconciliation stage that compares them and names the discrepancies is next.
+A record that did not migrate for a stated reason is not a discrepancy; it is the explained gap, and the readiness report turns it into work. A discrepancy is a number nobody can explain: a stage that does not account for the one before it, a record the run counted as accepted that the target does not hold, or a record the target holds that the run counted as failed. Each one is stored with sample identifiers. `POST .../migrations/{run_id}/reconcile` reads the target again later and compares it with what the run saw, which catches a namespace purged or written to after the rehearsal.
+
+Measured on the committed sample, full dry run: balanced, 28 of 28 checks. 9,259 source rows; 75 subscriptions set aside by rule 11; 9,184 records in scope; 2,021 excluded, each with its first error (organizations: 97 missing required values, 16 unmapped statuses, 15 duplicate account numbers, 13 blank ones); 7,163 sent, accepted and held by the target, identifier for identifier. 1,030 organization rows carry 999 distinct account numbers. Reconciling adds no measurable time to the 65-second run in the compose stack. With the `malformed` fault and one attempt, the write lands, the runner records it as failed, and reconciliation reports it as in the target but not accepted, with the identifiers.
+
+A successful HTTP status is not evidence that a migration is correct. A reconciled count is.
 
 ### 6. Reporting
 
-The readiness report answers one question: do we have enough evidence to proceed with production onboarding?
+The readiness report answers one question: do we have enough evidence to proceed with production onboarding? It is built in four layers, and only the last may involve a model.
 
-It contains the mapping summary (approved, edited, rejected, unresolved, awaiting the customer), the data quality summary (duplicates, missing required fields, malformed values by column), validation results (passed, failed, warnings, top failure reasons), the dry-run and reconciliation numbers, the blockers, the open customer questions, next steps, and technical risks. The state is one of `READY`, `READY WITH CONDITIONS`, or `BLOCKED`, decided by rules over those numbers. The model may draft the plain-English executive summary from the computed numbers; it does not compute or change them.
+- **Facts.** Everything already stored about the project, read back: the profile, the mapping decisions, the latest dry run, its latest reconciliation, every issue it found. Nothing is estimated.
+- **Gates.** Stated rules over the facts decide the status. Any blocker is `BLOCKED`, any condition is `READY WITH CONDITIONS`, otherwise `READY`. Blockers: undecided mappings or open customer questions, no full rehearsal, a rehearsal that no longer matches today's plan (mappings or configuration changed since), a reconciliation with discrepancies, any record the target refused or failed, or an entity where fewer than `READINESS_MIN_ENTITY_COVERAGE` (95%) of its in-scope records landed. Conditions: any record left behind above that floor, any record that migrates with a warning. Each gate states what it checked and the number it found, so a status can be argued with line by line.
+- **Work.** Issues grouped into what somebody has to do, counted in records: decisions only the customer can make (with the question to send them), data the customer has to correct, records that wait on another fix (children of a rejected account), warnings to sign off. Next steps and technical risks follow from the gates and the work by rule. Values are quoted only where they are vocabulary (`'Call'`, `'Trial'`, `'Actve'`); emails, phones, names and records are counted, never quoted.
+- **Summary.** The configured model drafts the executive summary and explains the five largest blockers in the customer's language, from the formatted facts only. The draft is checked: the headline states the status as decided, no other status word appears, every number in the text appears in the facts, every explanation names a real work item. Problems go back to the model verbatim; after the last attempt, or with no model, the summary is written from the facts by code and the report says so. Cached by input hash like the mapping calls.
 
-Exported as Markdown for people and JSON for automation.
+Measured on the committed sample: `BLOCKED`, with all four entities under the 95% floor (organizations 86.3%, contacts 74.7%, subscriptions 44.6%, activities 84.1%), 27 work items, 7 customer questions led by the 311 subscriptions in the dormancy conflict, and up to 839 records released once their accounts are fixed. claude-opus-5 drafted a summary that passed the check on the first attempt in 16 seconds (4,823 tokens in, 1,255 out); an earlier prompt that listed the codes only inside the json needed three attempts, which is what the check is for.
+
+Exported as Markdown for people (executive part, then a technical appendix with the gates, the profile, the mappings, validation, the dry run, the reconciliation and provenance) and JSON for automation. Every report is stored; `GET /reports/readiness` with nothing stored answers with a preview computed on the spot and marked as one.
 
 ## Architecture
 
@@ -270,10 +272,12 @@ Exported as Markdown for people and JSON for automation.
 - **Validation engine:** `app/services/validation.py`. The target's Pydantic contract, the platform's cross-record invariants, the customer's cross-checks. Errors block, warnings travel.
 - **Migration runner:** `app/services/migration.py`. One HTTP request per record against the target API into a per-run namespace, idempotent retries, children blocked when their organization did not land, every refusal stored with the target's answer.
 - **Mock target platform:** `app/api/target.py` and `app/services/target_store.py`. Meridian's write API with the rules a real platform owns, namespaces, and injectable faults.
+- **Reconciliation:** `app/services/reconciliation.py`. A pure comparison of what a dry run knew against what the target holds, called by the runner as it finishes and again on a re-check.
+- **Readiness report:** `app/services/readiness.py` and `app/ai/report_prompt.py`. Facts, gates, work, summary; the summary checked against the facts; Markdown and JSON.
 - **Target catalog:** `app/target`. Meridian's data model as Pydantic models; the catalog flattens them into the field list the comparison classifies against and the mapping prompt sees. The JSON schema files under `target_platform/schema` are generated from these models, and a test fails if they drift.
 - **Database:** one PostgreSQL with two schemas. `onboarding` holds this tool's state. `target` holds the fictional platform's tables and is only ever written through the target API, so the migration cannot bypass the interface.
 - **Workbench UI:** Streamlit, talks to the API over HTTP only. `ui/streamlit_app.py` holds navigation and the project selector, `ui/views/` one module per screen.
-- **CLI:** Typer. `profile`, `suggest` and `eval-mapping` work without the API or the database; `transformation-plan`, `validate` and `dry-run` run the later stages on a project from the terminal.
+- **CLI:** Typer. `profile`, `suggest` and `eval-mapping` work without the API or the database; `transformation-plan`, `validate`, `dry-run`, `reconcile` and `readiness-report` run the later stages on a project from the terminal.
 - **Logging:** structlog, JSON in containers and console locally, request id on every line, context fields (project, dataset, stage, counts, durations) bound per pipeline step.
 
 ### Database
@@ -291,6 +295,8 @@ Schema `onboarding`:
 | `migration_runs` | one validation pass or one dry run: kind, status, the staging namespace, the configuration version and the whole transformation plan, per-entity counts from source rows through accepted and blocked, issue counts by type, the rules applied, what normalization changed, what the target holds, timings |
 | `validation_issues` | one row per thing wrong with one record: entity, dataset, source row, record id, column, error type, severity, message, the offending value, the rule that found it |
 | `migration_failures` | one row per record the target refused or the run never attempted: stage, attempts, HTTP status, error type, the target's message, request id |
+| `reconciliation_results` | one reconciliation of one dry run, at the end of the run or on a re-check: per-entity counts from source rows to what the target holds, exclusions by first error, every check, the discrepancies with sample ids, and the ledger of accepted ids a re-check compares against |
+| `readiness_reports` | one generated report, never updated: status, the whole content as json (facts, gates, work, questions, next steps, risks, summary), the rendered Markdown, where the summary came from and the model call behind it |
 
 Schema `target` holds the platform's `organizations`, `contacts`, `subscriptions` and `activities`, keyed by `(namespace, id)`, written only through the target API.
 
@@ -326,6 +332,13 @@ Schema `target` holds the platform's `organizations`, `contacts`, `subscriptions
 | GET | `/api/v1/projects/{id}/migrations/{run_id}/issues` | what validation found, filter by `entity`, `severity`, `error_type` |
 | GET | `/api/v1/projects/{id}/migrations/{run_id}/issue-breakdown` | issue counts by entity, severity and type |
 | GET | `/api/v1/projects/{id}/migrations/{run_id}/failures` | records the target refused, and records never attempted because their organization was |
+| GET | `/api/v1/projects/{id}/migrations/{run_id}/reconciliation` | the latest reconciliation of a dry run (404 for a validation pass) |
+| GET | `/api/v1/projects/{id}/migrations/{run_id}/reconciliations` | every reconciliation of a dry run, newest first |
+| POST | `/api/v1/projects/{id}/migrations/{run_id}/reconcile` | read the target again and compare (409 when the namespace was purged) |
+| POST | `/api/v1/projects/{id}/reports/readiness` | generate and store a readiness report; `use_model` lets the model draft the summary |
+| GET | `/api/v1/projects/{id}/reports/readiness` | the latest report as json, or Markdown with `?format=markdown`; a preview when none is stored |
+| GET | `/api/v1/projects/{id}/reports` | every stored report, newest first |
+| GET | `/api/v1/projects/{id}/reports/{report_id}` | one stored report, json or Markdown |
 | GET | `/mock/billing/v1/subscriptions` | the customer's LegacyBill 4.2 api: bearer token, `page`, `page_size`, `has_more` |
 | POST | `/target/v1/organizations`, `/contacts`, `/subscriptions`, `/activities` | Meridian's write api: bearer token, `X-Meridian-Namespace`, 201 created, 200 unchanged, 409 conflict, 422 refused |
 | GET / DELETE | `/target/v1/counts`, `/target/v1/{entity}`, `/target/v1/namespaces/{id}` | what a namespace holds; purge a staging namespace |
@@ -370,7 +383,7 @@ Each risk below, the response, and the mechanism in this codebase. Where the mec
 
 ## Evaluation and testing
 
-**Test suites.** pytest, 296 tests: 251 unit, 44 integration, one end to end. Unit tests need nothing; integration tests run against the compose PostgreSQL in their own database (`onboarding_test`, created by `deploy/postgres-init`) and skip cleanly when it is not up. No test calls a model provider: a fake provider that reads the same brief the real model gets answers from the deterministic comparison, and can be told to break the contract so the retry and failure paths are exercised.
+**Test suites.** pytest, 345 tests: 288 unit, 56 integration, one end to end. Unit tests need nothing; integration tests run against the compose PostgreSQL in their own database (`onboarding_test`, created by `deploy/postgres-init`) and skip cleanly when it is not up. No test calls a model provider: a fake provider that reads the same brief the real model gets answers from the deterministic comparison, and can be told to break the contract so the retry and failure paths are exercised.
 
 - The profiler is pinned to the synthetic generator's own defect manifest. Where a defect maps one to one onto a measurement (missing ids, duplicated ids, missing seat counts) the counts must agree exactly; where duplication copies defective rows the profiler must find at least as many.
 - The schema comparison is judged on the committed sample: it must catch the renames the synonym table covers, refuse to guess at the semantic ones, and read the profiler's stats into the right compatibility notes.
@@ -383,9 +396,11 @@ Each risk below, the response, and the mechanism in this codebase. Where the mec
 - The target API is tested on its own: the token, the id contract (identical re-send is a no-op, changed content a 409 naming the fields), parents before children, one primary and one email per organization, the lifecycle rule, namespace isolation and purge, forced faults.
 - The migration client is tested against a stubbed target: a 5xx is retried to the limit, a 409 and a 422 never are, a timeout followed by `unchanged` is an accepted record, a 200 with the wrong body is a failure.
 - The validation pass and the dry run are tested over the whole sample with the counts the sample actually produces, so a change in a converter or a rule shows up as a changed number. A run with every write forced to fail completes, stores each failure with status 500 and a request id, and blocks every child.
-- The end-to-end test takes a project from four source files (three files and the paged billing feed) through profiling, comparison, proposals in manual mode, a full review, validation of all 9,259 rows and a rehearsed slice against the target, with no model key.
+- Reconciliation is tested as a pure function (balanced, a missing record, a failed write that landed, a count that does not add up, an exclusion without a reason) and over HTTP: a slice balances because the records it never reached are counted, the `malformed` fault produces an `unexpected_in_target` discrepancy, a namespace purged after the run is caught by a re-check, and a purged run or a validation pass says why it cannot be reconciled.
+- Every readiness gate is tested on both sides, and so is the check on the model's summary: an invented number, another status word, a headline without the status, explanations for the wrong work. A property test holds the code-written summary to the same check, which caught the template quoting two counts the model's facts did not carry. Over HTTP: a fake model whose summary passes is used and then served from the cache; one that invents a number is retried to the limit and replaced by the template, with the reason on the report.
+- The end-to-end test takes a project from four source files (three files and the paged billing feed) through profiling, comparison, proposals in manual mode, a full review, validation of all 9,259 rows, a rehearsed slice against the target, its reconciliation and a readiness report, with no model key.
 
-**Workbench verification.** Every screen is checked in a real headless browser (Chromium via Playwright) before it is committed: page errors, console errors, the content it is supposed to show, and screenshots reviewed by eye. The dry run page was driven through the whole sequence against the live database: open the plan, validate, open the records, run a full dry run. This is a review step, not part of the pytest suite. It exists because jsdom-style assertions passed three layout defects that a real browser caught on the first screen.
+**Workbench verification.** Every screen is checked in a real headless browser (Chromium via Playwright) before it is committed: page errors, console errors, the content it is supposed to show, and screenshots reviewed by eye. The dry run page was driven through the whole sequence against the live database: open the plan, validate, open the records, run a full dry run. The readiness page was driven the same way: read the report, re-check the reconciliation, open the checks and the appendix, generate a report with the model switched off, and confirm the overview and the dry run page show the result. This is a review step, not part of the pytest suite. It exists because jsdom-style assertions passed three layout defects that a real browser caught on the first screen.
 
 **Mapping evaluation.** `evals/expected_mappings.json` holds the golden set for the committed sample: 41 fields across the four sources, each with the right target or null, alternative answers that also count, one field the customer must be asked about (`customer_tier`, by the customer's own rule 3), and fields where asking is acceptable but not required. `enterprise-onboarding eval-mapping` runs the same prompt path as the API with no database and writes `evals/results/*.json`. Every field gets one outcome: correct, deferred (asked instead of answering), unresolved (no target, no question), wrong, or overconfident (answered where it should have asked).
 
@@ -478,9 +493,11 @@ Once a project's mappings are reviewed, run the later stages from the terminal (
 uv run enterprise-onboarding transformation-plan latest
 uv run enterprise-onboarding validate latest
 uv run enterprise-onboarding dry-run latest --limit 200
+uv run enterprise-onboarding reconcile latest
+uv run enterprise-onboarding readiness-report latest --out readiness.md
 ```
 
-Configuration is environment variables with working defaults for everything except the LLM keys; see `deploy/env.template`. `LLM_PROVIDER` is `anthropic`, `openai` or `none`. With `none` the tool runs in manual mode. `MAPPING_HIGH_CONFIDENCE` (0.85) and `MAPPING_LOW_CONFIDENCE` (0.6) steer the review screen and the bulk-approval floor. `TARGET_FAULT_RATE` and `TARGET_FAULT_MODES` make the mock target misbehave on purpose for a rehearsal of the failure paths; both are off by default.
+Configuration is environment variables with working defaults for everything except the LLM keys; see `deploy/env.template`. `LLM_PROVIDER` is `anthropic`, `openai` or `none`. With `none` the tool runs in manual mode. `MAPPING_HIGH_CONFIDENCE` (0.85) and `MAPPING_LOW_CONFIDENCE` (0.6) steer the review screen and the bulk-approval floor. `TARGET_FAULT_RATE` and `TARGET_FAULT_MODES` make the mock target misbehave on purpose for a rehearsal of the failure paths; both are off by default. `READINESS_MIN_ENTITY_COVERAGE` (0.95) is the share of an entity's in-scope records that must land before its gap stops blocking go-live.
 
 ## Project layout
 
@@ -528,8 +545,10 @@ Rules the AWS deployment follows:
 
 ## Current limitations
 
-- **Stages not yet in the codebase:** reconciliation and the readiness report. The counts they need exist on every run; the comparison and the verdict are next.
-- **The dry run is sequential.** One request per record, about 7 ms each in process: 55 seconds for the 7,163 valid records of the sample, and the 10,000-organization customer would take about ten minutes. Batching and parallel writes are on the list, after reconciliation; a sequential run is reproducible, and reproducible is what a rehearsal is for.
+- **The dry run is sequential.** One request per record, about 7 ms each in process: 55 seconds for the 7,163 valid records of the sample, and the 10,000-organization customer would take about ten minutes. Batching and parallel writes are on the list; a sequential run is reproducible, and reproducible is what a rehearsal is for.
+- **The summary check covers numbers and status words, not every claim.** A draft that invents a figure or softens the status is refused. A sentence that explains why Meridian needs a valid email is the model's reasoning about the facts, not a fact the check can verify; the work items and the gates beside it are.
+- **The readiness floor is a policy choice.** 95% of an entity's in-scope records, configurable, chosen for this demo. A real implementation team would set it per customer and per entity (subscriptions are billing, activities are history).
+- **The first deep link after the workbench restarts shows a "Page not found" dialog.** Streamlit resolves the page before the app has registered its pages on the server's first run; the right page renders behind it and every later visit is clean. Opening the overview first avoids it.
 - **One transformation configuration.** The value maps and rule thresholds are written for Apex. A second customer is a second file, which has not been written yet, so the "configuration, not code" claim is a design, not a measured result.
 - **Rule 1 flags nothing on the sample.** The account row's primary contact email never matches a contact on any account that lacks a primary, so the rule reports 127 accounts and flags no contact. That is the data's finding, and it means the rule's flagging path is exercised by its unit tests, not by the sample.
 - **One model call takes one to two minutes** on a fifteen-column file with adaptive thinking. Datasets run in parallel so a project takes as long as its slowest file, and the answer is cached, but the first suggest on a project is a wait.

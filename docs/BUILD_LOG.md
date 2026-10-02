@@ -263,3 +263,72 @@ Chronological engineering decisions. Each entry: problem, decision, why, alterna
 - The entity table came back from the api in jsonb's order, not write order (postgres sorts jsonb keys by length). Fixed in the workbench and the cli; the run row is still jsonb because nothing else reads it in order.
 - Workbench: the Dry run page was driven in headless Chromium against the live database (select the project, open the plan, validate, open the records, full dry run) with screenshots reviewed by eye. Two defects in the checker itself (the page's uppercase labels) and none in the page.
 - 235 unit tests, 24 integration tests, 1 end-to-end test, all green without a model key. The end-to-end test creates a project, attaches three files and the billing feed, profiles, compares, proposes in manual mode, reviews every column (the reviewer supplies the identifiers the heuristic cannot see, through the same edit action the workbench uses), validates all 9,259 rows and rehearses a slice against the target.
+
+## 2026-10-02, Day 5
+
+### Reconciliation runs inside the dry run, not after it
+
+- **Problem:** reconciliation as a separate stage, run later, would have to rebuild what the run knew: which records were valid, which were sent, which were accepted. The run row keeps counts, not identifiers, and re-transforming later describes today's mappings, not the run's.
+- **Decision:** the runner reconciles as it finishes, before any purge, with everything it holds in memory: counts per stage, the first error of every excluded record, the accepted identifiers. The result goes to `reconciliation_results` with the ledger of accepted identifiers, so a later re-check can compare the target against what the run saw.
+- **Alternatives:** a reconciliation endpoint that re-derives the expected set from the stored plan (re-runs the transform, and silently answers a different question when the mappings changed); counts only (cheaper, and blind to the case where one record is missing and another is unexpected, which leaves the counts equal).
+- **Result:** reading back 7,163 identifiers takes nine requests and no measurable share of the 65-second run. The ledger is 98 KB of json, 25 KB as postgres stores it.
+
+### Identifiers, not counts
+
+- **Problem:** "the namespace holds 889 organizations and the run accepted 889" is the Day 4 check. It passes when one accepted record is missing and one refused record landed anyway.
+- **Decision:** the accepted identifiers are compared with the identifiers the target holds, read back through the target's own api. Missing and unexpected records are separate discrepancies with sample identifiers; an unexpected record the run recorded as failed is called out as a write that landed and lost its answer.
+- **Result:** the `malformed` fault with one attempt now fails reconciliation by name instead of passing a count check by accident. On Day 4 that test asserted `target_counts == 2` and `accepted == 0` side by side and nothing connected them.
+
+### Not reached is counted, not derived
+
+- **Problem:** "valid = sent + blocked + not reached" is a tautology if not-reached is computed as the difference.
+- **Decision:** the runner counts records it never reached where it stops reaching them: past a `limit_per_entity`, after `stop_after_failures`, or an entity left out with `entities`. The check then compares three independent counts with a fourth.
+- **Result:** a limited slice balances on its own terms. A unit test drops one not-reached record and the check names `valid_accounted`.
+
+### Every exclusion has exactly one reason
+
+- **Problem:** a record can carry several errors. Counting exclusions by issue type adds up to more than the records excluded (88 contacts with a short phone number, 83 of them as their first error; 45 repeated emails, 25 as the first), and a reconciliation that does not add up is worthless.
+- **Decision:** the reason a record is excluded is its first error in pipeline order (conversion, then the contract, then the batch checks). Reconciliation checks that reasons sum to exclusions. The readiness report's work table counts records per problem, says plainly that a record with two problems appears twice, and points at the reconciliation for the once-each count.
+
+### The status is decided by gates, and the gates are stated
+
+- **Problem:** `READY WITH CONDITIONS` invites judgment calls. A status that depends on how somebody felt about the numbers cannot be argued with.
+- **Decision:** `assess` is a pure function over stored facts. Blockers: undecided mappings or open questions, no full rehearsal, a rehearsal whose plan no longer equals today's, a reconciliation with discrepancies, any record the target refused or failed, an entity below 95% of its in-scope records landing. Conditions: anything left behind above the floor, any record with a warning. Records the customer's own rules set aside do not count against coverage. Every gate prints what it checked and the number it found.
+- **Why:** the readiness report is the thing a customer pushes back on. Each line has to survive "why does this say blocked."
+- **Alternatives:** a weighted score (a number with no meaning to a customer); asking the model for the status (the one rule forbids it, and it would be right most of the time, which is worse).
+- **Result:** Apex is `BLOCKED`, with all four entities under the floor and subscriptions at 44.6%. That is the honest answer for this export, and the report says what changes it: 311 subscriptions in the dormancy conflict, 215 `Call` activities, 106 malformed emails, 97 organizations missing required values, and the rest in the table.
+
+### A stale rehearsal is a blocker
+
+- **Decision:** the report compares the dry run's stored plan with the plan the approved mappings and the configuration produce now. A reopened mapping or a new configuration version makes the rehearsal stale, and the report says which.
+- **Why:** a readiness report about a migration that would no longer run that way is a report about something else.
+
+### Issues become work with an owner
+
+- **Decision:** every issue type maps to a kind (customer decision, customer data correction, released by other fixes, review and sign-off), a sentence, and for decisions the question to send. Values are quoted only where they are vocabulary (`'Call'`, `'Trial'`, `'Actve'`, `'CA'`); emails, phones, names and records are counted, never quoted. An issue type the catalog does not know still becomes work with a plain sentence rather than disappearing.
+- **Result:** 27 work items, 7 customer questions, and the 839 records waiting on their accounts shown as one expectation instead of three blockers.
+
+### The model drafts the summary, the code checks it
+
+- **Problem:** the spec allows the model to draft the executive summary "grounded only in deterministic results." A sponsor reads the summary instead of the numbers, so an invented figure or a softened status there is the most expensive mistake the tool can make.
+- **Decision:** the facts go to the model already formatted the way they may be quoted. `check_summary` refuses a draft whose headline does not state the status, that uses another status word, that contains any number not in the facts, or whose explanations do not cover exactly the codes asked for. Problems go back verbatim, then the summary falls back to one written by code, and the report says which and why.
+- **Alternatives:** trust the model (no); let the model write only prose with placeholders the code fills (safe, and reads like a mail merge); skip the model (the template is serviceable, the model's explanations are better at saying why a record cannot go).
+- **Result:** a property test holds the code-written summary to the same check, and it failed on the first run: the template quoted the number of decisions and corrections, which the model's facts did not carry. Fixed by adding the counts to the facts. The first real report needed three attempts: claude-opus-5 returned no blocker explanations twice because the codes were only inside the json. Naming them in the instruction fixed it; the next report passed on the first attempt in 16 seconds (4,823 tokens in, 1,255 out). The check covers numbers and status words, not every sentence of reasoning, and the README says so.
+
+### GET answers even when nothing is stored
+
+- **Decision:** `GET /reports/readiness` returns the latest stored report, or, with none, a preview computed on the spot with the template summary, marked `stored: false`, written nowhere.
+- **Why:** the spec's endpoint is a GET, and a reviewer trying it should get the answer, not a 404 that says to POST first. Generating with the model and storing stays a POST because it has side effects and costs money.
+
+### The first deep link after a restart shows a Streamlit dialog
+
+- **Problem:** the browser pass found a "Page not found" dialog over the readiness page, then could not reproduce it.
+- **Finding:** it appears on the first request to any page path after the workbench process starts, on every page, not only the new one. On a server's first script run Streamlit's page registry only knows the main script, so the runner sends `page_not_found` before `st.navigation` registers the pages; the right page renders behind the dialog and every later session is clean.
+- **Decision:** recorded as a limitation, not patched around the framework. Opening the overview first avoids it.
+
+### Measured
+
+- Full dry run on the committed sample in the compose stack: 7,163 accepted, 65 seconds, reconciliation balanced, 28 of 28 checks.
+- Readiness: `BLOCKED`, 4 blockers, 1 condition, 27 work items, 7 customer questions. claude-opus-5 summary: one attempt, 16 seconds.
+- Workbench: the readiness page driven in headless Chromium against the live database (read the report, re-check the reconciliation, open the checks and the appendix, generate with the model off, then the overview card and the dry run page's reconciliation line), 18 of 18 checks, no page errors, screenshots reviewed by eye. Two fixes from the review: "1 conditions", and chips whose word spaces rendered too narrow to read.
+- 288 unit tests, 56 integration tests, 1 end-to-end test, all green without a model key.
