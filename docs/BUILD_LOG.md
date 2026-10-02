@@ -332,3 +332,96 @@ Chronological engineering decisions. Each entry: problem, decision, why, alterna
 - Readiness: `BLOCKED`, 4 blockers, 1 condition, 27 work items, 7 customer questions. claude-opus-5 summary: one attempt, 16 seconds.
 - Workbench: the readiness page driven in headless Chromium against the live database (read the report, re-check the reconciliation, open the checks and the appendix, generate with the model off, then the overview card and the dry run page's reconciliation line), 18 of 18 checks, no page errors, screenshots reviewed by eye. Two fixes from the review: "1 conditions", and chips whose word spaces rendered too narrow to read.
 - 288 unit tests, 56 integration tests, 1 end-to-end test, all green without a model key.
+
+## 2026-10-02, Day 6
+
+### A log line has to say which step, which run, and how it ended
+
+- **Problem:** the logs had a request id and some context, bound by hand in some services and not others. A crash that no handler caught came back as starlette's plain-text `Internal Server Error`, with no request id in the body and no request line in the log, which is the one failure where the id matters most.
+- **Decision:** a `stage()` timer around every pipeline step: it binds the step and its context (project, run, dataset or entity) for every line inside it and ends with `stage_finished` (duration, record count, what the step learned) or `stage_failed` (the error type). Stages nest, so a run id finds the transform, the validation, each entity's writes and the reconciliation. The middleware turns anything that escapes into the error envelope with the request id, maps an unreachable database to 503, and replaces a caller's request id when it does not look like one, so a header cannot write text into the logs. The request id is in every error body and the workbench prints it beside the error.
+- **Why:** the person diagnosing a failed onboarding has an id and a question. The answer should be a filter, not a search.
+- **Result:** a test switches json logging on, runs a real dry run, parses every line and asserts the fields on every step. `docs/RUNBOOK.md` is the procedure, with a real dead-target run as the worked example.
+
+### Alembic takes over the schema, and the live database is stamped, not rebuilt
+
+- **Problem:** `create_all` at startup cannot change a table that exists, and the build log promised migrations once the model stopped moving. The live database holds the operator's project and a rehearsal project; it could not be dropped.
+- **Decision:** a baseline revision generated from the models against an empty database, then compared with the live database and the test database that `create_all` had built: no differences. The api runs `upgrade head` at startup under an advisory lock; a database with tables and no version table is stamped as the baseline first. The live database was dumped with `pg_dump` before the first start.
+- **Finding:** the first comparison reported every table as missing. The database user and the app's schema are both called `onboarding`, so postgres' default `search_path` (`"$user", public`) made `onboarding` the default schema and reflection stopped qualifying its tables. The connection now pins `search_path` to `public`; every table is schema-qualified, so nothing else needed it.
+- **Alternatives:** run migrations only as a separate step (right for production, and `enterprise-onboarding migrate` is that step; at startup keeps the reviewer's one `docker compose up`); rebuild the live database from scratch (loses the operator's review).
+- **Result:** the live database is at `0002` with both projects intact. Tests run the migrations from empty, over a database with rows in it, twice, and down and back up. Test teardown now truncates the tables instead of dropping them, because the schema belongs to the migrations.
+
+### A dead target is not a flaky target
+
+- **Problem:** the runner retried each record three times with backoff and moved on. Against a target that refuses connections, every organization was retried, every child was blocked, and the run ended `completed`, which advanced the project as if the rehearsal had happened.
+- **Decision:** a breaker. Ten records in a row that fail their retries means the target is down: the run stops writing, counts what it did not reach as not reached (so reconciliation still balances), stores its counts and failures, reconciles, and ends `failed` with the reason. A refusal or an acceptance resets the count, because a target that answers, even with a no, is up. The stage does not move.
+- **Measured:** the same full dry run against a closed port: 670 seconds and `completed` without the breaker, 8.5 seconds and `failed` with it. With a 20-second timeout instead of a refused connection, the old behaviour would have run for hours.
+- **Alternatives:** `stop_after_failures`, which already existed, counts refusals too (a data problem is not a target problem) and is opt-in; a time budget per run (needs a number nobody can choose in advance).
+
+### A run whose process dies leaves a heartbeat behind
+
+- **Problem:** a run that raised after its writes, or whose database connection dropped, could be left `running`: the error handler committed on a session that needed a rollback first. A run whose process was killed stayed `running` forever.
+- **Decision:** everything after a run starts is inside one guard that rolls back, re-reads the run and marks it failed. Runs carry `heartbeat_at` (migration `0002`), touched at most every 30 seconds while the runner makes progress; a run still `running` with no heartbeat for ten minutes is marked failed as interrupted when the api starts and before the project's next run.
+- **Why a heartbeat and not "anything running at startup":** the cli runs dry runs in its own process. A startup sweep that failed every running run would kill the cli's live one.
+
+### Waiting as long as the other side asks
+
+- **Decision:** the target client and the billing loader read `Retry-After` (seconds or an http date), wait that long capped at ten seconds, and fall back to a linear backoff when the header is absent. The loader now retries 429s and 5xx at all; before, the first 429 failed the profile. The mock feed can rate-limit (a sliding window), and the mock target has a `rate_limited` fault and can fail only a record's first attempts, which is what a transient fault looks like to a client that retries.
+
+### An unreadable target is not an empty one
+
+- **Problem:** found while testing the breaker. When the target could not be read back, reconciliation treated it as holding nothing; a run that accepted nothing then balanced, because zero equals zero.
+- **Decision:** an entity the target would not give back fails its own check, `target_readable`, and the reconciliation is `discrepancies` until a re-check reads it.
+
+### One module owns the lifecycle
+
+- **Problem:** stage moves were if-chains in four services, each with its own idea of which stages it could move from.
+- **Decision:** `app/services/workflow.py`: a table of completions (which event moves the project from which stages to which) and the review stage computed from the mappings. Services report what happened. A test walks every event from every stage, and another fails if anything outside the module assigns a stage.
+
+### LangGraph: evaluated against the working workflow, not adopted
+
+- **Date:** 2026-10-02.
+- **Problem:** the spec names LangGraph as a candidate for the workflow (state, branching, a human step, resumable stages) and asks for the decision to be recorded either way, once the plain-python version works.
+- **Decision:** plain Python, with the workflow's state in postgres and the lifecycle in `app/services/workflow.py`.
+- **How it was decided:** the pipeline was rebuilt as a LangGraph `StateGraph` over the real services, outside the repository: profile, suggest, an `interrupt` for review with a conditional edge back while anything was undecided, validate, dry run, report, with an in-memory checkpointer. It ran end to end against a scratch database in 3.5 seconds, pausing for review twice. It worked. It did not fit:
+  - review here is many decisions by different people over days, plus customer answers, reopens and bulk approval, each a row with who and when. An `interrupt` is one pause that one caller resumes with all the answers.
+  - the checkpointer held its own copy of the stage and the undecided count, which goes stale the moment someone reopens a mapping in the workbench. Two sources of truth for the one thing the readiness report has to be right about.
+  - the resume payload, the reviewer's decisions, was serialized into the checkpoint, and LangGraph warned that deserializing an unregistered type will be blocked in a future version. A second, opaque audit trail beside the real one.
+  - the node that pauses re-runs from its start on resume, so everything before the pause has to be safe to repeat.
+  - the workbench lets a person re-validate, re-rehearse, re-profile and re-report in any order the stage table allows. In a graph that is an edge from every node or a jump; in `workflow.py` it is two tables.
+  - in a clean environment it brings 38 packages (langgraph, langchain-core, the checkpoint libraries, ormsgpack) for nothing the current code does not already do.
+- **Alternatives:** adopt it for the keyword (the spec says not to); use it only for the two model calls (each is one structured call with a bounded retry, already a function).
+- **What would change the answer:** the model deciding the next step. An agent that reads validation failures, proposes a fix, runs validation again and loops is what LangGraph is for. The one rule in `ARCHITECTURE.md` says the model never decides the workflow; if that rule changes, this decision is the first to revisit.
+
+### The readiness report becomes a package
+
+- **Decision:** the 1,793-line module is now `app/services/readiness/` with one module per layer: facts, gates, work, summary, the service that builds and stores reports, the markdown render, and the vocabulary they share. The split was mechanical: each module's cross-imports were generated from the names it uses, nothing about the report changed, and the existing tests ran unchanged.
+
+### Tests that found bugs
+
+- **The cli, driven against the database for the first time, which it had never been:** its log lines went to stdout, so `readiness-report --format json > report.json` would have carried them; they go to stderr now. A command that exited early (no projects, no dry run) left its session open, and the test teardown waited forever on the locks it held; every command now opens its project through a context manager that closes the session on every path.
+- **The model providers, driven offline through the real sdks with a mock transport:** an answer cut off mid-json made the sdk raise pydantic's `ValidationError` from inside `parse()`, before any stop reason could be checked, and it escaped as a 500 instead of a 502 `llm_error`.
+- **The workflow table test:** a log field named `event` clashed with structlog's own argument and would have crashed a re-profile; caught before it shipped.
+- **CI:** GitHub Actions runs ruff, the formatter check, mypy and the whole suite against a postgres service on every push, with no model key. mypy is clean over the app package, with its config in `pyproject.toml`.
+
+### The image carried the keys
+
+- **Problem:** found while measuring disk use. The repository had no `.dockerignore`, so `COPY . .` put `.env` (with the model keys), `.git`, the local virtualenv and every cache into the image: 4.27 GB. The image never left the server, so nothing leaked; pushed to a registry for the AWS phase, it would have shipped the keys.
+- **Decision:** a `.dockerignore` that keeps secrets, history, environments, caches, generated data and tests out. Runtime configuration arrives from compose's `env_file`, never baked into a layer.
+- **Result:** the keys are absent from the image (checked by listing and by searching the app's files for key prefixes), the image is 2.53 GB, and pruning the old images and build cache freed 16.7 GB. The remaining waste is the Dockerfile's `chown -R` layer, which copies `/app` a second time (642 MB); a `COPY --chown` removes it.
+
+### The evaluation asks what happens without the names, and what no model gets
+
+- **Problem:** the mapping eval was one run per provider on one dataset, both 41 of 41. A perfect score from one run says little: it could be luck, it could be the column names doing all the work, and nothing said how much of it the model was responsible for.
+- **Decision:** three measurements on top of the golden set. Repeats (`--runs`), with the fields whose outcome changes between runs. An `opaque` variant: the same rows with every column renamed to a code that carries no meaning, keys shared between files keeping one code so relationships still line up, the rules document unchanged (it names two columns by their old names, which is what happens when the documentation is older than the export). A `baseline`: the deterministic comparison scored like a model. And a summary eval: the readiness summary drafted repeatedly from one stored report's facts, through the same check-and-feedback loop the report uses, with the loop extracted so the eval measures exactly what the report does.
+- **Why the opaque variant:** the question that matters for the human-review design is not how often the model is right but how it is wrong. A model that is wrong at high confidence defeats the review screen; one that is wrong at low confidence lands in front of a person.
+- **Measured** (prompt `2026-09-30.2`, 2026-10-02): the comparison alone 31 of 41 (24 of 33 targets), refusing the semantic calls and not asking about `customer_tier`. claude-opus-5: 41 of 41 in three runs out of three, no field changing. gpt-5: 41, 40, 41; the miss is `created_on`, asked about at 0.40 instead of answered. Opaque names, two runs each: claude-opus-5 40 of 41 both times, mapping `account_owner` (an internal sales owner with no home in Meridian) to `contact.first_name` at 0.62 and 0.68; gpt-5 40 of 41, asking about `created_on` again. Without names both models asked more (questions the golden set did not expect went from 5 to 8 per run to 8 to 12) and were less sure (mean confidence on right answers 0.84 to 0.79, 0.87 to 0.82). Wrong answers at 0.85 or above: zero in all ten runs. Summary: five of five first-attempt passes for both providers, 16 and 53 seconds per summary. One of the twelve claude-opus-5 calls on the sample answered a field that does not exist and was corrected on the second attempt by the contract check.
+- **Cost:** $4.24 on Anthropic (224,239 tokens in, 124,741 out) and about $1.78 on OpenAI at gpt-5's list price.
+- **Caveat, still:** one customer, one generator. The opaque variant removes the names but keeps the shapes and the vocabularies, which is where most of the remaining signal is. A second customer with a different shape is still the way to make the numbers mean more.
+
+### Measured
+
+- 10,000 organizations (`generate-data --rows 10000`), golden mappings, in process: 92,751 source rows profiled in 14.7 seconds and validated in 14.2; full dry run of 72,302 valid records in 628 seconds, all accepted, reconciliation balanced; readiness `BLOCKED`, organizations 87.3%, contacts 76.1%, subscriptions 44.2%, activities 84.2%. The README's "about ten minutes" for this customer is now a measurement.
+- Dead target, full sample: 670 seconds and `completed` without the breaker, 8.5 seconds and `failed` with it.
+- Tests: 449 (360 unit, 88 integration, 1 end to end), up from 345; line coverage 95%, up from 91%, with the cli from 0% to 88%. mypy clean. CI green on its first run.
+- Image: 4.27 GB to 2.53 GB, with no key inside; 16.7 GB of old images and build cache reclaimed.
+- Workbench: the dry run page driven in headless Chromium against failed runs, 13 of 13 checks, one wording fix (an unreadable namespace called purged).

@@ -270,15 +270,16 @@ Exported as Markdown for people (executive part, then a technical appendix with 
 - **Human review and clarification:** `app/services/mapping.py` and `app/services/clarifications.py`. Decisions with a trail, questions to the customer, bulk approval with a floor.
 - **Transformation engine:** `app/services/transform`. Pure converters chosen by the target field's type, the customer's value maps and rule settings from `sample_customer/transformation_config.yaml`, record and cross-dataset rules citing the customer's rule numbers, a plan derived from the approved mappings.
 - **Validation engine:** `app/services/validation.py`. The target's Pydantic contract, the platform's cross-record invariants, the customer's cross-checks. Errors block, warnings travel.
-- **Migration runner:** `app/services/migration.py`. One HTTP request per record against the target API into a per-run namespace, idempotent retries, children blocked when their organization did not land, every refusal stored with the target's answer.
+- **Migration runner:** `app/services/migration.py`. One HTTP request per record against the target API into a per-run namespace, idempotent retries that honour `Retry-After`, children blocked when their organization did not land, every refusal stored with the target's answer, a breaker that stops a run when the target is down, and a heartbeat so a run whose process died is found and marked failed.
 - **Mock target platform:** `app/api/target.py` and `app/services/target_store.py`. Meridian's write API with the rules a real platform owns, namespaces, and injectable faults.
 - **Reconciliation:** `app/services/reconciliation.py`. A pure comparison of what a dry run knew against what the target holds, called by the runner as it finishes and again on a re-check.
-- **Readiness report:** `app/services/readiness.py` and `app/ai/report_prompt.py`. Facts, gates, work, summary; the summary checked against the facts; Markdown and JSON.
+- **Readiness report:** `app/services/readiness/` (one module per layer) and `app/ai/report_prompt.py`. Facts, gates, work, summary; the summary checked against the facts; Markdown and JSON.
+- **Orchestration:** `app/services/workflow.py`. The project's lifecycle as two tables, with the state in PostgreSQL; nothing else moves a project's stage. LangGraph was evaluated against this and not adopted; the reasons are in `docs/ARCHITECTURE.md`.
 - **Target catalog:** `app/target`. Meridian's data model as Pydantic models; the catalog flattens them into the field list the comparison classifies against and the mapping prompt sees. The JSON schema files under `target_platform/schema` are generated from these models, and a test fails if they drift.
-- **Database:** one PostgreSQL with two schemas. `onboarding` holds this tool's state. `target` holds the fictional platform's tables and is only ever written through the target API, so the migration cannot bypass the interface.
+- **Database:** one PostgreSQL with two schemas. `onboarding` holds this tool's state. `target` holds the fictional platform's tables and is only ever written through the target API, so the migration cannot bypass the interface. Alembic owns the schema; the API applies migrations at startup under an advisory lock, and `enterprise-onboarding migrate` is the same thing as a release step.
 - **Workbench UI:** Streamlit, talks to the API over HTTP only. `ui/streamlit_app.py` holds navigation and the project selector, `ui/views/` one module per screen.
-- **CLI:** Typer. `profile`, `suggest` and `eval-mapping` work without the API or the database; `transformation-plan`, `validate`, `dry-run`, `reconcile` and `readiness-report` run the later stages on a project from the terminal.
-- **Logging:** structlog, JSON in containers and console locally, request id on every line, context fields (project, dataset, stage, counts, durations) bound per pipeline step.
+- **CLI:** Typer. `profile`, `suggest`, `eval-mapping` and `eval-summary` work without the API or the database; `transformation-plan`, `validate`, `dry-run`, `reconcile` and `readiness-report` run the later stages on a project from the terminal; `migrate` applies schema migrations. Log lines go to stderr, so a report piped to a file is only the report.
+- **Logging:** structlog, JSON in containers and console locally. A request id on every line and in every error body; a timer around every pipeline step that logs how it ended with the project, the run, the dataset or entity, the record count, the duration and the error type. `docs/RUNBOOK.md` is the procedure for diagnosing a failed onboarding from them.
 
 ### Database
 
@@ -292,7 +293,7 @@ Schema `onboarding`:
 | `field_mappings` | one row per source column per project: proposed target, status, origin (model, heuristic, manual), confidence, reason, whether a rule is needed and which, whether the customer has to be asked, what the comparison said, which model call produced it, and who decided what when |
 | `clarification_questions` | a question for the customer, usually tied to one mapping: the text, the values and candidates it is about, status (open, answered, withdrawn), the answer and the resolution applied |
 | `llm_calls` | every model call: purpose, dataset, provider, model, prompt version, input hash, cached, status, attempts, tokens, latency, request id, and the structured answer |
-| `migration_runs` | one validation pass or one dry run: kind, status, the staging namespace, the configuration version and the whole transformation plan, per-entity counts from source rows through accepted and blocked, issue counts by type, the rules applied, what normalization changed, what the target holds, timings |
+| `migration_runs` | one validation pass or one dry run: kind, status, the staging namespace, the configuration version and the whole transformation plan, per-entity counts from source rows through accepted, blocked and not reached, issue counts by type, the rules applied, what normalization changed, what the target holds, timings, a heartbeat |
 | `validation_issues` | one row per thing wrong with one record: entity, dataset, source row, record id, column, error type, severity, message, the offending value, the rule that found it |
 | `migration_failures` | one row per record the target refused or the run never attempted: stage, attempts, HTTP status, error type, the target's message, request id |
 | `reconciliation_results` | one reconciliation of one dry run, at the end of the run or on a re-check: per-entity counts from source rows to what the target holds, exclusions by first error, every check, the discrepancies with sample ids, and the ledger of accepted ids a re-check compares against |
@@ -369,21 +370,23 @@ Each risk below, the response, and the mechanism in this codebase. Where the mec
 
 **Retry safety.** Target ids are the customer's stable legacy identifiers, and the target API treats same id plus same content as a no-op and same id plus different content as a conflict. Re-running a dry run cannot create duplicates.
 
-**Target API failure and rate limits.** Transport failures are classified apart from data failures. The migration runner retries with backoff on transient errors, captures every failure with its response, and the mock target can inject 500s, slow responses and malformed bodies so that path is tested.
+**Target API failure and rate limits.** Transport failures are classified apart from data failures. The migration runner retries transient errors, waits as long as a `Retry-After` asks (capped), and captures every failure with its response. A target that fails ten records in a row is down, not flaky: the run stops writing, counts what it did not reach, and fails with the reason. Measured against a target that refuses connections, a full rehearsal stops in 8.5 seconds instead of retrying for eleven minutes and then calling itself complete. The mock target can inject 500s, 429s, slow responses and malformed bodies, on every attempt or only the first, and the customer's billing feed can rate-limit, so every one of those paths is tested.
 
 **Sensitive customer data.** The application handles the customer's data in real life, so the defaults are conservative. Every published port is bound to `127.0.0.1`. Stored samples are capped at five values of at most 60 characters per column. The mapping prompt gets statistics and shapes, values only for small business vocabularies, and nothing at all from email, phone, name and free-text columns; a unit test checks that no email address from the sample can reach a prompt. Raw rows never leave the database. LLM keys are read from the environment only. No `.env*` file of any kind is ever committed, templates included: `.gitignore` carries `.env*` with no exceptions, the template lives at `deploy/env.template`, and a committed pre-commit hook (`make hooks`) refuses env files and runs gitleaks on the staged diff.
 
 **Auditability.** The question is not only "did this record migrate" but "how did we decide what this record should become." Mapping decisions, their reasoning, approval state, clarification answers, validation results and reconciliation output are stored with the project. Profiles are replaced on re-profile; decisions are kept.
 
-**Schema drift.** The target catalog is generated from the Pydantic models and a test fails if the committed schema files diverge. The schema comparison is recomputed on request, never cached, so a changed export or a changed target shows up the next time someone looks.
+**Schema drift.** The target catalog is generated from the Pydantic models and a test fails if the committed schema files diverge. The schema comparison is recomputed on request, never cached, so a changed export or a changed target shows up the next time someone looks. The tool's own schema is managed by Alembic, and the migrations are tested from empty, over existing data, and down and back up.
 
-**Observability.** structlog with JSON output in containers, a request id on every line and in the `x-request-id` response header, and per-stage context (project id, dataset, stage, record counts, duration in ms, error type). Someone diagnosing a failed onboarding filters by project id and stage instead of grepping free text.
+**Observability.** structlog with JSON output in containers. A request id on every line, in the `x-request-id` header and in every error body, including errors nothing handled, which come back in the error envelope instead of a plain-text 500. Every pipeline step logs how it ended, with the project, the run, the dataset or entity, the record count, the duration and the error type, nested so one run id finds every step. Someone diagnosing a failed onboarding filters by an id instead of grepping free text; `docs/RUNBOOK.md` walks through it with a real failed run.
+
+**Runs that die.** A run that raises is rolled back and marked failed whatever state it left the session in. A run whose process died stops sending its heartbeat and is marked failed as interrupted when the API starts or the project's next run begins. A run never stays `running` forever.
 
 **Failure philosophy.** The system fails loudly when correctness cannot be established. An unresolved required field does not silently become null. A record that violates the target schema is not counted as migrated. An ambiguous business concept is not mapped because the model produced an answer. A count mismatch is not hidden by a 200. Uncertainty is information, and the system exposes it.
 
 ## Evaluation and testing
 
-**Test suites.** pytest, 345 tests: 288 unit, 56 integration, one end to end. Unit tests need nothing; integration tests run against the compose PostgreSQL in their own database (`onboarding_test`, created by `deploy/postgres-init`) and skip cleanly when it is not up. No test calls a model provider: a fake provider that reads the same brief the real model gets answers from the deterministic comparison, and can be told to break the contract so the retry and failure paths are exercised.
+**Test suites.** pytest, 449 tests: 360 unit, 88 integration, one end to end, with 95% line coverage of the app package. GitHub Actions runs ruff, the formatter check, mypy and the whole suite against a PostgreSQL service on every push. Unit tests need nothing; integration tests run against the compose PostgreSQL in their own database (`onboarding_test`, created by `deploy/postgres-init`) and skip cleanly when it is not up. No test calls a model provider: a fake provider that reads the same brief the real model gets answers from the deterministic comparison, and can be told to break the contract so the retry and failure paths are exercised.
 
 - The profiler is pinned to the synthetic generator's own defect manifest. Where a defect maps one to one onto a measurement (missing ids, duplicated ids, missing seat counts) the counts must agree exactly; where duplication copies defective rows the profiler must find at least as many.
 - The schema comparison is judged on the committed sample: it must catch the renames the synonym table covers, refuse to guess at the semantic ones, and read the profiler's stats into the right compatibility notes.
@@ -396,30 +399,42 @@ Each risk below, the response, and the mechanism in this codebase. Where the mec
 - The target API is tested on its own: the token, the id contract (identical re-send is a no-op, changed content a 409 naming the fields), parents before children, one primary and one email per organization, the lifecycle rule, namespace isolation and purge, forced faults.
 - The migration client is tested against a stubbed target: a 5xx is retried to the limit, a 409 and a 422 never are, a timeout followed by `unchanged` is an accepted record, a 200 with the wrong body is a failure.
 - The validation pass and the dry run are tested over the whole sample with the counts the sample actually produces, so a change in a converter or a rule shows up as a changed number. A run with every write forced to fail completes, stores each failure with status 500 and a request id, and blocks every child.
+- Every failure path in the failure table of `docs/ARCHITECTURE.md` is driven for real by a test: a feed that rate-limits or stays down, a source that disappears, a broken configuration, a target that is down (the breaker), rate-limits or fails each record once, a crash after the writes, a database that drops mid-run, a process that dies and leaves its run behind, a model that does not answer or answers garbage.
+- The logs are tested the way they are read: json logging on, a real dry run, every line parsed, and the spec's fields (project, run, stage, entity, record count, duration, error type) asserted on every step. An unhandled error keeps the error envelope and leaves its traceback in the log under the request id.
+- The schema migrations run from empty, over a database built before migrations with rows in it, twice in a row, and down to nothing and back up, each time compared with the models.
+- The model providers are driven offline through the real SDKs with a mock transport: structured answers, every error class, refusals, truncation. The cli is driven against the database, stage by stage.
 - Reconciliation is tested as a pure function (balanced, a missing record, a failed write that landed, a count that does not add up, an exclusion without a reason) and over HTTP: a slice balances because the records it never reached are counted, the `malformed` fault produces an `unexpected_in_target` discrepancy, a namespace purged after the run is caught by a re-check, and a purged run or a validation pass says why it cannot be reconciled.
 - Every readiness gate is tested on both sides, and so is the check on the model's summary: an invented number, another status word, a headline without the status, explanations for the wrong work. A property test holds the code-written summary to the same check, which caught the template quoting two counts the model's facts did not carry. Over HTTP: a fake model whose summary passes is used and then served from the cache; one that invents a number is retried to the limit and replaced by the template, with the reason on the report.
 - The end-to-end test takes a project from four source files (three files and the paged billing feed) through profiling, comparison, proposals in manual mode, a full review, validation of all 9,259 rows, a rehearsed slice against the target, its reconciliation and a readiness report, with no model key.
 
-**Workbench verification.** Every screen is checked in a real headless browser (Chromium via Playwright) before it is committed: page errors, console errors, the content it is supposed to show, and screenshots reviewed by eye. The dry run page was driven through the whole sequence against the live database: open the plan, validate, open the records, run a full dry run. The readiness page was driven the same way: read the report, re-check the reconciliation, open the checks and the appendix, generate a report with the model switched off, and confirm the overview and the dry run page show the result. This is a review step, not part of the pytest suite. It exists because jsdom-style assertions passed three layout defects that a real browser caught on the first screen.
+**Workbench verification.** Every screen is checked in a real headless browser (Chromium via Playwright) before it is committed: page errors, console errors, the content it is supposed to show, and screenshots reviewed by eye. The dry run page was driven through the whole sequence against the live database: open the plan, validate, open the records, run a full dry run; and against failed runs (a breaker that opened, a run that stopped before it counted anything), which caught the page calling an unreadable namespace purged. The readiness page was driven the same way: read the report, re-check the reconciliation, open the checks and the appendix, generate a report with the model switched off, and confirm the overview and the dry run page show the result. This is a review step, not part of the pytest suite. It exists because jsdom-style assertions passed three layout defects that a real browser caught on the first screen.
 
-**Mapping evaluation.** `evals/expected_mappings.json` holds the golden set for the committed sample: 41 fields across the four sources, each with the right target or null, alternative answers that also count, one field the customer must be asked about (`customer_tier`, by the customer's own rule 3), and fields where asking is acceptable but not required. `enterprise-onboarding eval-mapping` runs the same prompt path as the API with no database and writes `evals/results/*.json`. Every field gets one outcome: correct, deferred (asked instead of answering), unresolved (no target, no question), wrong, or overconfident (answered where it should have asked).
+**Mapping evaluation.** `evals/expected_mappings.json` holds the golden set for the committed sample: 41 fields across the four sources, each with the right target or null, alternative answers that also count, one field the customer must be asked about (`customer_tier`, by the customer's own rule 3), and fields where asking is acceptable but not required. `enterprise-onboarding eval-mapping` runs the same prompt path as the API with no database and writes `evals/results/*.json`. Every field gets one outcome: correct, deferred (asked instead of answering), unresolved (no target, no question), wrong, or overconfident (answered where it should have asked). Three ways to run it: the sample as it is; `--variant opaque`, the same rows with every column renamed to a code (`c01`, `c02`, ...) so the names carry nothing; and `--variant baseline`, the deterministic comparison alone with no model, which is what the model is measured against. `--runs N` repeats it and reports the spread and the fields whose outcome changed.
 
-Measured on 2026-09-30 with prompt version `2026-09-30.2`:
+Measured on 2026-10-02, prompt version `2026-09-30.2`, three runs per provider on the sample and two on the opaque variant:
 
-| | claude-opus-5 | gpt-5 |
-|---|---|---|
-| fields correct | 41 / 41 | 41 / 41 |
-| fields with an expected target, correct | 33 / 33 | 33 / 33 |
-| wrong, unresolved, overconfident | 0, 0, 0 | 0, 0, 0 |
-| incorrect at confidence >= 0.85 | 0 | 0 |
-| clarification recall | 1 / 1 | 1 / 1 |
-| asked where the golden set expected no question | 7 | 8 |
-| transformation flag recall | 1.0 | 1.0 |
-| mean confidence on correct answers | 0.85 | 0.887 |
-| tokens in / out, four calls | 39,364 / 22,921 | 25,507 / 27,389 |
-| wall time, calls in parallel | 106 s | 90 s |
+| | no model | claude-opus-5 | gpt-5 |
+|---|---|---|---|
+| fields correct, sample | 31 / 41 | 41, 41, 41 | 41, 40, 41 |
+| targets correct, sample | 24 / 33 | 33, 33, 33 | 33, 32, 33 |
+| wrong, sample | 1 | 0, 0, 0 | 0, 0, 0 |
+| fields whose outcome changed between runs | | none | `created_on`: answered twice, asked once at 0.40 |
+| asked where no question was expected, sample | 1 | 7, 6, 8 | 7, 8, 5 |
+| mean confidence on correct answers, sample | none exists | 0.84 | 0.87 |
+| fields correct, opaque names | | 40, 40 | 40, 40 |
+| what was missed, opaque names | | `account_owner` (no home in Meridian) mapped to `contact.first_name` at 0.62 and 0.68 | `created_on` asked about at 0.40 instead of answered |
+| asked where no question was expected, opaque | | 10, 12 | 9, 8 |
+| mean confidence on correct answers, opaque | | 0.79 | 0.82 |
+| clarification recall (`customer_tier`), every run | 0 / 1 | 1 / 1 | 1 / 1 |
+| **wrong at confidence 0.85 or above, every run** | | **0** | **0** |
+
+What it says. The comparison alone gets three quarters of the fields and refuses exactly the calls that need meaning (which column is the account, a name split in two, a plan under another name); the model closes that gap. With the names gone, both models lose one field and get more careful rather than more wrong: confidence drops and they ask more. The one wrong answer in ten runs came in at 0.62 and 0.68, amber on the review screen and below the bulk-approval floor, which is the property the human review rests on. In one call of the twelve on the sample, claude-opus-5 answered a field that does not exist; the contract check sent it back and the second attempt was clean, the retry loop doing its job in a real run.
 
 Both models over-ask: they raise data-handling questions (blank keys, duplicates, defaults) that the validation stage settles later with the engineer. That count is tracked as a metric and the prompt is tuned against it. This is one customer and 41 fields with lenient alternatives, so it is a regression check for the prompt and the providers, not a benchmark. Metrics shown anywhere in this repo come from the result files; none are invented.
+
+**Summary evaluation.** `enterprise-onboarding eval-summary` drafts the readiness summary from one report's facts (`evals/readiness_report_apex.json`, the stored Apex report without its summary) as many times as asked, with no cache, each draft through the same ask, check and feedback loop the report uses. Five drafts per provider, prompt `2026-10-02.2`: claude-opus-5 passed the fact check on the first attempt five times out of five, 16 seconds per summary; gpt-5 five out of five, 53 seconds per summary. No draft was rejected and none fell back to the code-written summary. The check's teeth are tested separately, with drafts that invent a number or soften the status.
+
+The evaluation runs on this page cost $4.24 on Anthropic (224,239 tokens in, 124,741 out) and about $1.78 on OpenAI at gpt-5's list price.
 
 **System metrics vs business claims.** Profiling and comparison timings, counts, and eval scores are measured and reported as such. Business impact (implementation hours saved, avoidable errors) is not measured against real production usage and is labeled as an estimate wherever it appears.
 
@@ -431,13 +446,14 @@ Both models over-ask: they raise data-handling questions (blank keys, duplicates
 | api | FastAPI | the onboarding API, the simulated billing source, the simulated target platform |
 | data processing | pandas | load and profile tabular customer data from raw values |
 | contracts and validation | Pydantic v2 | request and response models, the target platform's data model, structured model output |
-| persistence | PostgreSQL 16, SQLAlchemy 2 | implementation state, profiles, mappings, results, audit data |
+| persistence | PostgreSQL 16, SQLAlchemy 2, Alembic | implementation state, profiles, mappings, results, audit data; versioned schema migrations |
 | http | httpx | the billing feed loader and the migration runner |
 | ai | provider interface: Anthropic default, OpenAI, or none | semantic mapping suggestions; configured by environment, no provider or model name hardcoded |
 | ui | Streamlit | the implementation workbench |
 | cli | Typer | backend operations from the terminal |
 | logging | structlog | JSON logs with request ids and stage context |
-| testing | pytest | unit, integration, end to end; the workbench is also checked in a real browser before commit |
+| testing | pytest, mypy, ruff | unit, integration, end to end, and a failure-scenario suite; the workbench is also checked in a real browser before commit |
+| ci | GitHub Actions | lint, types and the whole suite against a PostgreSQL service on every push, no model key |
 | packaging | Docker, Docker Compose | one command brings up PostgreSQL, the API and the workbench |
 | cloud | AWS S3, EC2, IAM | object storage for intake and outputs, a hosted demo instance, role-based access |
 
@@ -475,16 +491,22 @@ Local development without containers (needs [uv](https://docs.astral.sh/uv/) and
 ```bash
 uv sync
 make hooks       # one-time: pre-commit hook that blocks .env files and runs gitleaks
+uv run enterprise-onboarding migrate    # the api also does this at startup
 uv run uvicorn app.main:app --reload
 uv run streamlit run ui/streamlit_app.py
 uv run pytest
+make lint typecheck
 ```
 
 Ask the model about one file, or score it against the golden set, without the API or the database:
 
 ```bash
 uv run enterprise-onboarding suggest sample_customer/data/organizations.csv --customer "Apex Equipment Services"
-uv run enterprise-onboarding eval-mapping
+uv run enterprise-onboarding eval-mapping                       # the golden set as it is
+uv run enterprise-onboarding eval-mapping --runs 3              # three times, with the spread
+uv run enterprise-onboarding eval-mapping --variant opaque      # every column renamed to a code
+uv run enterprise-onboarding eval-mapping --variant baseline    # no model, the comparison alone
+uv run enterprise-onboarding eval-summary --runs 5              # the readiness summary against its fact check
 ```
 
 Once a project's mappings are reviewed, run the later stages from the terminal (the api has to be up for the dry run, because the runner reaches the target platform over http):
@@ -502,7 +524,7 @@ Configuration is environment variables with working defaults for everything exce
 ## Project layout
 
 ```
-app/            the service: api, core (config, db, logging, errors, http), models, schemas, services, target
+app/            the service: api, core (config, db, migrations, logging, errors, http), migrations (alembic), models, schemas, services, target
 ui/             streamlit workbench, talks to the api over http
 scripts/        synthetic customer data generator, target schema export
 sample_customer/  the fictional customer's exports, business rules, kickoff notes, transformation configuration
@@ -510,7 +532,8 @@ target_platform/  the fictional saas platform's schema and documentation
 tests/          unit, integration, e2e
 evals/          golden mapping set and measured results for the ai mapping step
 deploy/         env template, postgres init
-docs/           architecture, build log
+docs/           architecture, build log, runbook
+.github/        ci
 ```
 
 ## Deployment
@@ -545,7 +568,7 @@ Rules the AWS deployment follows:
 
 ## Current limitations
 
-- **The dry run is sequential.** One request per record, about 7 ms each in process: 55 seconds for the 7,163 valid records of the sample, and the 10,000-organization customer would take about ten minutes. Batching and parallel writes are on the list; a sequential run is reproducible, and reproducible is what a rehearsal is for.
+- **The dry run is sequential and runs inside the request.** One request per record, 8 to 9 ms each in process: 55 seconds for the 7,163 valid records of the sample, and 628 seconds for the 72,302 of the 10,000-organization customer, measured. Ten minutes is past what an HTTP request should hold open. The run row already carries the job's state and a heartbeat, so the next step is a worker queue, then parallel writes partitioned by organization so the answers stay the same; a sequential run is reproducible, and reproducible is what a rehearsal is for.
 - **The summary check covers numbers and status words, not every claim.** A draft that invents a figure or softens the status is refused. A sentence that explains why Meridian needs a valid email is the model's reasoning about the facts, not a fact the check can verify; the work items and the gates beside it are.
 - **The readiness floor is a policy choice.** 95% of an entity's in-scope records, configurable, chosen for this demo. A real implementation team would set it per customer and per entity (subscriptions are billing, activities are history).
 - **The first deep link after the workbench restarts shows a "Page not found" dialog.** Streamlit resolves the page before the app has registered its pages on the server's first run; the right page renders behind it and every later visit is clean. Opening the overview first avoids it.
@@ -554,16 +577,15 @@ Rules the AWS deployment follows:
 - **One model call takes one to two minutes** on a fifteen-column file with adaptive thinking. Datasets run in parallel so a project takes as long as its slowest file, and the answer is cached, but the first suggest on a project is a wait.
 - **The mapping eval is one customer.** 41 fields, lenient alternatives, one ambiguous field. Both providers score 100% on it, which says the prompt and the providers handle this sample, not that they handle every customer.
 - **AWS deployment is designed, not deployed.** The storage switch, S3 adapter and `docs/AWS_DEPLOYMENT.md` do not exist yet.
-- **Schema management** is `create_all` at startup, not Alembic migrations.
-- **Profiling is a per-cell Python loop.** About 18 seconds for 92,751 rows. Fine for the demo; vectorized tagging or sampling above a row threshold is the fix for larger customers.
-- **Orchestration is plain Python** with the project's stage in PostgreSQL. LangGraph is evaluated against the working workflow, not before it exists.
+- **Profiling is a per-cell Python loop.** 14.7 seconds for 92,751 rows. Fine for the demo; vectorized tagging or sampling above a row threshold is the fix for larger customers.
+- **The breaker counts records, not time.** Ten records in a row that fail their retries stop a run. Against refused connections that is seconds; against a target that hangs until the 20-second timeout it is ten minutes before the run gives up.
 - **Single-tenant, no authentication.** The tool is an internal implementation tool bound to localhost; production would need API authentication, role-based review, and customer isolation.
 
 ## Future work
 
 Only after the end-to-end workflow above is solid:
 
-- LangGraph, if the workflow's state and branching earn it, with the decision recorded either way
+- runs on a worker queue, with the API answering 202 and the run id
 - RAG over the target platform's implementation docs to ground mapping suggestions
 - a second customer dataset with a different shape
 - batching and resumable runs for large datasets; vectorized profiling
@@ -573,12 +595,13 @@ Only after the end-to-end workflow above is solid:
 - additional source connectors and target adapters
 - automated rollback planning
 - PDF export of the readiness report
-- Alembic migrations once the schema settles
+- hosted tracing and evaluation dashboards for the model calls (LangSmith, or a self-hosted equivalent) once real traffic exists, after a review of what the prompts would send to a third party
 
 ## Documentation
 
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): components, data flow, database, API, AI boundaries, local vs AWS
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): components, data flow, database, API, AI boundaries, failure recovery, orchestration, observability, security and scaling considerations, local vs AWS
 - [docs/BUILD_LOG.md](docs/BUILD_LOG.md): dated engineering decisions with the alternatives that lost
+- [docs/RUNBOOK.md](docs/RUNBOOK.md): diagnosing a failed onboarding from the logs, with a real worked example
 - [target_platform/documentation](target_platform/documentation/README.md): Meridian's entity model, required fields, enums, relationships, API and validation rules
 - [sample_customer/business_rules.md](sample_customer/business_rules.md) and [implementation_notes.md](sample_customer/implementation_notes.md): the customer's rules and the kickoff notes the mapping step interprets
 
