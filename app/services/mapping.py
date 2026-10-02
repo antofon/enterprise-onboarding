@@ -38,7 +38,7 @@ from app.models.mapping import (
     MappingStatus,
     QuestionStatus,
 )
-from app.models.project import OnboardingProject, ProjectStage, SourceDataset
+from app.models.project import OnboardingProject, SourceDataset
 from app.schemas.mapping import (
     BulkApproveResult,
     DatasetSuggestResult,
@@ -48,6 +48,7 @@ from app.schemas.mapping import (
     SuggestRequest,
     SuggestRunRead,
 )
+from app.services import workflow
 from app.services.comparison import Classification, FieldComparison, compare, field_comparison_dict
 from app.services.profiling.types import DatasetProfile
 from app.services.sources import read_document, stored_profiles
@@ -941,12 +942,6 @@ def bulk_approve(
 
 # --- stage ------------------------------------------------------------------------------------
 
-_LATER_THAN_MAPPING = (
-    ProjectStage.validated,
-    ProjectStage.dry_run_complete,
-    ProjectStage.reported,
-)
-
 
 def advance_stage(session: Session, project: OnboardingProject) -> None:
     """mapped: proposals exist. in_review: a person has started deciding. ready_to_transform:
@@ -963,20 +958,12 @@ def advance_stage(session: Session, project: OnboardingProject) -> None:
             ClarificationQuestion.status == QuestionStatus.open,
         )
     ).first()
-    all_decided = all(m.decided for m in rows)
-    person_acted = any(m.decided for m in rows)
-    if all_decided and open_q is None:
-        computed = ProjectStage.ready_to_transform
-    elif person_acted:
-        computed = ProjectStage.in_review
-    else:
-        # proposals only, even with questions the model raised: nobody has reviewed yet
-        computed = ProjectStage.mapped
-    if project.stage in _LATER_THAN_MAPPING and computed == ProjectStage.ready_to_transform:
-        return
-    if project.stage != computed:
-        log.info("stage_changed", from_stage=project.stage.value, to_stage=computed.value)
-        project.stage = computed
+    workflow.reviewed(
+        project,
+        any_decided=any(m.decided for m in rows),
+        all_decided=all(m.decided for m in rows),
+        open_questions=open_q is not None,
+    )
 
 
 def list_llm_calls(session: Session, project: OnboardingProject) -> list[LlmCall]:

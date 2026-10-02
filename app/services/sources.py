@@ -17,12 +17,12 @@ from app.core.logging import get_logger, stage
 from app.models.project import (
     DatasetKind,
     OnboardingProject,
-    ProjectStage,
     SourceDataset,
     SourceField,
 )
 from app.schemas.mapping import AvailableDocument
 from app.schemas.sources import AvailableSource, ProfiledDataset, ProfileRunRead, SourceAttach
+from app.services import workflow
 from app.services.comparison import ComparisonReport, compare
 from app.services.profiling import (
     DatasetProfile,
@@ -33,6 +33,7 @@ from app.services.profiling import (
     profile_frame,
     resolve_source_path,
 )
+from app.services.workflow import Event
 
 log = get_logger(__name__)
 
@@ -258,9 +259,7 @@ def _profile_project(
             )
         )
 
-    if project.stage in (ProjectStage.created, ProjectStage.profiled):
-        project.stage = ProjectStage.profiled
-    else:
+    if not workflow.complete(project, Event.profiled):
         log.warning("reprofiled_after_mapping", stage=project.stage.value)
     session.commit()
     duration_ms = round((time.perf_counter() - started) * 1000, 1)

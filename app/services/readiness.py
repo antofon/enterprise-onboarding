@@ -42,11 +42,13 @@ from app.core.errors import AppError, NotFoundError
 from app.core.logging import get_logger, stage
 from app.models.mapping import ClarificationQuestion, LlmCall, QuestionStatus
 from app.models.migration import MigrationRun, RunKind, RunStatus, ValidationIssueRow
-from app.models.project import OnboardingProject, ProjectStage
+from app.models.project import OnboardingProject
 from app.models.report import ReadinessReport, ReadinessStatus, ReconciliationStatus
 from app.models.target import WRITE_ORDER
 from app.services import mapping as mapping_service
 from app.services import reconciliation as reconciliation_service
+from app.services import workflow
+from app.services.workflow import Event
 from app.target.schema import PLATFORM_NAME
 
 log = get_logger(__name__)
@@ -1356,8 +1358,7 @@ def _generate_report(
     report.markdown = render_markdown(content)
     report.content = content
     session.add(report)
-    if project.stage in (ProjectStage.dry_run_complete, ProjectStage.reported):
-        project.stage = ProjectStage.reported
+    workflow.complete(project, Event.reported)
     session.commit()
     log.info(
         "readiness_report",

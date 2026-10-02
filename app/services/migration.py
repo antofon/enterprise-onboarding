@@ -54,8 +54,9 @@ from app.models.migration import (
     RunStatus,
     ValidationIssueRow,
 )
-from app.models.project import OnboardingProject, ProjectStage
+from app.models.project import OnboardingProject
 from app.models.target import ID_COLUMN, WRITE_ORDER
+from app.services import workflow
 from app.services.profiling.types import Severity
 from app.services.reconciliation import (
     EntityLedger,
@@ -68,6 +69,7 @@ from app.services.transform.config import TransformationConfig
 from app.services.transform.engine import TransformResult
 from app.services.transform.types import RecordDraft, RecordIssue
 from app.services.validation import ValidationOutcome, validate
+from app.services.workflow import Event
 
 log = get_logger(__name__)
 
@@ -628,8 +630,7 @@ def run_validation(
             run.issues_truncated = _store_issues(
                 session, run, outcome.issues, settings.validation_issue_limit
             )
-            if project.stage in (ProjectStage.ready_to_transform, ProjectStage.validated):
-                project.stage = ProjectStage.validated
+            workflow.complete(project, Event.validated)
             run = _finish(session, run, status=RunStatus.completed, started=started)
         except Exception as exc:
             _fail_run(session, run.id, started, exc)
@@ -785,12 +786,7 @@ def _rehearse(
             started=started,
             error="; ".join([state.stopped, *notes]),
         )
-    if project.stage in (
-        ProjectStage.ready_to_transform,
-        ProjectStage.validated,
-        ProjectStage.dry_run_complete,
-    ):
-        project.stage = ProjectStage.dry_run_complete
+    workflow.complete(project, Event.rehearsed)
     return _finish(
         session, run, status=RunStatus.completed, started=started, error="; ".join(notes) or None
     )
