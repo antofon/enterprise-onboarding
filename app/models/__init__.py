@@ -23,6 +23,12 @@ from app.models.project import (
     SourceDataset,
     SourceField,
 )
+from app.models.report import (
+    ReadinessReport,
+    ReadinessStatus,
+    ReconciliationResult,
+    ReconciliationStatus,
+)
 from app.models.target import (
     LIVE_NAMESPACE,
     TargetActivity,
@@ -48,6 +54,10 @@ __all__ = [
     "OnboardingProject",
     "ProjectStage",
     "QuestionStatus",
+    "ReadinessReport",
+    "ReadinessStatus",
+    "ReconciliationResult",
+    "ReconciliationStatus",
     "SourceDataset",
     "SourceField",
     "TargetActivity",

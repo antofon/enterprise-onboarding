@@ -26,7 +26,7 @@ import re
 import time
 import uuid
 from collections import Counter, defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
@@ -47,8 +47,14 @@ from app.models.migration import (
     ValidationIssueRow,
 )
 from app.models.project import OnboardingProject, ProjectStage
-from app.models.target import WRITE_ORDER
+from app.models.target import ID_COLUMN, WRITE_ORDER
 from app.services.profiling.types import Severity
+from app.services.reconciliation import (
+    EntityLedger,
+    first_errors,
+    read_target_ids,
+    reconcile_run,
+)
 from app.services.transform import get_config, transform_project
 from app.services.transform.config import TransformationConfig
 from app.services.transform.engine import TransformResult
@@ -108,6 +114,12 @@ class EntityTally:
     failed: int = 0
     blocked: int = 0
     retries: int = 0
+    # valid records the run never reached: past a limit, or after it gave up on the entity
+    not_attempted: int = 0
+    # identifiers, kept for reconciliation and not for the run row
+    accepted_ids: list[str] = field(default_factory=list)
+    refused_ids: list[str] = field(default_factory=list)
+    refusals: Counter[str] = field(default_factory=Counter)
 
     def as_dict(self) -> dict[str, int]:
         return {
@@ -119,6 +131,7 @@ class EntityTally:
             "failed": self.failed,
             "blocked": self.blocked,
             "retries": self.retries,
+            "not_attempted": self.not_attempted,
         }
 
 
@@ -248,6 +261,30 @@ class TargetClient:
         response.raise_for_status()
         return dict(response.json().get("counts", {}))
 
+    def list_ids(self, entity: str, page_size: int = 1000) -> set[str]:
+        """every identifier of one entity in the namespace, paged through the target's own
+        read api. reconciliation trusts what the target says it holds, not what the run says
+        it sent."""
+        ids: set[str] = set()
+        offset = 0
+        column = ID_COLUMN[entity]
+        while True:
+            response = self.client.get(
+                f"{self.base_url}/{PLURAL[entity]}",
+                params={"limit": page_size, "offset": offset},
+                headers={
+                    "Authorization": f"Bearer {self.settings.target_api_token}",
+                    "X-Meridian-Namespace": str(self.namespace),
+                },
+                timeout=self.settings.target_request_timeout_seconds,
+            )
+            response.raise_for_status()
+            page = response.json()
+            ids.update(str(row[column]) for row in page if row.get(column) is not None)
+            if len(page) < page_size:
+                return ids
+            offset += page_size
+
     def purge(self) -> None:
         self.client.delete(
             f"{self.base_url}/namespaces/{self.namespace}",
@@ -340,6 +377,7 @@ def _totals(stats: dict[str, Any]) -> dict[str, int]:
         "rejected",
         "failed",
         "blocked",
+        "not_attempted",
     )
     return {key: sum(int(entity.get(key, 0)) for entity in stats.values()) for key in keys}
 
@@ -405,6 +443,45 @@ def _finish(
 def _selected(result: TransformResult, options: RunOptions) -> tuple[str, ...]:
     entities = options.entities or result.plan.entities
     return tuple(e for e in WRITE_ORDER if e in entities and e in result.plan.entities)
+
+
+def _ledgers(
+    result: TransformResult,
+    outcome: ValidationOutcome,
+    tallies: dict[str, EntityTally],
+    source_rows: dict[str, int],
+) -> list[EntityLedger]:
+    """what the run knows about every entity, for reconciliation. an entity the run did not
+    write (restricted with `entities`) has every valid record counted as not reached."""
+    ledgers = []
+    for entity in WRITE_ORDER:
+        if entity not in outcome.counts:
+            continue
+        counts = outcome.counts[entity]
+        drafts = result.records.get(entity, [])
+        tally = tallies.get(entity) or EntityTally(not_attempted=counts["valid"])
+        ledgers.append(
+            EntityLedger(
+                entity=entity,
+                source_rows=source_rows.get(entity, 0),
+                distinct_ids=len({d.record_id for d in drafts if d.record_id}),
+                built=counts["built"],
+                skipped_by_rule=counts["skipped_by_rule"],
+                excluded=counts["invalid"],
+                excluded_by_reason=first_errors(drafts),
+                valid=counts["valid"],
+                not_attempted=tally.not_attempted,
+                blocked=tally.blocked,
+                attempted=tally.attempted,
+                accepted=tally.accepted,
+                rejected=tally.rejected,
+                failed=tally.failed,
+                refusals_by_type=dict(tally.refusals.most_common()),
+                accepted_ids=list(tally.accepted_ids),
+                refused_ids=list(tally.refused_ids),
+            )
+        )
+    return ledgers
 
 
 # --- validation ---------------------------------------------------------------------------------
@@ -532,6 +609,15 @@ def run_dry_run(
     except httpx.HTTPError as exc:
         log.warning("target_counts_unavailable", error=str(exc)[:200])
         run.target_counts = {}
+    # reconcile before any purge, while the namespace still holds what the run wrote
+    source_rows = _source_rows_by_entity(result)
+    ledgers = _ledgers(result, outcome, tallies, source_rows)
+    reconcile_run(
+        session,
+        run,
+        ledgers=ledgers,
+        target_ids=read_target_ids(target, [ledger.entity for ledger in ledgers]),
+    )
     if options.purge_namespace_after:
         target.purge()
         run.target_counts = {}
@@ -566,8 +652,9 @@ def _write_records(
         tallies[entity] = tally
         records: list[RecordDraft] = outcome.valid.get(entity, [])
         if options.limit_per_entity is not None:
+            tally.not_attempted = max(0, len(records) - options.limit_per_entity)
             records = records[: options.limit_per_entity]
-        for draft in records:
+        for position, draft in enumerate(records):
             record_id = draft.record_id or ""
             parent = draft.payload.get("organization_id")
             if entity != "organization" and parent is not None:
@@ -596,6 +683,7 @@ def _write_records(
             tally.retries += max(0, answer.attempts - 1)
             if answer.outcome == "accepted":
                 tally.accepted += 1
+                tally.accepted_ids.append(record_id)
                 if entity == "organization":
                     accepted_organizations.add(record_id)
                 if answer.created:
@@ -605,6 +693,8 @@ def _write_records(
                 continue
             if entity == "organization":
                 refused_organizations[record_id] = answer.error_type or "refused"
+            tally.refused_ids.append(record_id)
+            tally.refusals[answer.error_type or "unknown"] += 1
             if answer.outcome == "rejected":
                 tally.rejected += 1
                 stage = FailureStage.target
@@ -628,6 +718,7 @@ def _write_records(
                 options.stop_after_failures is not None
                 and tally.rejected + tally.failed >= options.stop_after_failures
             ):
+                tally.not_attempted += len(records) - position - 1
                 log.warning(
                     "dry_run_stopped_early",
                     entity=entity,

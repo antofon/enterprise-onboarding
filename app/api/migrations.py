@@ -14,7 +14,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 
+from app.core.config import get_settings
 from app.core.db import DbSession
+from app.core.errors import NotFoundError
 from app.core.http import HttpClient
 from app.models.migration import RunKind
 from app.schemas.common import ErrorEnvelope
@@ -28,8 +30,10 @@ from app.schemas.migration import (
     TransformationPlanRead,
     ValidateRequest,
 )
+from app.schemas.report import ReconciliationRead
 from app.services import migration as migration_service
-from app.services.migration import RunOptions
+from app.services import reconciliation as reconciliation_service
+from app.services.migration import RunOptions, TargetClient
 from app.services.projects import get_project
 from app.services.transform import build_plan
 
@@ -199,3 +203,70 @@ def run_failures(
         session, run, entity=entity, error_type=error_type, limit=limit, offset=offset
     )
     return [FailureRead.model_validate(r) for r in rows]
+
+
+@router.get(
+    "/projects/{project_id}/migrations/{run_id}/reconciliation",
+    response_model=ReconciliationRead,
+    summary="the latest reconciliation of a dry run: source to target, every count accounted for",
+    responses=NOT_FOUND,
+)
+def get_reconciliation(
+    project_id: uuid.UUID, run_id: uuid.UUID, session: DbSession
+) -> ReconciliationRead:
+    project = get_project(session, project_id)
+    run = migration_service.get_run(session, project, run_id)
+    found = reconciliation_service.latest_for_run(session, run)
+    if found is None:
+        raise NotFoundError(
+            "no reconciliation for this run; only a dry run is reconciled",
+            details={"run_id": str(run_id), "kind": run.kind.value},
+        )
+    return ReconciliationRead.model_validate(found)
+
+
+@router.get(
+    "/projects/{project_id}/migrations/{run_id}/reconciliations",
+    response_model=list[ReconciliationRead],
+    summary="every reconciliation of a dry run, newest first",
+    responses=NOT_FOUND,
+)
+def list_reconciliations(
+    project_id: uuid.UUID, run_id: uuid.UUID, session: DbSession
+) -> list[ReconciliationRead]:
+    project = get_project(session, project_id)
+    run = migration_service.get_run(session, project, run_id)
+    return [
+        ReconciliationRead.model_validate(r)
+        for r in reconciliation_service.list_for_run(session, run)
+    ]
+
+
+@router.post(
+    "/projects/{project_id}/migrations/{run_id}/reconcile",
+    response_model=ReconciliationRead,
+    status_code=201,
+    summary="read the target again and compare it with what the run saw",
+    responses={
+        **NOT_FOUND,
+        409: {
+            "model": ErrorEnvelope,
+            "description": "not a completed dry run, or its namespace was purged",
+        },
+    },
+)
+def recheck(
+    project_id: uuid.UUID, run_id: uuid.UUID, session: DbSession, http: HttpClient
+) -> ReconciliationRead:
+    project = get_project(session, project_id)
+    run = migration_service.get_run(session, project, run_id)
+    target = None
+    if run.namespace is not None:
+        target = TargetClient(
+            http,
+            settings=get_settings(),
+            namespace=run.namespace,
+            request_prefix=f"recheck-{str(run.id)[:8]}",
+        )
+    result = reconciliation_service.recheck(session, run, target=target)
+    return ReconciliationRead.model_validate(result)
