@@ -64,6 +64,7 @@ select = ["E", "F", "I", "B", "UP"]
 [tool.ruff.lint.per-file-ignores]
 # the system prompt is prose; wrapping it would change what the model reads
 "app/ai/prompts.py" = ["E501"]
+"app/ai/report_prompt.py" = ["E501"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["app", "common", "views"]

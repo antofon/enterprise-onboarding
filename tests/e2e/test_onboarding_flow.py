@@ -2,9 +2,9 @@
 
 Create the project, attach four sources including the billing feed, profile them, compare the
 schemas, propose mappings, review every column the way an implementation engineer would, validate,
-and rehearse the migration against the target platform. No model is configured, so the proposals
-come from the deterministic comparison: this test is about the workflow holding together, and it
-has to hold together without an api key.
+rehearse the migration against the target platform, reconcile, and report readiness. No model is
+configured, so the proposals come from the deterministic comparison: this test is about the
+workflow holding together, and it has to hold together without an api key.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ DRY_RUN_LIMIT = 25
 GOLDEN_KEYS = {"subscriptions": "subscriptions.json"}
 
 
-def test_a_customer_goes_from_four_source_files_to_a_rehearsed_migration(client) -> None:
+def test_a_customer_goes_from_four_source_files_to_a_readiness_report(client) -> None:
     client.app.dependency_overrides[get_http_client] = lambda: client
     try:
         # 1. the project
@@ -132,6 +132,25 @@ def test_a_customer_goes_from_four_source_files_to_a_rehearsed_migration(client)
         ).json()
         assert issues
         assert sum(row["count"] for row in issues) == sum(validation["issue_counts"].values())
+
+        # 11. reconciliation: the run reconciled itself against the target as it finished
+        rec = client.get(f"/api/v1/projects/{pid}/migrations/{dry_run['id']}/reconciliation").json()
+        assert rec["status"] == "balanced", rec["discrepancies"]
+        assert rec["totals"]["source_rows"] == 9259
+        assert rec["totals"]["accepted"] == rec["totals"]["in_target"]
+
+        # 12. the readiness report: a slice is not a rehearsal of the whole migration, and the
+        # sample's real problems keep it blocked either way
+        report = client.post(f"/api/v1/projects/{pid}/reports/readiness", json={})
+        assert report.status_code == 201
+        body = report.json()
+        assert body["status"] == "BLOCKED"
+        assert "rehearsal" in {g["code"] for g in body["content"]["blockers"]}
+        assert body["content"]["customer_questions"]
+        assert body["content"]["next_steps"]
+        markdown = client.get(f"/api/v1/projects/{pid}/reports/readiness?format=markdown").text
+        assert "**Status: BLOCKED**" in markdown
+        assert client.get(f"/api/v1/projects/{pid}").json()["stage"] == "reported"
     finally:
         client.app.dependency_overrides.clear()
 

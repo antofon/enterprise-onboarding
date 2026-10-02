@@ -76,3 +76,37 @@ class MappingProposal(BaseModel):
             "assumptions made. empty list when there are none"
         )
     )
+
+
+class BlockerExplanation(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    code: str = Field(description="the work item code, copied exactly as given")
+    explanation: str = Field(
+        description=(
+            "two or three sentences for the customer's project sponsor: what is wrong, why "
+            "Meridian cannot take these records as they are, and what the customer has to do. "
+            "only numbers that appear in the facts"
+        )
+    )
+
+
+class ReadinessSummary(BaseModel):
+    """the executive summary of a readiness report. the status and every number are decided by
+    code before the model is asked; the model writes the sentences around them."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    headline: str = Field(
+        description="one sentence that states the readiness status exactly as given"
+    )
+    summary: str = Field(
+        description=(
+            "one or two short paragraphs for the customer's sponsor and the implementation lead: "
+            "where the migration stands, what the rehearsal showed, what stands between the "
+            "customer and go-live. only numbers that appear in the facts, quoted exactly"
+        )
+    )
+    blocker_explanations: list[BlockerExplanation] = Field(
+        description="one entry for each work item listed under explain, in the order given"
+    )

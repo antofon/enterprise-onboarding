@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     # how many rejected or failed records one dry run stores in full
     migration_failure_limit: int = 2000
 
+    # readiness policy: an entity where fewer than this share of in-scope records landed in the
+    # rehearsal blocks go-live. anything short of all of them is a condition the customer signs
+    readiness_min_entity_coverage: float = Field(default=0.95, ge=0.0, le=1.0)
+
     llm_provider: LlmProvider = "none"
     anthropic_api_key: str | None = None
     anthropic_model: str = "claude-opus-5"

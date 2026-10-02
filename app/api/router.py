@@ -9,6 +9,7 @@ from app.api import (
     mappings,
     migrations,
     projects,
+    reports,
     sources,
     target,
 )
@@ -22,6 +23,7 @@ v1.include_router(sources.router)
 v1.include_router(mappings.router)
 v1.include_router(clarifications.router)
 v1.include_router(migrations.router)
+v1.include_router(reports.router)
 api_router.include_router(v1)
 
 # simulated external systems live under their own prefixes, outside /api/v1
