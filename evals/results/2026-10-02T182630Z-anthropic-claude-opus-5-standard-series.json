@@ -1,0 +1,73 @@
+{
+  "runs": 3,
+  "metrics": {
+    "correct": {
+      "min": 41.0,
+      "max": 41.0,
+      "mean": 41.0
+    },
+    "accuracy": {
+      "min": 1.0,
+      "max": 1.0,
+      "mean": 1.0
+    },
+    "target_correct": {
+      "min": 33.0,
+      "max": 33.0,
+      "mean": 33.0
+    },
+    "wrong": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "overconfident": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "deferred": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "unresolved": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "incorrect_high_confidence": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "clarification_recall": {
+      "min": 1.0,
+      "max": 1.0,
+      "mean": 1.0
+    },
+    "clarification_false_positives": {
+      "min": 6.0,
+      "max": 8.0,
+      "mean": 7.0
+    },
+    "mean_confidence_correct": {
+      "min": 0.841,
+      "max": 0.842,
+      "mean": 0.842
+    }
+  },
+  "unstable_fields": {},
+  "usage": {
+    "input_tokens": 127978,
+    "output_tokens": 71434
+  },
+  "provider": "anthropic",
+  "model": "claude-opus-5",
+  "variant": "standard",
+  "run_started": [
+    "2026-10-02T18:22:41+00:00",
+    "2026-10-02T18:24:35+00:00",
+    "2026-10-02T18:26:30+00:00"
+  ]
+}

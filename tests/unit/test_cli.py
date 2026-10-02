@@ -56,3 +56,40 @@ def test_a_report_format_other_than_markdown_or_json_is_refused() -> None:
     result = runner.invoke(cli.app, ["readiness-report", "latest", "--format", "pdf"])
     assert result.exit_code == 2
     assert "markdown or json" in result.output
+
+
+def test_the_baseline_eval_runs_with_no_model() -> None:
+    result = runner.invoke(cli.app, ["eval-mapping", "--variant", "baseline", "--out", ""])
+    assert result.exit_code == 0, result.output
+    assert "none / deterministic comparison" in result.stdout
+    assert "fields 41  correct 31" in result.stdout
+
+
+def test_an_unknown_eval_variant_is_refused() -> None:
+    result = runner.invoke(cli.app, ["eval-mapping", "--variant", "upside-down"])
+    assert result.exit_code == 2
+    assert "standard, opaque or baseline" in result.output
+
+
+def test_repeated_mapping_runs_report_the_spread(monkeypatch, tmp_path) -> None:
+    from tests.fakes import FakeProvider
+
+    monkeypatch.setattr(cli, "_require_provider", lambda: FakeProvider())
+    result = runner.invoke(cli.app, ["eval-mapping", "--runs", "2", "--out", str(tmp_path)])
+    assert result.exit_code == 0, result.output
+    assert "--- run 2 of 2" in result.stdout
+    assert "fields whose outcome changed between runs: 0" in result.stdout
+    series = list(tmp_path.glob("*-standard-series.json"))
+    assert len(series) == 1
+    assert json.loads(series[0].read_text())["runs"] == 2
+    assert len(list(tmp_path.glob("*.json"))) == 3  # two runs and the series
+
+
+def test_the_summary_eval_prints_its_counts(monkeypatch, tmp_path) -> None:
+    from tests.unit.test_evaluation import ScriptedSummaries
+
+    monkeypatch.setattr(cli, "_require_provider", lambda: ScriptedSummaries("good"))
+    result = runner.invoke(cli.app, ["eval-summary", "--runs", "2", "--out", str(tmp_path)])
+    assert result.exit_code == 0, result.output
+    assert "2 runs: 2 passed first time, 0 after feedback, 0 fell back" in result.stdout
+    assert len(list(tmp_path.glob("*-summary.json"))) == 1

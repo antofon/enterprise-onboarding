@@ -1,0 +1,75 @@
+{
+  "ran_at": "2026-10-02T18:37:38+00:00",
+  "provider": "openai",
+  "model": "gpt-5",
+  "prompt_version": "2026-10-02.2",
+  "source": "evals/readiness_report_apex.json",
+  "status": "BLOCKED",
+  "explain_codes": [
+    "subscription:business_rule_violation",
+    "activity:unmapped_value",
+    "contact:malformed_email",
+    "organization:missing_required",
+    "contact:phone_too_short"
+  ],
+  "metrics": {
+    "runs": 5,
+    "passed_first_attempt": 5,
+    "passed_after_feedback": 0,
+    "fell_back_to_template": 0,
+    "provider_errors": 0,
+    "attempts_total": 5,
+    "rejected_drafts": 0,
+    "rejection_kinds": {},
+    "mean_latency_ms": 52779.1,
+    "input_tokens": 15515,
+    "output_tokens": 19573
+  },
+  "runs": [
+    {
+      "passed": true,
+      "attempts": 1,
+      "rejections": [],
+      "error": null,
+      "input_tokens": 3103,
+      "output_tokens": 3329,
+      "latency_ms": 70734.0
+    },
+    {
+      "passed": true,
+      "attempts": 1,
+      "rejections": [],
+      "error": null,
+      "input_tokens": 3103,
+      "output_tokens": 3503,
+      "latency_ms": 45771.3
+    },
+    {
+      "passed": true,
+      "attempts": 1,
+      "rejections": [],
+      "error": null,
+      "input_tokens": 3103,
+      "output_tokens": 4785,
+      "latency_ms": 64438.1
+    },
+    {
+      "passed": true,
+      "attempts": 1,
+      "rejections": [],
+      "error": null,
+      "input_tokens": 3103,
+      "output_tokens": 3874,
+      "latency_ms": 37509.8
+    },
+    {
+      "passed": true,
+      "attempts": 1,
+      "rejections": [],
+      "error": null,
+      "input_tokens": 3103,
+      "output_tokens": 4082,
+      "latency_ms": 45442.4
+    }
+  ]
+}

@@ -243,19 +243,80 @@ def suggest(
 def eval_mapping(
     golden: str = typer.Option("evals/expected_mappings.json", help="the golden set"),
     out: str = typer.Option("evals/results", help="where the result json lands; '' to skip"),
+    variant: str = typer.Option(
+        "standard",
+        help="standard: the sample as it is. opaque: every column renamed to a meaningless code. "
+        "baseline: the deterministic comparison alone, no model",
+    ),
+    runs: int = typer.Option(1, min=1, help="run it this many times and report the spread"),
 ) -> None:
     """run the mapping prompt over the golden set and score it. writes evals/results/*.json."""
+    from datetime import UTC, datetime
     from pathlib import Path
 
-    from app.services.evaluation import run_mapping_eval
-
-    _logging()
-    provider = _require_provider()
-    report = run_mapping_eval(
-        provider, golden_path=Path(golden), out_dir=Path(out) if out else None
+    from app.services.evaluation import (
+        load_golden,
+        opaque_variant,
+        run_baseline_eval,
+        run_mapping_eval,
+        summarize_series,
     )
+
+    if variant not in ("standard", "opaque", "baseline"):
+        raise typer.BadParameter("--variant is standard, opaque or baseline")
+    _logging()
+    out_dir = Path(out) if out else None
+    if variant == "baseline":
+        _print_eval(run_baseline_eval(golden_path=Path(golden), out_dir=out_dir))
+        return
+    provider = _require_provider()
+    data = load_golden(Path(golden))
+    if variant == "opaque":
+        data = opaque_variant(data)
+    reports = []
+    for n in range(runs):
+        if runs > 1:
+            typer.echo(f"--- run {n + 1} of {runs}")
+        report = run_mapping_eval(
+            provider,
+            golden_path=Path(golden),
+            golden=data,
+            variant=variant,  # type: ignore[arg-type]
+            out_dir=out_dir,
+        )
+        _print_eval(report)
+        reports.append(report)
+    if runs > 1:
+        import json
+
+        series = summarize_series(reports)
+        typer.echo(f"--- {runs} runs")
+        for key, spread in series["metrics"].items():
+            typer.echo(
+                f"  {key:<32} min {spread['min']}  max {spread['max']}  mean {spread['mean']}"
+            )
+        unstable = series["unstable_fields"]
+        typer.echo(f"  fields whose outcome changed between runs: {len(unstable)}")
+        for field_name, outcomes in unstable.items():
+            typer.echo(f"    {field_name}: {', '.join(outcomes)}")
+        if out_dir is not None:
+            stamp = datetime.now(UTC).strftime("%Y-%m-%dT%H%M%SZ")
+            path = out_dir / f"{stamp}-{provider.name}-{provider.model}-{variant}-series.json"
+            series.update(
+                provider=provider.name,
+                model=provider.model,
+                variant=variant,
+                run_started=[r.ran_at for r in reports],
+            )
+            path.write_text(json.dumps(series, indent=2) + "\n")
+            typer.echo(f"  series written to {path}")
+
+
+def _print_eval(report) -> None:
     m = report.metrics
-    typer.echo(f"{report.provider} / {report.model}, prompt {report.prompt_version}")
+    typer.echo(
+        f"{report.provider} / {report.model}, prompt {report.prompt_version}, {report.variant}"
+    )
     typer.echo(
         f"fields {m['fields']}  correct {m['correct']}  accuracy {m['accuracy']}  "
         f"target accuracy {m['target_accuracy']} ({m['target_correct']}/{m['target_fields']})"
@@ -278,7 +339,7 @@ def eval_mapping(
     u = report.usage
     typer.echo(
         f"{u['calls']} calls, {u['attempts']} attempts, {u['input_tokens']} in / "
-        f"{u['output_tokens']} out tokens, {u['latency_ms']:.0f} ms"
+        f"{u['output_tokens']} out tokens, {u.get('latency_ms', 0):.0f} ms"
     )
     typer.echo("")
     for r in report.rows:
@@ -289,6 +350,48 @@ def eval_mapping(
                 f"{', asks' if r.clarification_required else ''}), expected "
                 f"{r.expected or '-'}{' or a question' if r.clarify_expected else ''}"
             )
+
+
+@app.command("eval-summary")
+def eval_summary(
+    content: str = typer.Option(
+        "evals/readiness_report_apex.json",
+        help="a readiness report's json (the content of a stored report) to draft from",
+    ),
+    runs: int = typer.Option(5, min=1, help="how many summaries to draft"),
+    out: str = typer.Option("evals/results", help="where the result json lands; '' to skip"),
+) -> None:
+    """draft the readiness summary RUNS times from one report's facts and count how often the
+    check passes it first time, after feedback, or not at all."""
+    import json
+    from pathlib import Path
+
+    from app.services.evaluation import run_summary_eval
+
+    _logging()
+    provider = _require_provider()
+    report = run_summary_eval(
+        provider,
+        json.loads(Path(content).read_text()),
+        runs=runs,
+        source=content,
+        out_dir=Path(out) if out else None,
+    )
+    m = report.metrics
+    typer.echo(
+        f"{report.provider} / {report.model}, prompt {report.prompt_version}, {report.status}"
+    )
+    typer.echo(
+        f"{m['runs']} runs: {m['passed_first_attempt']} passed first time, "
+        f"{m['passed_after_feedback']} after feedback, {m['fell_back_to_template']} fell back to "
+        f"the template ({m['provider_errors']} provider errors)"
+    )
+    typer.echo(
+        f"{m['rejected_drafts']} drafts rejected; mean {m['mean_latency_ms'] / 1000:.1f}s per "
+        f"summary; {m['input_tokens']} in / {m['output_tokens']} out tokens"
+    )
+    for kind, count in m["rejection_kinds"].items():
+        typer.echo(f"  {count:>3}  {kind}")
 
 
 # --- transformation and migration ---------------------------------------------------------------

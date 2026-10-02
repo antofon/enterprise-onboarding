@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 import re
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from sqlalchemy import select
@@ -333,10 +333,70 @@ def draft_summary(
         latency_ms=0.0,
     )
     session.add(call)
+    asked = request_summary(
+        provider, bundle, facts=facts, status=content["status"], codes=codes, settings=settings
+    )
+    call.attempts = asked.attempts
+    call.model = asked.model or provider.model
+    call.input_tokens = asked.input_tokens
+    call.output_tokens = asked.output_tokens
+    call.latency_ms = asked.latency_ms
+    call.request_id = asked.request_id
+    if asked.error is not None:
+        call.error = asked.error
+        return SummaryOutcome(
+            summary=template_summary(content),
+            origin="template",
+            note=f"the model could not be reached ({asked.error}); the summary is written "
+            "from the facts by code",
+            call=call,
+        )
+    if asked.summary is not None:
+        call.status = "ok"
+        call.response = asked.summary.model_dump()
+        return SummaryOutcome(summary=asked.summary.model_dump(), origin="model", call=call)
+    problems = asked.rejections[-1]
+    call.error = "; ".join(problems)[:2000]
+    return SummaryOutcome(
+        summary=template_summary(content),
+        origin="template",
+        note=f"the model's draft failed the check against the facts {call.attempts} times "
+        f"({problems[0]}); the summary is written from the facts by code",
+        call=call,
+    )
+
+
+@dataclass
+class SummaryRequest:
+    """how one request for a summary went: the draft that passed, or none, and every rejection
+    on the way. Shared by the report and the eval, so the eval measures exactly what the report
+    does."""
+
+    summary: ReadinessSummary | None = None
+    attempts: int = 0
+    rejections: list[list[str]] = field(default_factory=list)
+    error: str | None = None
+    model: str | None = None
+    input_tokens: int = 0
+    output_tokens: int = 0
+    latency_ms: float = 0.0
+    request_id: str | None = None
+
+
+def request_summary(
+    provider: LlmProvider,
+    bundle: Any,
+    *,
+    facts: dict[str, Any],
+    status: str,
+    codes: list[str],
+    settings: Settings,
+) -> SummaryRequest:
+    """ask, check, send the problems back, up to LLM_MAX_ATTEMPTS. no database."""
+    out = SummaryRequest()
     feedback = ""
-    problems: list[str] = []
-    while call.attempts < settings.llm_max_attempts:
-        call.attempts += 1
+    while out.attempts < settings.llm_max_attempts:
+        out.attempts += 1
         try:
             result: StructuredResult[ReadinessSummary] = provider.complete(
                 system=bundle.system,
@@ -345,20 +405,14 @@ def draft_summary(
                 max_tokens=settings.llm_max_output_tokens,
             )
         except (LlmError, LlmUnavailableError) as exc:
-            call.error = exc.message
-            log.warning("readiness_summary_failed", error=exc.message, attempt=call.attempts)
-            return SummaryOutcome(
-                summary=template_summary(content),
-                origin="template",
-                note=f"the model could not be reached ({exc.message}); the summary is written "
-                "from the facts by code",
-                call=call,
-            )
-        call.model = result.model
-        call.input_tokens = (call.input_tokens or 0) + (result.input_tokens or 0)
-        call.output_tokens = (call.output_tokens or 0) + (result.output_tokens or 0)
-        call.latency_ms = round((call.latency_ms or 0) + result.latency_ms, 1)
-        call.request_id = result.request_id
+            out.error = exc.message
+            log.warning("readiness_summary_failed", error=exc.message, attempt=out.attempts)
+            return out
+        out.model = result.model
+        out.input_tokens += result.input_tokens or 0
+        out.output_tokens += result.output_tokens or 0
+        out.latency_ms = round(out.latency_ms + result.latency_ms, 1)
+        out.request_id = result.request_id
         parsed = result.parsed
         parsed = ReadinessSummary(
             headline=_no_em_dash(parsed.headline),
@@ -368,29 +422,22 @@ def draft_summary(
                 for b in parsed.blocker_explanations
             ],
         )
-        problems = check_summary(parsed, facts=facts, status=content["status"], codes=codes)
+        problems = check_summary(parsed, facts=facts, status=status, codes=codes)
         if not problems:
-            call.status = "ok"
-            call.response = parsed.model_dump()
+            out.summary = parsed
             log.info(
                 "readiness_summary",
-                model=call.model,
-                attempts=call.attempts,
-                input_tokens=call.input_tokens,
-                output_tokens=call.output_tokens,
-                duration_ms=call.latency_ms,
+                model=out.model,
+                attempts=out.attempts,
+                input_tokens=out.input_tokens,
+                output_tokens=out.output_tokens,
+                duration_ms=out.latency_ms,
             )
-            return SummaryOutcome(summary=parsed.model_dump(), origin="model", call=call)
-        log.warning("readiness_summary_rejected", attempt=call.attempts, problems=problems[:5])
+            return out
+        out.rejections.append(problems)
+        log.warning("readiness_summary_rejected", attempt=out.attempts, problems=problems[:5])
         feedback = (
             "\n\nYour previous answer had these problems. Fix them and answer again in full:\n- "
             + "\n- ".join(problems)
         )
-    call.error = "; ".join(problems)[:2000]
-    return SummaryOutcome(
-        summary=template_summary(content),
-        origin="template",
-        note=f"the model's draft failed the check against the facts {call.attempts} times "
-        f"({problems[0]}); the summary is written from the facts by code",
-        call=call,
-    )
+    return out

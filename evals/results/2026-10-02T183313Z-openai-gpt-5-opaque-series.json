@@ -1,0 +1,72 @@
+{
+  "runs": 2,
+  "metrics": {
+    "correct": {
+      "min": 40.0,
+      "max": 40.0,
+      "mean": 40.0
+    },
+    "accuracy": {
+      "min": 0.976,
+      "max": 0.976,
+      "mean": 0.976
+    },
+    "target_correct": {
+      "min": 32.0,
+      "max": 32.0,
+      "mean": 32.0
+    },
+    "wrong": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "overconfident": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "deferred": {
+      "min": 1.0,
+      "max": 1.0,
+      "mean": 1.0
+    },
+    "unresolved": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "incorrect_high_confidence": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "clarification_recall": {
+      "min": 1.0,
+      "max": 1.0,
+      "mean": 1.0
+    },
+    "clarification_false_positives": {
+      "min": 8.0,
+      "max": 9.0,
+      "mean": 8.5
+    },
+    "mean_confidence_correct": {
+      "min": 0.807,
+      "max": 0.825,
+      "mean": 0.816
+    }
+  },
+  "unstable_fields": {},
+  "usage": {
+    "input_tokens": 47124,
+    "output_tokens": 57455
+  },
+  "provider": "openai",
+  "model": "gpt-5",
+  "variant": "opaque",
+  "run_started": [
+    "2026-10-02T18:30:54+00:00",
+    "2026-10-02T18:33:13+00:00"
+  ]
+}

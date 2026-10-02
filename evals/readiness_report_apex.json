@@ -1,0 +1,1354 @@
+{
+  "blockers": [
+    {
+      "code": "coverage:organization",
+      "detail": "889 of 1,030 organizations in scope landed (86.3%); 141 stay behind. The floor is 95%.",
+      "outcome": "blocker",
+      "title": "Too many organizations cannot migrate"
+    },
+    {
+      "code": "coverage:contact",
+      "detail": "1,702 of 2,279 contacts in scope landed (74.7%); 577 stay behind. The floor is 95%.",
+      "outcome": "blocker",
+      "title": "Too many contacts cannot migrate"
+    },
+    {
+      "code": "coverage:subscription",
+      "detail": "414 of 928 subscriptions in scope landed (44.6%); 514 stay behind. The floor is 95%.",
+      "outcome": "blocker",
+      "title": "Too many subscriptions cannot migrate"
+    },
+    {
+      "code": "coverage:activity",
+      "detail": "4,158 of 4,947 activities in scope landed (84.1%); 789 stay behind. The floor is 95%.",
+      "outcome": "blocker",
+      "title": "Too many activities cannot migrate"
+    }
+  ],
+  "conditions": [
+    {
+      "code": "warnings",
+      "detail": "308 records pass but carry a warning somebody has to read and accept before go-live.",
+      "outcome": "condition",
+      "title": "Records will migrate with warnings"
+    }
+  ],
+  "customer_questions": [
+    {
+      "code": "subscription:business_rule_violation",
+      "question": "These 311 subscriptions are live in billing, but the account each one belongs to migrates as inactive, and Meridian allows no live subscription under an inactive account. For each account: should it stay active in Meridian, or should the subscription end before migration?",
+      "records": 311,
+      "source": "validation"
+    },
+    {
+      "code": "activity:unmapped_value",
+      "question": "Which Meridian value should 'Call' in kind become? Until a rule says so, these 215 activities stay behind.",
+      "records": 215,
+      "source": "validation"
+    },
+    {
+      "code": "subscription:unmapped_value",
+      "question": "Which Meridian value should 'Trial' in plan become? Until a rule says so, these 27 subscriptions stay behind.",
+      "records": 27,
+      "source": "validation"
+    },
+    {
+      "code": "organization:unmapped_value",
+      "question": "Which Meridian value should 'Actve' in lifecycle_status become? Until a rule says so, these 16 organizations stay behind.",
+      "records": 16,
+      "source": "validation"
+    },
+    {
+      "code": "subscription:undecidable_plan",
+      "question": "Which plan should this 1 subscription get? The rule that decides 'Legacy Gold' needs a value the export does not have.",
+      "records": 1,
+      "source": "validation"
+    },
+    {
+      "code": "subscription:plan_conflicts_with_tier",
+      "question": "22 subscriptions sit on accounts whose tier calls for a different plan (customer rule 4). Is the billing plan right, or should these accounts move plan?",
+      "records": 22,
+      "source": "validation"
+    },
+    {
+      "code": "organization:ambiguous_country",
+      "question": "Which country are these 7 organizations in? The export says 'CA' and has no state or region to decide it.",
+      "records": 7,
+      "source": "validation"
+    }
+  ],
+  "facts": {
+    "data_profile": {
+      "datasets": [
+        {
+          "columns": 7,
+          "errors": 1,
+          "info": 2,
+          "kind": "csv",
+          "name": "activity.csv",
+          "profiled": true,
+          "rows": 4947,
+          "warnings": 6
+        },
+        {
+          "columns": 9,
+          "errors": 2,
+          "info": 6,
+          "kind": "csv",
+          "name": "contacts.csv",
+          "profiled": true,
+          "rows": 2279,
+          "warnings": 5
+        },
+        {
+          "columns": 15,
+          "errors": 3,
+          "info": 7,
+          "kind": "csv",
+          "name": "organizations.csv",
+          "profiled": true,
+          "rows": 1030,
+          "warnings": 13
+        },
+        {
+          "columns": 10,
+          "errors": 1,
+          "info": 1,
+          "kind": "json",
+          "name": "subscriptions.json",
+          "profiled": true,
+          "rows": 1003,
+          "warnings": 7
+        }
+      ],
+      "profiled": 4,
+      "rows": 9259
+    },
+    "dry_run": {
+      "applied_rules": {
+        "ca_country_from_region (customer rule 5)": 35,
+        "dormant_account_inactive (customer rule 2)": 469,
+        "drop_dead_trials (customer rule 11)": 75,
+        "drop_dead_trials (customer rule 11): records not migrated": 75,
+        "legacy_gold_seat_split (customer rule 7)": 6
+      },
+      "as_of": "2026-10-01",
+      "config_version": "2026-10-01.1",
+      "duration_seconds": 65.0,
+      "failures_truncated": false,
+      "id": "06502c70-d113-4c0f-81db-363eb7cbfadb",
+      "issue_counts": {
+        "ambiguous_country": 7,
+        "business_rule_violation": 311,
+        "date_in_future": 3,
+        "duplicate_contact_email": 45,
+        "duplicate_identifier": 15,
+        "duplicate_primary_contact": 43,
+        "invalid_value": 9,
+        "malformed_email": 106,
+        "missing_identifier": 13,
+        "missing_relationship": 143,
+        "missing_required": 181,
+        "no_primary_contact": 152,
+        "parent_record_rejected": 839,
+        "phone_too_short": 88,
+        "plan_conflicts_with_tier": 22,
+        "primary_contact_missing": 16,
+        "primary_contact_not_found": 127,
+        "undecidable_plan": 1,
+        "unmapped_value": 258
+      },
+      "issues_truncated": false,
+      "namespace": "d09faa98-80c1-4d33-81cd-1fb3b9d685ab",
+      "namespace_kept": true,
+      "options": {
+        "entities": null,
+        "limit_per_entity": null,
+        "purge_namespace_after": false,
+        "stop_after_failures": null
+      },
+      "partial": false,
+      "plan_current": true,
+      "plan_stale_reason": null,
+      "started_at": "2026-10-02T07:37:14+00:00",
+      "stats": {
+        "activity": {
+          "accepted": 4158,
+          "attempted": 4158,
+          "blocked": 0,
+          "built": 4947,
+          "created": 4158,
+          "failed": 0,
+          "invalid": 789,
+          "not_attempted": 0,
+          "rejected": 0,
+          "retries": 0,
+          "skipped_by_rule": 0,
+          "source_rows": 4947,
+          "unchanged": 0,
+          "valid": 4158,
+          "with_warnings": 0
+        },
+        "contact": {
+          "accepted": 1702,
+          "attempted": 1702,
+          "blocked": 0,
+          "built": 2279,
+          "created": 1702,
+          "failed": 0,
+          "invalid": 577,
+          "not_attempted": 0,
+          "rejected": 0,
+          "retries": 0,
+          "skipped_by_rule": 0,
+          "source_rows": 2279,
+          "unchanged": 0,
+          "valid": 1702,
+          "with_warnings": 152
+        },
+        "organization": {
+          "accepted": 889,
+          "attempted": 889,
+          "blocked": 0,
+          "built": 1030,
+          "created": 889,
+          "failed": 0,
+          "invalid": 141,
+          "not_attempted": 0,
+          "rejected": 0,
+          "retries": 0,
+          "skipped_by_rule": 0,
+          "source_rows": 1030,
+          "unchanged": 0,
+          "valid": 889,
+          "with_warnings": 134
+        },
+        "subscription": {
+          "accepted": 414,
+          "attempted": 414,
+          "blocked": 0,
+          "built": 1003,
+          "created": 414,
+          "failed": 0,
+          "invalid": 514,
+          "not_attempted": 0,
+          "rejected": 0,
+          "retries": 0,
+          "skipped_by_rule": 75,
+          "source_rows": 1003,
+          "unchanged": 0,
+          "valid": 414,
+          "with_warnings": 22
+        }
+      },
+      "target_counts": {
+        "activity": 4158,
+        "contact": 1702,
+        "organization": 889,
+        "subscription": 414
+      },
+      "totals": {
+        "accepted": 7163,
+        "attempted": 7163,
+        "blocked": 0,
+        "built": 9259,
+        "failed": 0,
+        "invalid": 2021,
+        "not_attempted": 0,
+        "rejected": 0,
+        "skipped_by_rule": 75,
+        "source_rows": 9259,
+        "valid": 7163,
+        "with_warnings": 308
+      }
+    },
+    "environment": {
+      "target_fault_rate": 0.0
+    },
+    "generated_at": "2026-10-02T08:01:54+00:00",
+    "issue_groups": [
+      {
+        "entity": "activity",
+        "error_type": "parent_record_rejected",
+        "fields": [
+          "organization_id"
+        ],
+        "records": 519,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "subscription",
+        "error_type": "business_rule_violation",
+        "fields": [
+          "status"
+        ],
+        "records": 311,
+        "rule": "platform rule: no live subscription under a dormant account",
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "contact",
+        "error_type": "parent_record_rejected",
+        "fields": [
+          "organization_id"
+        ],
+        "records": 231,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "activity",
+        "error_type": "unmapped_value",
+        "fields": [
+          "kind"
+        ],
+        "records": 215,
+        "rule": null,
+        "severity": "error",
+        "values": [
+          [
+            "Call",
+            215
+          ]
+        ]
+      },
+      {
+        "entity": "contact",
+        "error_type": "malformed_email",
+        "fields": [
+          "email"
+        ],
+        "records": 106,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "organization",
+        "error_type": "missing_required",
+        "fields": [
+          "billing_country",
+          "lifecycle_status"
+        ],
+        "records": 97,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "subscription",
+        "error_type": "parent_record_rejected",
+        "fields": [
+          "organization_id"
+        ],
+        "records": 89,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "contact",
+        "error_type": "phone_too_short",
+        "fields": [
+          "phone"
+        ],
+        "records": 88,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "contact",
+        "error_type": "missing_relationship",
+        "fields": [
+          "organization_id"
+        ],
+        "records": 70,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "subscription",
+        "error_type": "missing_required",
+        "fields": [
+          "seats",
+          "renewal_date",
+          "start_date"
+        ],
+        "records": 61,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "activity",
+        "error_type": "missing_relationship",
+        "fields": [
+          "organization_id"
+        ],
+        "records": 55,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "contact",
+        "error_type": "duplicate_contact_email",
+        "fields": [
+          "email"
+        ],
+        "records": 45,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "contact",
+        "error_type": "duplicate_primary_contact",
+        "fields": [
+          "is_primary"
+        ],
+        "records": 43,
+        "rule": "platform rule: one primary contact per organization",
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "subscription",
+        "error_type": "unmapped_value",
+        "fields": [
+          "plan"
+        ],
+        "records": 27,
+        "rule": null,
+        "severity": "error",
+        "values": [
+          [
+            "Trial",
+            27
+          ]
+        ]
+      },
+      {
+        "entity": "contact",
+        "error_type": "missing_required",
+        "fields": [
+          "organization_id"
+        ],
+        "records": 19,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "subscription",
+        "error_type": "missing_relationship",
+        "fields": [
+          "organization_id"
+        ],
+        "records": 18,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "organization",
+        "error_type": "unmapped_value",
+        "fields": [
+          "lifecycle_status"
+        ],
+        "records": 16,
+        "rule": null,
+        "severity": "error",
+        "values": [
+          [
+            "Actve",
+            16
+          ]
+        ]
+      },
+      {
+        "entity": "organization",
+        "error_type": "duplicate_identifier",
+        "fields": [
+          "organization_id"
+        ],
+        "records": 15,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "organization",
+        "error_type": "missing_identifier",
+        "fields": [
+          "organization_id"
+        ],
+        "records": 13,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "subscription",
+        "error_type": "invalid_value",
+        "fields": [],
+        "records": 9,
+        "rule": null,
+        "severity": "error",
+        "values": []
+      },
+      {
+        "entity": "subscription",
+        "error_type": "undecidable_plan",
+        "fields": [
+          "plan"
+        ],
+        "records": 1,
+        "rule": "legacy_gold_seat_split (customer rule 7)",
+        "severity": "error",
+        "values": [
+          [
+            "Legacy Gold",
+            1
+          ]
+        ]
+      },
+      {
+        "entity": "contact",
+        "error_type": "no_primary_contact",
+        "fields": [
+          "is_primary"
+        ],
+        "records": 152,
+        "rule": "customer rule 1",
+        "severity": "warning",
+        "values": []
+      },
+      {
+        "entity": "organization",
+        "error_type": "primary_contact_not_found",
+        "fields": [
+          "primary_contact_email"
+        ],
+        "records": 127,
+        "rule": "primary_from_account_email (customer rule 1)",
+        "severity": "warning",
+        "values": []
+      },
+      {
+        "entity": "subscription",
+        "error_type": "plan_conflicts_with_tier",
+        "fields": [
+          "plan"
+        ],
+        "records": 22,
+        "rule": "customer rule 4",
+        "severity": "warning",
+        "values": [
+          [
+            "professional",
+            15
+          ],
+          [
+            "starter",
+            7
+          ]
+        ]
+      },
+      {
+        "entity": "organization",
+        "error_type": "primary_contact_missing",
+        "fields": [
+          "primary_contact_email"
+        ],
+        "records": 16,
+        "rule": "primary_from_account_email (customer rule 1)",
+        "severity": "warning",
+        "values": []
+      },
+      {
+        "entity": "organization",
+        "error_type": "ambiguous_country",
+        "fields": [
+          "billing_country"
+        ],
+        "records": 7,
+        "rule": "ca_country_from_region (customer rule 5)",
+        "severity": "warning",
+        "values": [
+          [
+            "CA",
+            7
+          ]
+        ]
+      },
+      {
+        "entity": "organization",
+        "error_type": "date_in_future",
+        "fields": [
+          "customer_since"
+        ],
+        "records": 3,
+        "rule": null,
+        "severity": "warning",
+        "values": []
+      }
+    ],
+    "mappings": {
+      "approved": 33,
+      "approved_below_high_confidence": 0,
+      "approved_by_origin": {
+        "manual": 33
+      },
+      "high_confidence_threshold": 0.85,
+      "ignored": 8,
+      "open_questions": 0,
+      "rejected": 0,
+      "required_missing": [],
+      "total": 41,
+      "undecided": 0
+    },
+    "open_questions": [],
+    "policy": {
+      "min_entity_coverage": 0.95
+    },
+    "project": {
+      "customer": "Apex Equipment Services",
+      "id": "346ee17d-ff4a-4ced-84d2-ad6d72c794b7",
+      "name": "Day 4 rehearsal",
+      "source_systems": [
+        "Legacy CRM",
+        "LegacyBill 4.2"
+      ],
+      "stage": "reported",
+      "target_environment": "staging",
+      "target_platform": "Meridian"
+    },
+    "reconciliation": {
+      "checks_passed": 28,
+      "checks_total": 28,
+      "created_at": "2026-10-02T07:52:31+00:00",
+      "discrepancies": [],
+      "entities": {
+        "activity": {
+          "accepted": 4158,
+          "attempted": 4158,
+          "blocked": 0,
+          "built": 4947,
+          "coverage": 0.8405,
+          "distinct_ids": 4947,
+          "excluded": 789,
+          "excluded_by_reason": {
+            "missing_relationship": 55,
+            "parent_record_rejected": 519,
+            "unmapped_value": 215
+          },
+          "failed": 0,
+          "in_scope": 4947,
+          "in_target": 4158,
+          "not_attempted": 0,
+          "refusals_by_type": {},
+          "rejected": 0,
+          "skipped_by_rule": 0,
+          "source_rows": 4947,
+          "valid": 4158
+        },
+        "contact": {
+          "accepted": 1702,
+          "attempted": 1702,
+          "blocked": 0,
+          "built": 2279,
+          "coverage": 0.7468,
+          "distinct_ids": 2279,
+          "excluded": 577,
+          "excluded_by_reason": {
+            "duplicate_contact_email": 25,
+            "duplicate_primary_contact": 43,
+            "malformed_email": 106,
+            "missing_relationship": 70,
+            "missing_required": 19,
+            "parent_record_rejected": 231,
+            "phone_too_short": 83
+          },
+          "failed": 0,
+          "in_scope": 2279,
+          "in_target": 1702,
+          "not_attempted": 0,
+          "refusals_by_type": {},
+          "rejected": 0,
+          "skipped_by_rule": 0,
+          "source_rows": 2279,
+          "valid": 1702
+        },
+        "organization": {
+          "accepted": 889,
+          "attempted": 889,
+          "blocked": 0,
+          "built": 1030,
+          "coverage": 0.8631,
+          "distinct_ids": 999,
+          "excluded": 141,
+          "excluded_by_reason": {
+            "duplicate_identifier": 15,
+            "missing_identifier": 13,
+            "missing_required": 97,
+            "unmapped_value": 16
+          },
+          "failed": 0,
+          "in_scope": 1030,
+          "in_target": 889,
+          "not_attempted": 0,
+          "refusals_by_type": {},
+          "rejected": 0,
+          "skipped_by_rule": 0,
+          "source_rows": 1030,
+          "valid": 889
+        },
+        "subscription": {
+          "accepted": 414,
+          "attempted": 414,
+          "blocked": 0,
+          "built": 1003,
+          "coverage": 0.4461,
+          "distinct_ids": 1003,
+          "excluded": 514,
+          "excluded_by_reason": {
+            "business_rule_violation": 311,
+            "invalid_value": 9,
+            "missing_relationship": 18,
+            "missing_required": 61,
+            "parent_record_rejected": 89,
+            "undecidable_plan": 1,
+            "unmapped_value": 25
+          },
+          "failed": 0,
+          "in_scope": 928,
+          "in_target": 414,
+          "not_attempted": 0,
+          "refusals_by_type": {},
+          "rejected": 0,
+          "skipped_by_rule": 75,
+          "source_rows": 1003,
+          "valid": 414
+        }
+      },
+      "failed_checks": [],
+      "id": "712ef85b-191d-4931-aa1b-e81a42ebaa2c",
+      "status": "balanced",
+      "totals": {
+        "accepted": 7163,
+        "attempted": 7163,
+        "blocked": 0,
+        "built": 9259,
+        "distinct_ids": 9228,
+        "excluded": 2021,
+        "failed": 0,
+        "in_scope": 9184,
+        "in_target": 7163,
+        "not_attempted": 0,
+        "rejected": 0,
+        "skipped_by_rule": 75,
+        "source_rows": 9259,
+        "valid": 7163
+      },
+      "trigger": "recheck"
+    },
+    "report_version": "1"
+  },
+  "gates": [
+    {
+      "code": "mappings_decided",
+      "detail": "33 approved, 8 not migrated, 0 rejected, no open questions.",
+      "outcome": "pass",
+      "title": "Every field is decided"
+    },
+    {
+      "code": "rehearsal",
+      "detail": "Dry run 06502c70 sent every valid record to the target in 65.0 seconds.",
+      "outcome": "pass",
+      "title": "The whole migration was rehearsed"
+    },
+    {
+      "code": "rehearsal_current",
+      "detail": "Same approved mappings and configuration 2026-10-01.1.",
+      "outcome": "pass",
+      "title": "The rehearsal matches today's plan"
+    },
+    {
+      "code": "reconciliation",
+      "detail": "All 28 checks passed: every source row is accounted for and the target holds exactly the accepted records.",
+      "outcome": "pass",
+      "title": "Source and target reconcile"
+    },
+    {
+      "code": "target_accepted",
+      "detail": "7,163 of 7,163 accepted.",
+      "outcome": "pass",
+      "title": "The target accepted every record sent"
+    },
+    {
+      "code": "coverage:organization",
+      "detail": "889 of 1,030 organizations in scope landed (86.3%); 141 stay behind. The floor is 95%.",
+      "outcome": "blocker",
+      "title": "Too many organizations cannot migrate"
+    },
+    {
+      "code": "coverage:contact",
+      "detail": "1,702 of 2,279 contacts in scope landed (74.7%); 577 stay behind. The floor is 95%.",
+      "outcome": "blocker",
+      "title": "Too many contacts cannot migrate"
+    },
+    {
+      "code": "coverage:subscription",
+      "detail": "414 of 928 subscriptions in scope landed (44.6%); 514 stay behind. The floor is 95%.",
+      "outcome": "blocker",
+      "title": "Too many subscriptions cannot migrate"
+    },
+    {
+      "code": "coverage:activity",
+      "detail": "4,158 of 4,947 activities in scope landed (84.1%); 789 stay behind. The floor is 95%.",
+      "outcome": "blocker",
+      "title": "Too many activities cannot migrate"
+    },
+    {
+      "code": "warnings",
+      "detail": "308 records pass but carry a warning somebody has to read and accept before go-live.",
+      "outcome": "condition",
+      "title": "Records will migrate with warnings"
+    }
+  ],
+  "next_steps": [
+    "Send the customer the 7 questions in this report and record each answer as a rule in the transformation configuration or as a mapping decision.",
+    "Send the customer the record lists for 13 data corrections (639 records). Each list comes from the run's issues, filtered by problem, with the source row of every record.",
+    "Expect up to 839 more records to migrate once their accounts are fixed: they are excluded only because the account they belong to is.",
+    "When the corrected export arrives: re-profile, re-run the dry run, and generate this report again.",
+    "Purge staging namespace d09faa98-80c1-4d33-81cd-1fb3b9d685ab once the customer has signed off; it holds a copy of their data."
+  ],
+  "report_id": "fa3dc800-5c96-4973-89ef-74e3eef6050f",
+  "report_version": "1",
+  "status": "BLOCKED",
+  "technical_risks": [
+    {
+      "code": "sequential_writes",
+      "detail": "The rehearsal sent 7,163 records in 65.0 seconds, about 9.1 ms each. At ten times the volume that is roughly 11 minutes (a projection from this run, not a measurement). Plan the production window for it or batch the writes.",
+      "title": "Writes are sequential"
+    },
+    {
+      "code": "pinned_date",
+      "detail": "Dormancy and trial rules are measured from 2026-10-01 (the configuration's as_of). If go-live is later, more accounts become dormant and more trials expire; move as_of to the go-live date and rehearse again.",
+      "title": "Date-based rules are measured from a fixed date"
+    },
+    {
+      "code": "warnings_migrate",
+      "detail": "308 records carry a warning and are not held back. Each one is a known imperfection the customer is accepting.",
+      "title": "Records with warnings will migrate"
+    },
+    {
+      "code": "staging_copy",
+      "detail": "Namespace d09faa98-80c1-4d33-81cd-1fb3b9d685ab holds every accepted record. Purge it after sign-off.",
+      "title": "A copy of the customer's data sits in staging"
+    }
+  ],
+  "work_items": [
+    {
+      "blocks_records": true,
+      "code": "subscription:business_rule_violation",
+      "entity": "subscription",
+      "error_type": "business_rule_violation",
+      "fields": [
+        "status"
+      ],
+      "kind": "decision",
+      "owner": "customer decision",
+      "question": "These 311 subscriptions are live in billing, but the account each one belongs to migrates as inactive, and Meridian allows no live subscription under an inactive account. For each account: should it stay active in Meridian, or should the subscription end before migration?",
+      "records": 311,
+      "rule": "platform rule: no live subscription under a dormant account",
+      "severity": "error",
+      "title": "311 subscriptions conflict with a Meridian rule (platform rule: no live subscription under a dormant account)",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "activity:unmapped_value",
+      "entity": "activity",
+      "error_type": "unmapped_value",
+      "fields": [
+        "kind"
+      ],
+      "kind": "decision",
+      "owner": "customer decision",
+      "question": "Which Meridian value should 'Call' in kind become? Until a rule says so, these 215 activities stay behind.",
+      "records": 215,
+      "rule": null,
+      "severity": "error",
+      "title": "215 activities carry kind values that no rule maps ('Call' (215))",
+      "values": [
+        [
+          "Call",
+          215
+        ]
+      ]
+    },
+    {
+      "blocks_records": true,
+      "code": "subscription:unmapped_value",
+      "entity": "subscription",
+      "error_type": "unmapped_value",
+      "fields": [
+        "plan"
+      ],
+      "kind": "decision",
+      "owner": "customer decision",
+      "question": "Which Meridian value should 'Trial' in plan become? Until a rule says so, these 27 subscriptions stay behind.",
+      "records": 27,
+      "rule": null,
+      "severity": "error",
+      "title": "27 subscriptions carry plan values that no rule maps ('Trial' (27))",
+      "values": [
+        [
+          "Trial",
+          27
+        ]
+      ]
+    },
+    {
+      "blocks_records": true,
+      "code": "organization:unmapped_value",
+      "entity": "organization",
+      "error_type": "unmapped_value",
+      "fields": [
+        "lifecycle_status"
+      ],
+      "kind": "decision",
+      "owner": "customer decision",
+      "question": "Which Meridian value should 'Actve' in lifecycle_status become? Until a rule says so, these 16 organizations stay behind.",
+      "records": 16,
+      "rule": null,
+      "severity": "error",
+      "title": "16 organizations carry lifecycle_status values that no rule maps ('Actve' (16))",
+      "values": [
+        [
+          "Actve",
+          16
+        ]
+      ]
+    },
+    {
+      "blocks_records": true,
+      "code": "subscription:undecidable_plan",
+      "entity": "subscription",
+      "error_type": "undecidable_plan",
+      "fields": [
+        "plan"
+      ],
+      "kind": "decision",
+      "owner": "customer decision",
+      "question": "Which plan should this 1 subscription get? The rule that decides 'Legacy Gold' needs a value the export does not have.",
+      "records": 1,
+      "rule": "legacy_gold_seat_split (customer rule 7)",
+      "severity": "error",
+      "title": "1 subscription cannot be given a plan: 'Legacy Gold' (1) depends on a value that is empty",
+      "values": [
+        [
+          "Legacy Gold",
+          1
+        ]
+      ]
+    },
+    {
+      "blocks_records": true,
+      "code": "contact:malformed_email",
+      "entity": "contact",
+      "error_type": "malformed_email",
+      "fields": [
+        "email"
+      ],
+      "kind": "data_fix",
+      "owner": "customer data correction",
+      "question": null,
+      "records": 106,
+      "rule": null,
+      "severity": "error",
+      "title": "106 contacts have an email address that is not valid",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "organization:missing_required",
+      "entity": "organization",
+      "error_type": "missing_required",
+      "fields": [
+        "billing_country",
+        "lifecycle_status"
+      ],
+      "kind": "data_fix",
+      "owner": "customer data correction",
+      "question": null,
+      "records": 97,
+      "rule": null,
+      "severity": "error",
+      "title": "97 organizations are missing values Meridian requires (billing_country, lifecycle_status)",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "contact:phone_too_short",
+      "entity": "contact",
+      "error_type": "phone_too_short",
+      "fields": [
+        "phone"
+      ],
+      "kind": "data_fix",
+      "owner": "customer data correction",
+      "question": null,
+      "records": 88,
+      "rule": null,
+      "severity": "error",
+      "title": "88 contacts have a phone number with too few digits",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "contact:missing_relationship",
+      "entity": "contact",
+      "error_type": "missing_relationship",
+      "fields": [
+        "organization_id"
+      ],
+      "kind": "data_fix",
+      "owner": "customer data correction",
+      "question": null,
+      "records": 70,
+      "rule": null,
+      "severity": "error",
+      "title": "70 contacts belong to accounts that are not in the export at all",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "subscription:missing_required",
+      "entity": "subscription",
+      "error_type": "missing_required",
+      "fields": [
+        "seats",
+        "renewal_date",
+        "start_date"
+      ],
+      "kind": "data_fix",
+      "owner": "customer data correction",
+      "question": null,
+      "records": 61,
+      "rule": null,
+      "severity": "error",
+      "title": "61 subscriptions are missing values Meridian requires (seats, renewal_date, start_date)",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "activity:missing_relationship",
+      "entity": "activity",
+      "error_type": "missing_relationship",
+      "fields": [
+        "organization_id"
+      ],
+      "kind": "data_fix",
+      "owner": "customer data correction",
+      "question": null,
+      "records": 55,
+      "rule": null,
+      "severity": "error",
+      "title": "55 activities belong to accounts that are not in the export at all",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "contact:duplicate_contact_email",
+      "entity": "contact",
+      "error_type": "duplicate_contact_email",
+      "fields": [
+        "email"
+      ],
+      "kind": "data_fix",
+      "owner": "customer data correction",
+      "question": null,
+      "records": 45,
+      "rule": null,
+      "severity": "error",
+      "title": "45 contacts repeat an email address already used on the same account",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "contact:duplicate_primary_contact",
+      "entity": "contact",
+      "error_type": "duplicate_primary_contact",
+      "fields": [
+        "is_primary"
+      ],
+      "kind": "data_fix",
+      "owner": "customer data correction",
+      "question": null,
+      "records": 43,
+      "rule": "platform rule: one primary contact per organization",
+      "severity": "error",
+      "title": "43 contacts are marked primary on accounts that already have one",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "contact:missing_required",
+      "entity": "contact",
+      "error_type": "missing_required",
+      "fields": [
+        "organization_id"
+      ],
+      "kind": "data_fix",
+      "owner": "customer data correction",
+      "question": null,
+      "records": 19,
+      "rule": null,
+      "severity": "error",
+      "title": "19 contacts are missing values Meridian requires (organization_id)",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "subscription:missing_relationship",
+      "entity": "subscription",
+      "error_type": "missing_relationship",
+      "fields": [
+        "organization_id"
+      ],
+      "kind": "data_fix",
+      "owner": "customer data correction",
+      "question": null,
+      "records": 18,
+      "rule": null,
+      "severity": "error",
+      "title": "18 subscriptions belong to accounts that are not in the export at all",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "organization:duplicate_identifier",
+      "entity": "organization",
+      "error_type": "duplicate_identifier",
+      "fields": [
+        "organization_id"
+      ],
+      "kind": "data_fix",
+      "owner": "customer data correction",
+      "question": null,
+      "records": 15,
+      "rule": null,
+      "severity": "error",
+      "title": "15 organizations reuse an identifier that is already in the export",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "organization:missing_identifier",
+      "entity": "organization",
+      "error_type": "missing_identifier",
+      "fields": [
+        "organization_id"
+      ],
+      "kind": "data_fix",
+      "owner": "customer data correction",
+      "question": null,
+      "records": 13,
+      "rule": null,
+      "severity": "error",
+      "title": "13 organizations have no identifier",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "subscription:invalid_value",
+      "entity": "subscription",
+      "error_type": "invalid_value",
+      "fields": [],
+      "kind": "data_fix",
+      "owner": "customer data correction",
+      "question": null,
+      "records": 9,
+      "rule": null,
+      "severity": "error",
+      "title": "9 subscriptions fail a value check Meridian applies",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "activity:parent_record_rejected",
+      "entity": "activity",
+      "error_type": "parent_record_rejected",
+      "fields": [
+        "organization_id"
+      ],
+      "kind": "dependent",
+      "owner": "released by other fixes",
+      "question": null,
+      "records": 519,
+      "rule": null,
+      "severity": "error",
+      "title": "519 activities wait on an account that cannot migrate yet; fixing the account releases them",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "contact:parent_record_rejected",
+      "entity": "contact",
+      "error_type": "parent_record_rejected",
+      "fields": [
+        "organization_id"
+      ],
+      "kind": "dependent",
+      "owner": "released by other fixes",
+      "question": null,
+      "records": 231,
+      "rule": null,
+      "severity": "error",
+      "title": "231 contacts wait on an account that cannot migrate yet; fixing the account releases them",
+      "values": []
+    },
+    {
+      "blocks_records": true,
+      "code": "subscription:parent_record_rejected",
+      "entity": "subscription",
+      "error_type": "parent_record_rejected",
+      "fields": [
+        "organization_id"
+      ],
+      "kind": "dependent",
+      "owner": "released by other fixes",
+      "question": null,
+      "records": 89,
+      "rule": null,
+      "severity": "error",
+      "title": "89 subscriptions wait on an account that cannot migrate yet; fixing the account releases them",
+      "values": []
+    },
+    {
+      "blocks_records": false,
+      "code": "subscription:plan_conflicts_with_tier",
+      "entity": "subscription",
+      "error_type": "plan_conflicts_with_tier",
+      "fields": [
+        "plan"
+      ],
+      "kind": "decision",
+      "owner": "customer decision",
+      "question": "22 subscriptions sit on accounts whose tier calls for a different plan (customer rule 4). Is the billing plan right, or should these accounts move plan?",
+      "records": 22,
+      "rule": "customer rule 4",
+      "severity": "warning",
+      "title": "22 subscriptions are on a plan the customer's own rules say they should not have",
+      "values": [
+        [
+          "professional",
+          15
+        ],
+        [
+          "starter",
+          7
+        ]
+      ]
+    },
+    {
+      "blocks_records": false,
+      "code": "organization:ambiguous_country",
+      "entity": "organization",
+      "error_type": "ambiguous_country",
+      "fields": [
+        "billing_country"
+      ],
+      "kind": "decision",
+      "owner": "customer decision",
+      "question": "Which country are these 7 organizations in? The export says 'CA' and has no state or region to decide it.",
+      "records": 7,
+      "rule": "ca_country_from_region (customer rule 5)",
+      "severity": "warning",
+      "title": "7 organizations have country 'CA' (7) and nothing that tells which country it is",
+      "values": [
+        [
+          "CA",
+          7
+        ]
+      ]
+    },
+    {
+      "blocks_records": false,
+      "code": "contact:no_primary_contact",
+      "entity": "contact",
+      "error_type": "no_primary_contact",
+      "fields": [
+        "is_primary"
+      ],
+      "kind": "review",
+      "owner": "review and sign-off",
+      "question": null,
+      "records": 152,
+      "rule": "customer rule 1",
+      "severity": "warning",
+      "title": "152 contacts belong to accounts that have no primary contact (customer rule 1)",
+      "values": []
+    },
+    {
+      "blocks_records": false,
+      "code": "organization:primary_contact_not_found",
+      "entity": "organization",
+      "error_type": "primary_contact_not_found",
+      "fields": [
+        "primary_contact_email"
+      ],
+      "kind": "review",
+      "owner": "review and sign-off",
+      "question": null,
+      "records": 127,
+      "rule": "primary_from_account_email (customer rule 1)",
+      "severity": "warning",
+      "title": "127 organizations name a primary contact that the contact export does not contain",
+      "values": []
+    },
+    {
+      "blocks_records": false,
+      "code": "organization:primary_contact_missing",
+      "entity": "organization",
+      "error_type": "primary_contact_missing",
+      "fields": [
+        "primary_contact_email"
+      ],
+      "kind": "review",
+      "owner": "review and sign-off",
+      "question": null,
+      "records": 16,
+      "rule": "primary_from_account_email (customer rule 1)",
+      "severity": "warning",
+      "title": "16 organizations name a primary contact and have no contacts in the export",
+      "values": []
+    },
+    {
+      "blocks_records": false,
+      "code": "organization:date_in_future",
+      "entity": "organization",
+      "error_type": "date_in_future",
+      "fields": [
+        "customer_since"
+      ],
+      "kind": "review",
+      "owner": "review and sign-off",
+      "question": null,
+      "records": 3,
+      "rule": null,
+      "severity": "warning",
+      "title": "3 organizations have dates after the migration date (customer_since)",
+      "values": []
+    }
+  ]
+}
