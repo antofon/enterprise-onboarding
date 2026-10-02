@@ -1,4 +1,4 @@
-.PHONY: up down logs ps seed test lint fmt shell hooks
+.PHONY: up down logs ps seed migrate test lint fmt shell hooks
 
 up:            ## build and start postgres, api, ui
 	docker compose up --build -d
@@ -14,6 +14,9 @@ ps:
 
 seed:          ## generate a 10k-org synthetic customer into generated/
 	docker compose exec api enterprise-onboarding generate-data --rows 10000 --out generated/apex
+
+migrate:       ## apply schema migrations (the api also does this at startup)
+	docker compose exec api enterprise-onboarding migrate
 
 test:          ## run the test suite locally (integration tests need `make up`)
 	uv run pytest

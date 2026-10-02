@@ -22,6 +22,7 @@ dependencies = [
     "faker>=28",
     "python-dateutil>=2.9",
     "pyyaml>=6",
+    "alembic>=1.14",
 ]
 
 [dependency-groups]

@@ -69,8 +69,10 @@ def configure_logging(force: bool = False, *, stream: TextIO | None = None) -> N
         lg = logging.getLogger(name)
         lg.handlers.clear()
         lg.propagate = True
-    # the request middleware already logs one line per request with its duration and id
+    # the request middleware already logs one line per request with its duration and id, and
+    # app.core.migrations one line per schema change; their own chatter adds nothing
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+    logging.getLogger("alembic").setLevel(logging.WARNING)
 
     _configured = True
 

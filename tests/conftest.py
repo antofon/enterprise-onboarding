@@ -27,16 +27,29 @@ def db_available() -> bool:
     return check_db()
 
 
+def empty_every_table() -> None:
+    """the schema stays (alembic owns it, and rebuilding it per test is slow); the rows go."""
+    from sqlalchemy import text
+
+    import app.models  # noqa: F401
+    from app.core.db import Base, get_engine
+
+    tables = ", ".join(f'"{t.schema}"."{t.name}"' for t in Base.metadata.sorted_tables)
+    with get_engine().begin() as conn:
+        conn.execute(text(f"truncate {tables} restart identity cascade"))
+
+
 @pytest.fixture
 def client(db_available: bool):
-    """a fresh app + clean tables per test. skips when postgres is not up."""
+    """a fresh app + empty tables per test. skips when postgres is not up."""
     if not db_available:
         pytest.skip("postgres not reachable on localhost:5433, run `make up` first")
 
-    from app.core.db import Base, get_engine, init_db
+    from app.core.db import init_db
     from app.main import create_app
 
     init_db()
+    empty_every_table()
     with TestClient(create_app()) as test_client:
         yield test_client
-    Base.metadata.drop_all(get_engine())
+    empty_every_table()

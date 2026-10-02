@@ -30,9 +30,28 @@ def check() -> None:
     typer.echo(f"version        {__version__}")
     typer.echo(f"env            {settings.app_env}")
     typer.echo(f"database       {'ok' if db_ok else 'unreachable'}")
+    if db_ok:
+        from app.core.db import get_engine
+        from app.core.migrations import current_revision, head_revision
+
+        with get_engine().connect() as connection:
+            revision = current_revision(connection)
+        typer.echo(f"schema         {revision or 'not migrated'} (newest {head_revision()})")
     typer.echo(f"llm provider   {settings.effective_llm_provider}")
     typer.echo(f"llm model      {settings.llm_model or '-'}")
     raise typer.Exit(code=0 if db_ok else 1)
+
+
+@app.command()
+def migrate() -> None:
+    """bring the database schema to the newest revision. the api does this at startup; in a
+    production deployment this is the release step that runs before the new version starts."""
+    configure_logging()
+    from app.core.db import get_engine
+    from app.core.migrations import head_revision, upgrade
+
+    revision = upgrade(get_engine())
+    typer.echo(f"database at schema revision {revision} (newest {head_revision()})")
 
 
 @app.command("generate-data")
