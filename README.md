@@ -621,6 +621,7 @@ Only after the end-to-end workflow above is solid:
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): components, data flow, database, API, AI boundaries, failure recovery, orchestration, observability, security and scaling considerations, local vs AWS
 - [docs/BUILD_LOG.md](docs/BUILD_LOG.md): dated engineering decisions with the alternatives that lost
 - [docs/RUNBOOK.md](docs/RUNBOOK.md): diagnosing a failed onboarding from the logs, with a real worked example
+- [docs/CUSTOMER_IMPLEMENTATION_PLAN.md](docs/CUSTOMER_IMPLEMENTATION_PLAN.md): the plan an implementation engineer would send the customer after the first rehearsal: milestones, migration sequence, rollback, open questions, acceptance criteria
 - [target_platform/documentation](target_platform/documentation/README.md): Meridian's entity model, required fields, enums, relationships, API and validation rules
 - [sample_customer/business_rules.md](sample_customer/business_rules.md) and [implementation_notes.md](sample_customer/implementation_notes.md): the customer's rules and the kickoff notes the mapping step interprets
 
