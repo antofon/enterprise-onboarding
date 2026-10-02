@@ -8,11 +8,16 @@ This tool is what an implementation or forward-deployed engineer would use to an
 
 > The customer (Apex Equipment Services), the target platform (Meridian), and every record are fictional and synthetic. This is a portfolio build, not a client engagement. Any business impact figure in the docs is labeled as a scenario estimate.
 
+![The readiness report: whether the customer can go live, what stands in the way, and the evidence behind each line](docs/screenshots/01-readiness-report.png)
+
+**In one paragraph:** the system takes a new customer's messy exports, measures what is wrong with them, has an AI model propose where every field belongs while a person approves each decision, rehearses the whole migration against the target platform's API in a sandbox, proves that no record went missing on the way, and tells the customer in plain language what stands between them and go-live. The AI handles meaning; everything that has to be exactly right (counting, validation, the go/no-go decision) is ordinary code with tests.
+
 ## Contents
 
 - [Why this problem matters](#why-this-problem-matters)
 - [Who this is for](#who-this-is-for)
 - [What the system does](#what-the-system-does)
+- [What it looks like](#what-it-looks-like)
 - [The one rule: where AI is and is not allowed](#the-one-rule-where-ai-is-and-is-not-allowed)
 - [End-to-end workflow](#end-to-end-workflow)
 - [Architecture](#architecture)
@@ -102,7 +107,21 @@ Three ways in:
 
 - **Workbench UI** (Streamlit): create a project, attach sources, profile them, read the quality issues and the schema comparison, get a proposed target for every field, decide each one, answer the customer's questions, read the transformation plan, validate, rehearse the migration against the target platform with every refusal explained, reconcile source against target, and read the readiness report with its blockers, customer questions and next steps. Talks to the API over HTTP only.
 - **REST API** (FastAPI): every operation the UI performs, plus the simulated billing source and, in the same process, the simulated target platform.
-- **CLI** (Typer): `check`, `generate-data`, `profile [--compare]`, `suggest`, `eval-mapping` work on one file or feed without the API or the database; `transformation-plan`, `validate`, `dry-run`, `reconcile` and `readiness-report` run the later stages on a project and print the same counts the workbench shows.
+- **CLI** (Typer): `check`, `generate-data`, `profile [--compare]`, `suggest`, `eval-mapping` and `eval-summary` work on one file or feed without the API or the database; `transformation-plan`, `validate`, `dry-run`, `reconcile` and `readiness-report` run the later stages on a project and print the same counts the workbench shows; `migrate` applies the schema migrations.
+
+## What it looks like
+
+**Source assessment.** Before anything moves, every file and feed is measured from its raw values: malformed emails, records pointing at accounts that do not exist, one date column in six formats. Each finding is a count of cells that failed a stated rule, with examples.
+
+![Source assessment of the customer's contact export](docs/screenshots/03-source-assessment.png)
+
+**Mapping review.** The model proposes where each of the customer's columns belongs in the target platform, with a confidence and a reason a person can check. Anything ambiguous becomes a question for the customer instead of a guess: `customer_tier` comes back at 0.45 because the customer's own rules say it is neither a plan nor a priority. A person approves every field.
+
+![AI-proposed field mappings with confidence, status and reasoning](docs/screenshots/02-mapping-review.png)
+
+**Dry run.** The migration is rehearsed against the target platform's API inside a sandbox namespace, one request per record, with retries and every refusal recorded. Reconciliation then follows every source row through to the target: 9,259 rows accounted for, 28 of 28 checks passed.
+
+![Dry run results with per-entity counts, reconciliation and what validation found](docs/screenshots/04-dry-run.png)
 
 ## The one rule: where AI is and is not allowed
 
@@ -532,7 +551,7 @@ target_platform/  the fictional saas platform's schema and documentation
 tests/          unit, integration, e2e
 evals/          golden mapping set and measured results for the ai mapping step
 deploy/         env template, postgres init
-docs/           architecture, build log, runbook
+docs/           architecture, build log, runbook, customer implementation plan, screenshots
 .github/        ci
 ```
 
