@@ -382,5 +382,127 @@ def dry_run(
     session.close()
 
 
+def _print_reconciliation(result) -> None:
+    from app.models.target import WRITE_ORDER
+
+    passed = sum(1 for c in result.checks if c["ok"])
+    typer.echo(
+        f"reconciliation {result.id} ({result.trigger}): {result.status.value}, "
+        f"{passed} of {len(result.checks)} checks passed"
+    )
+    columns = [
+        "source_rows",
+        "distinct_ids",
+        "skipped_by_rule",
+        "excluded",
+        "valid",
+        "not_attempted",
+        "blocked",
+        "attempted",
+        "accepted",
+        "in_target",
+    ]
+    typer.echo(f"{'entity':<14}" + "".join(f"{c.replace('_', ' '):>15}" for c in columns))
+    for entity in [e for e in WRITE_ORDER if e in result.entities]:
+        row = result.entities[entity]
+        typer.echo(f"{entity:<14}" + "".join(f"{int(row.get(c) or 0):>15,}" for c in columns))
+    for entity in [e for e in WRITE_ORDER if e in result.entities]:
+        reasons = result.entities[entity]["excluded_by_reason"]
+        if reasons:
+            listed = ", ".join(f"{k} {v:,}" for k, v in reasons.items())
+            typer.echo(f"  {entity} excluded: {listed}")
+    for d in result.discrepancies:
+        sample = ", ".join(d["sample_ids"][:5])
+        typer.echo(f"  DISCREPANCY {d['entity']} {d['kind']} ({d['count']:,}): {d['explanation']}")
+        if sample:
+            typer.echo(f"    sample: {sample}")
+
+
+@app.command()
+def reconcile(
+    project: str = typer.Argument("latest", help="project id, or `latest`"),
+    run: str | None = typer.Option(None, help="dry run id; default the newest dry run"),
+    recheck: bool = typer.Option(False, help="read the target again instead of showing the last"),
+) -> None:
+    """source against target for a dry run: every count accounted for, every id compared."""
+    import uuid
+
+    import httpx
+
+    from app.models.migration import RunKind
+    from app.services import migration as migration_service
+    from app.services import reconciliation as reconciliation_service
+
+    configure_logging()
+    settings = get_settings()
+    session, found = _open_project(project)
+    if run:
+        chosen = migration_service.get_run(session, found, uuid.UUID(run))
+    else:
+        chosen = migration_service.latest_run(session, found, kind=RunKind.dry_run)
+        if chosen is None:
+            typer.echo("no dry run on this project yet; run `dry-run` first", err=True)
+            raise typer.Exit(code=1)
+    if recheck:
+        assert chosen.namespace is not None
+        with httpx.Client(timeout=settings.target_request_timeout_seconds) as http:
+            target = migration_service.TargetClient(
+                http,
+                settings=settings,
+                namespace=chosen.namespace,
+                request_prefix=f"recheck-{str(chosen.id)[:8]}",
+            )
+            result = reconciliation_service.recheck(session, chosen, target=target)
+    else:
+        result = reconciliation_service.latest_for_run(session, chosen)
+        if result is None:
+            typer.echo(
+                "this run has no reconciliation; it predates reconciliation or is not a dry run",
+                err=True,
+            )
+            raise typer.Exit(code=1)
+    _print_reconciliation(result)
+    session.close()
+
+
+@app.command("readiness-report")
+def readiness_report(
+    project: str = typer.Argument("latest", help="project id, or `latest`"),
+    fmt: str = typer.Option("markdown", "--format", help="markdown or json"),
+    out: str | None = typer.Option(None, help="write the report to this file instead of stdout"),
+    model: bool = typer.Option(
+        True, help="let the configured model draft the summary (checked against the facts)"
+    ),
+) -> None:
+    """generate and store a readiness report, and print or save it."""
+    import json
+    from pathlib import Path
+
+    from app.ai.provider import build_provider
+    from app.services.readiness import generate_report
+
+    if fmt not in ("markdown", "json"):
+        raise typer.BadParameter("--format is markdown or json")
+    configure_logging()
+    session, found = _open_project(project)
+    report = generate_report(
+        session, found, provider=build_provider(), use_model=model, generated_by="cli"
+    )
+    text = (
+        report.markdown
+        if fmt == "markdown"
+        else json.dumps(report.content, indent=2, ensure_ascii=False, default=str)
+    )
+    if out:
+        Path(out).write_text(text + "\n", encoding="utf-8")
+        typer.echo(
+            f"{report.status.value}: report {report.id} written to {out} "
+            f"(summary: {report.summary_origin})"
+        )
+    else:
+        typer.echo(text)
+    session.close()
+
+
 if __name__ == "__main__":
     app()
