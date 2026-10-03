@@ -373,7 +373,7 @@ Interactive docs at `/docs`. The target platform's own API (`/target/v1`) is spe
 
 ### Where the data lives
 
-Two deployments of the same code. Local development is the build and review environment and never depends on AWS. The AWS demo extends it with object storage and a hosted instance behind a storage switch. See [Deployment](#deployment) and [Local development vs AWS demo](docs/ARCHITECTURE.md#local-development-vs-aws-demo).
+Two deployments of the same code. Local development is the build and review environment and never depends on AWS. The AWS demo runs the same stack on an EC2 instance, with the customer's files coming in from a private S3 bucket and the readiness report going back to it, through an IAM role. See [Deployment](#deployment) and [Local development vs AWS demo](docs/ARCHITECTURE.md#local-development-vs-aws-demo).
 
 ## Engineering considerations
 
@@ -551,7 +551,7 @@ target_platform/  the fictional saas platform's schema and documentation
 tests/          unit, integration, e2e
 evals/          golden mapping set and measured results for the ai mapping step
 deploy/         env template, postgres init
-docs/           architecture, build log, runbook, customer implementation plan, screenshots
+docs/           architecture, build log, runbook, aws deployment, customer implementation plan, screenshots
 .github/        ci
 ```
 
@@ -559,31 +559,25 @@ docs/           architecture, build log, runbook, customer implementation plan, 
 
 **Local (Docker Compose).** Three services: PostgreSQL 16, the FastAPI service, the Streamlit workbench. Every published port is bound to `127.0.0.1`. PostgreSQL is published on 5433 so a database already running on 5432 is left alone. The committed sample is mounted read-only; generated customers land in a named volume. This is the build and review environment and stays fully functional with no AWS account.
 
-**AWS demo (S3 + EC2 + IAM).** The same three services on one small Linux EC2 instance, with a private S3 bucket for intake datasets and generated outputs:
+**AWS demo (S3 + EC2 + IAM).** The same three services on one EC2 instance in us-west-2, with a private S3 bucket for the customer's intake files and the generated reports. Measured on a full run:
 
 ```text
-customer dataset
-   |
+S3 intake/apex/    the customer's four files
+   |   read by the instance's IAM role, no access key anywhere
    v
-S3 bucket (private)                 intake/{customer}/{project}/...
-   |
+EC2 c7i-flex.large, Ubuntu 24.04     docker compose: postgres, api, workbench, every port on 127.0.0.1
+   |   the workbench reached through an SSH tunnel; the security group opens port 22 to one IP, nothing else
    v
-EC2, small linux instance           docker compose, the same three services
-   instance profile = IAM role       s3 get/put/list on this bucket and prefix only
-   security group                    8000 and 8501 from the operator's ip, for the demo only
-   postgres                          inside compose, bound to 127.0.0.1 on the instance, never public
-   |
-   v
-S3 bucket                           output/{customer}/{project}/readiness.md, readiness.json, run logs
+S3 output/apex/    readiness-2026-10-03.md
 ```
 
-Rules the AWS deployment follows:
+- **Same answer as local.** 9,259 rows, 7,163 accepted, 2,021 blocked, 75 skipped, 0 refused, 28 of 28 reconciliation checks, `BLOCKED` with the same coverage per entity. 40.2 seconds for the full dry run.
+- **No long-lived keys.** The server's identity is the role: `aws sts get-caller-identity` answers `assumed-role/enterprise-onboarding-ec2`, and `aws configure list` shows both keys as `iam-role`.
+- **Least privilege, tested.** The role can list two prefixes, read `intake/`, write `output/`. A write into `intake/` and a delete in `output/` both come back `AccessDenied` from AWS.
+- **Scope is S3 + EC2 + IAM.** No RDS, no load balancer, no container service. PostgreSQL stays in Docker on the instance and is never reachable from outside it.
+- **Disposable.** Stopped between demos, it costs the disk, about $1.60 a month.
 
-- **Scope is S3 + EC2 + IAM.** No RDS, no load balancer, no container service. PostgreSQL in Docker on the instance is enough for this project; the point is the onboarding workflow, not the infrastructure.
-- **No long-lived keys anywhere.** The instance gets its permissions from an IAM role via the instance profile and boto3 picks them up on its own. Nothing AWS-related is committed, and the operator's own credentials stay on the operator's machine.
-- **Least privilege, explained.** The IAM policy lists only the S3 actions the application calls, scoped to the one bucket, with the reason for each statement in the deployment doc.
-- **Configuration, not code.** `STORAGE_BACKEND=local|s3`, `AWS_REGION`, `S3_BUCKET`, `S3_PREFIX` via environment. The S3 adapter implements the same storage interface as the local filesystem store, so local development never touches AWS.
-- **Documented and disposable.** Instance configuration, security group, IAM policy, deployment steps, expected monthly cost, and how to stop or delete everything after the demo live in `docs/AWS_DEPLOYMENT.md`.
+The AWS CLI on the instance moves the files between S3 and the app; the app itself has no AWS code. [docs/AWS_DEPLOYMENT.md](docs/AWS_DEPLOYMENT.md) has the resources, the IAM policy with the reason for each line, the steps, the evidence screenshots, the costs, and how to stop or delete everything.
 
 ## Current limitations
 
@@ -595,7 +589,7 @@ Rules the AWS deployment follows:
 - **Rule 1 flags nothing on the sample.** The account row's primary contact email never matches a contact on any account that lacks a primary, so the rule reports 127 accounts and flags no contact. That is the data's finding, and it means the rule's flagging path is exercised by its unit tests, not by the sample.
 - **One model call takes one to two minutes** on a fifteen-column file with adaptive thinking. Datasets run in parallel so a project takes as long as its slowest file, and the answer is cached, but the first suggest on a project is a wait.
 - **The mapping eval is one customer.** 41 fields, lenient alternatives, one ambiguous field. Both providers score 100% on it, which says the prompt and the providers handle this sample, not that they handle every customer.
-- **AWS deployment is designed, not deployed.** The storage switch, S3 adapter and `docs/AWS_DEPLOYMENT.md` do not exist yet.
+- **The app does not talk to S3 itself.** On the AWS demo the AWS CLI on the instance copies the intake files in and the report out, through the role. A `STORAGE_BACKEND=local|s3` switch with a boto3 adapter would let the workbench attach from the bucket and write to it directly; the IAM policy would not change.
 - **Profiling is a per-cell Python loop.** 14.7 seconds for 92,751 rows. Fine for the demo; vectorized tagging or sampling above a row threshold is the fix for larger customers.
 - **The breaker counts records, not time.** Ten records in a row that fail their retries stop a run. Against refused connections that is seconds; against a target that hangs until the 20-second timeout it is ten minutes before the run gives up.
 - **Single-tenant, no authentication.** The tool is an internal implementation tool bound to localhost; production would need API authentication, role-based review, and customer isolation.
@@ -605,6 +599,7 @@ Rules the AWS deployment follows:
 Only after the end-to-end workflow above is solid:
 
 - runs on a worker queue, with the API answering 202 and the run id
+- the S3 storage switch inside the app, and the AWS resources as infrastructure as code (Terraform or CDK) instead of console steps
 - RAG over the target platform's implementation docs to ground mapping suggestions
 - a second customer dataset with a different shape
 - batching and resumable runs for large datasets; vectorized profiling
@@ -621,6 +616,7 @@ Only after the end-to-end workflow above is solid:
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): components, data flow, database, API, AI boundaries, failure recovery, orchestration, observability, security and scaling considerations, local vs AWS
 - [docs/BUILD_LOG.md](docs/BUILD_LOG.md): dated engineering decisions with the alternatives that lost
 - [docs/RUNBOOK.md](docs/RUNBOOK.md): diagnosing a failed onboarding from the logs, with a real worked example
+- [docs/AWS_DEPLOYMENT.md](docs/AWS_DEPLOYMENT.md): the AWS demo: S3, EC2 and the IAM role, the policy line by line, the steps, the evidence, cost, stop and teardown
 - [docs/CUSTOMER_IMPLEMENTATION_PLAN.md](docs/CUSTOMER_IMPLEMENTATION_PLAN.md): the plan an implementation engineer would send the customer after the first rehearsal: milestones, migration sequence, rollback, open questions, acceptance criteria
 - [target_platform/documentation](target_platform/documentation/README.md): Meridian's entity model, required fields, enums, relationships, API and validation rules
 - [sample_customer/business_rules.md](sample_customer/business_rules.md) and [implementation_notes.md](sample_customer/implementation_notes.md): the customer's rules and the kickoff notes the mapping step interprets

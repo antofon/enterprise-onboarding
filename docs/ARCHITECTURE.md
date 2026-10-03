@@ -353,7 +353,7 @@ Implemented. structlog, one json object per line in containers, console output l
 
 ## Local development vs AWS demo
 
-Two deployments of the same code. Local is the build and review environment and stays fully functional with no AWS account. The AWS demo (planned, after the local workflow is verified end to end) extends it with object storage and a hosted instance. Nothing in the local path depends on AWS.
+Two deployments of the same code. Local is the build and review environment and stays fully functional with no AWS account. The AWS demo runs the same stack on an EC2 instance and moves the customer's files through a private S3 bucket with an IAM role. Nothing in the local path depends on AWS.
 
 **Local development (implemented):**
 
@@ -366,34 +366,35 @@ laptop or vps
   files
     sample_customer/   the committed 1,000-org customer, mounted read-only
     generated/         named volume for bigger generated customers
-  STORAGE_BACKEND=local   planned: artifacts (profiles, reports, run output) on the local filesystem
 ```
 
-**AWS demo (planned):**
+**AWS demo (implemented, console-built, stopped between demos):**
 
 ```
-customer dataset
+S3 bucket (private, block public access, SSE-S3)
+  intake/apex/       the customer's files
    |
+   |  aws cli on the host, as the instance's IAM role: get intake/*, list intake/ and output/
    v
-S3 bucket (private)                 intake/{customer}/{project}/...
+EC2 c7i-flex.large, Ubuntu 24.04, us-west-2
+  docker compose     the same three services, every port bound to 127.0.0.1
+  security group     ssh 22 from the operator's ip; the workbench and api through an ssh tunnel
+  admin shell        session manager, authenticated by iam, no inbound port
+  postgres           inside compose, never reachable from outside the instance
    |
+   |  aws cli on the host, as the role: put output/*
    v
-EC2, small linux instance           docker compose, the same three services
-   instance profile = IAM role       s3 get/put/list on this bucket and prefix only
-   security group                    8000 and 8501 from the operator's ip, for the demo only
-   postgres                          inside compose, bound to 127.0.0.1 on the instance, never public
-   |
-   v
-S3 bucket                           output/{customer}/{project}/readiness.md, readiness.json, run logs
+S3 bucket
+  output/apex/       readiness report (markdown)
 ```
 
-Rules the AWS phase follows:
+Rules the AWS demo follows:
 
 - **Scope is S3 + EC2 + IAM.** No RDS, no load balancer, no container service. Postgres in Docker is enough for this project; the point is the onboarding workflow, not the infrastructure.
-- **No long-lived keys anywhere.** The instance gets its permissions from an IAM role via the instance profile; boto3 picks them up on its own. Nothing AWS-related is ever committed, and the operator's own credentials stay on the operator's machine.
-- **Least privilege, explained.** The IAM policy lists only the S3 actions the application calls, scoped to the one bucket, and the deployment doc says why each statement exists.
-- **Configuration, not code.** `STORAGE_BACKEND=local|s3`, `AWS_REGION`, `S3_BUCKET`, `S3_PREFIX` via environment. The S3 adapter implements the same storage interface as the local filesystem store.
-- **Documented and disposable.** `docs/AWS_DEPLOYMENT.md` (planned) covers instance configuration, security group, IAM policy, deployment steps, expected monthly cost, and how to stop or delete everything after the demo.
+- **No long-lived keys anywhere.** The instance gets short-lived credentials from its IAM role through the instance metadata service (IMDSv2 required). No AWS key is on the server, in the repository or in the image.
+- **Least privilege, tested.** The role can list `intake/` and `output/`, read `intake/*`, write `output/*`, and nothing else: no write to intake, no delete anywhere. Both refusals were provoked on purpose and came back `AccessDenied`.
+- **The app has no AWS code.** The AWS CLI on the host copies files between S3 and the app's working area. A `STORAGE_BACKEND=local|s3` switch with a boto3 adapter behind the same interface as the local store is the designed next step; boto3 reads the role's credentials the same way, so the policy would not change.
+- **Documented and disposable.** [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) covers the resources, the policy line by line, the steps, the evidence, the cost, and how to stop or delete everything.
 
 ## Security considerations
 
@@ -413,9 +414,9 @@ The data is synthetic; the defaults are not. What is implemented, and what a pro
 | rate limiting | outbound: `Retry-After` honoured by the target client and the feed loader, a breaker for a target that is down; the mock target and feed simulate 429s | inbound limits at the gateway; per-customer write concurrency agreed with the target's owners |
 | schema versioning | Alembic with tested up and down migrations; the target's schema files are generated from the pydantic models and a test fails on drift; the customer configuration and both prompts carry versions that are stored on every run and every model call | migrations as a release step with a backup taken first |
 | backups | none automated; the live database was dumped before it was stamped with the baseline | automated snapshots and point-in-time recovery, restore drills; for the AWS demo, a nightly `pg_dump` to the project's S3 prefix |
-| customer isolation | one project per customer in one database; rehearsals isolated by namespace | a database or schema per customer, or row-level security keyed by tenant; one S3 prefix per customer with a policy scoped to it, which the AWS design already has |
+| customer isolation | one project per customer in one database; rehearsals isolated by namespace; on the AWS demo, one S3 folder per customer under `intake/` and `output/` | a database or schema per customer, or row-level security keyed by tenant; the role's S3 policy narrowed to the customer's prefix |
 
-Proposed for the AWS phase and not built: `APP_ENV=prod` refuses the default database password, forces json logs, requires `STORAGE_BACKEND=s3` and an explicit `LLM_PROVIDER`, and keeps `/docs` reachable from the operator's address only.
+Proposed and not built: `APP_ENV=prod` refuses the default database password, forces json logs, and requires an explicit `LLM_PROVIDER` (and `STORAGE_BACKEND=s3` once that switch exists). On the AWS demo `/docs` is already reachable only through the operator's SSH tunnel.
 
 ## Scaling considerations
 

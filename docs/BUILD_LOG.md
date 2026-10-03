@@ -425,3 +425,42 @@ Chronological engineering decisions. Each entry: problem, decision, why, alterna
 - Tests: 449 (360 unit, 88 integration, 1 end to end), up from 345; line coverage 95%, up from 91%, with the cli from 0% to 88%. mypy clean. CI green on its first run.
 - Image: 4.27 GB to 2.53 GB, with no key inside; 16.7 GB of old images and build cache reclaimed.
 - Workbench: the dry run page driven in headless Chromium against failed runs, 13 of 13 checks, one wording fix (an unreadable namespace called purged).
+
+## 2026-10-03, AWS demo
+
+### S3 from the host, not from the app
+
+- **Problem:** the original AWS design put a `STORAGE_BACKEND=local|s3` switch and a boto3 adapter inside the app. That is new code, new tests and a second storage path, written for one demo, in a phase whose point is the infrastructure and the permission model.
+- **Decision:** console-built resources and no app code. The AWS CLI on the instance copies `intake/apex/` into the app's working area and the readiness report out to `output/apex/`, as the instance's IAM role.
+- **Why:** the role, the policy and the refusals are identical whichever process makes the call, so the claim being proven does not depend on where the S3 call lives. The app stays the same code locally and on AWS.
+- **Alternatives:** the in-app adapter. It is still the right next step (the workbench could attach from the bucket), and the policy would not change for it.
+- **Result:** the full loop ran on AWS with two copy commands and no change to the application.
+
+### Ubuntu and a c7i-flex.large
+
+- **Problem:** Amazon Linux 2023's docker package has no buildx and no compose plugin, and the Dockerfile's cache mount needs BuildKit. Then the planned t3.medium was refused: the account is on the AWS Free Plan.
+- **Decision:** Ubuntu Server 24.04, where Docker's install script gives the engine, buildx and compose in one command and the Session Manager agent comes preinstalled. A `c7i-flex.large`, which the Free Plan allows: 2 vCPU, 4 GiB, the same memory as the plan.
+- **Result:** the image built on the instance, and the full dry run took 40.2 seconds against 65 locally.
+
+### No app port on the internet
+
+- **Problem:** the original design opened 8000 and 8501 to the operator's IP. That is two more rules to keep right, and the workbench has no login.
+- **Decision:** the security group opens SSH from one address and nothing else. The workbench and the API go through an SSH tunnel; setup went through Session Manager, which needs no inbound rule at all. Compose already binds every port to `127.0.0.1`, so a wrong security group edit would still expose nothing.
+- **Alternatives:** a public URL. It needs TLS and a login in front of it first, which is a load balancer and an identity provider: out of scope for S3 + EC2 + IAM.
+
+### Least privilege, proven by asking for what is not granted
+
+- **Decision:** the role's inline policy lists two prefixes, reads `intake/*`, writes `output/*`. Then two calls that must fail, made on purpose: a write into `intake/` and a delete of the report just written to `output/`.
+- **Result:** both `AccessDenied`, "because no identity-based policy allows" the action. `aws configure list` shows both keys as `iam-role`, and `~/.aws` holds no credentials file, only the CLI's own session id cache.
+
+### A reviewer found a dropped click in the first hour
+
+- **Problem:** on EC2, the first click on the mapping decide button after picking "Ignore field" did nothing. The radio sat inside a Streamlit form, so the button still read "Approve"; on submit the label changed, Streamlit took it for a new button, and the click was dropped. The form also carried the last field's decision and note onto the next field.
+- **Decision:** the radio moved above the form, every input keyed by the mapping, the target and rule inputs keyed by the mapping's last change (`1d9866f`).
+- **Result:** 23 of 23 checks in headless Chromium across all six decisions, both tabs, a double click, a field switch and a change made through the API. No decision had been recorded wrong. The bug was in the code on both deployments; AWS is where someone used the screen for real first.
+
+### Measured
+
+- EC2, S3-sourced files, every mapping decided by hand in the workbench: 9,259 rows, 7,163 valid and all accepted, 2,021 blocked, 75 skipped, 0 refused, reconciliation 28 of 28, `BLOCKED` with 4 blockers, 1 condition and 7 customer questions; organizations 86.3%, contacts 74.7%, subscriptions 44.6%, activities 84.1%. Identical to the local run on every number.
+- Full dry run: 40.2 seconds on the instance, 65 seconds in local compose.
+- Evidence screenshots, with account and instance ids covered, in `docs/screenshots/aws/` and [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md).
