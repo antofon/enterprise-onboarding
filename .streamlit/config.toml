@@ -6,6 +6,11 @@ address = "0.0.0.0"
 [browser]
 gatherUsageStats = false
 
+# no deploy button and no developer menu, also over an ssh tunnel where "auto" would show them
+# because the browser is on localhost. set STREAMLIT_CLIENT_TOOLBAR_MODE=developer to get them back.
+[client]
+toolbarMode = "minimal"
+
 [theme]
 base = "light"
 primaryColor = "#0F766E"

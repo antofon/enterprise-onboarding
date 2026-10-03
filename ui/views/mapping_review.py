@@ -6,7 +6,17 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from common import api_health, api_json, chip, error_text, esc, load_project, n, table
+from common import (
+    api_health,
+    api_json,
+    chip,
+    error_text,
+    esc,
+    load_project,
+    model_label,
+    n,
+    table,
+)
 
 STATUS_CHIP = {
     "suggested": "info",
@@ -94,7 +104,6 @@ def _controls(project: dict, summary: dict | None) -> None:
     project_id = project["id"]
     health = api_health()
     provider = health.get("llm_provider", "-")
-    model = health.get("llm_model") or ""
     docs = _documents()
     with st.container(border=True):
         c1, c2, c3, c4 = st.columns([3, 1.2, 1.3, 1.6], vertical_alignment="bottom")
@@ -137,7 +146,7 @@ def _controls(project: dict, summary: dict | None) -> None:
                     st.rerun()
                 st.error(error_text(body))
         mode = (
-            f"model <b>{esc(provider)}</b> · {esc(model)}"
+            f"model <b>{esc(model_label(health))}</b>"
             if provider != "none"
             else "<b>manual mode</b>: no model configured, proposals come from the comparison"
         )

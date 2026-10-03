@@ -464,3 +464,9 @@ Chronological engineering decisions. Each entry: problem, decision, why, alterna
 - EC2, S3-sourced files, every mapping decided by hand in the workbench: 9,259 rows, 7,163 valid and all accepted, 2,021 blocked, 75 skipped, 0 refused, reconciliation 28 of 28, `BLOCKED` with 4 blockers, 1 condition and 7 customer questions; organizations 86.3%, contacts 74.7%, subscriptions 44.6%, activities 84.1%. Identical to the local run on every number.
 - Full dry run: 40.2 seconds on the instance, 65 seconds in local compose.
 - Evidence screenshots, with account and instance ids covered, in `docs/screenshots/aws/` and [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md).
+
+### What a viewer sees, and what only a developer needs
+
+- **Problem:** the workbench still showed Streamlit's Deploy button and developer menu (over the SSH tunnel the browser is on localhost, where Streamlit shows them by default), and a sidebar line written for the person building it: `api ok · db ok · llm anthropic`. A dead API printed `api None`.
+- **Decision:** `client.toolbarMode = "minimal"` in `.streamlit/config.toml`, with `STREAMLIT_CLIENT_TOOLBAR_MODE=developer` to get the tools back. The sidebar names the live model the way people say it ("AI: Claude Opus 5"), as do the mapping review and the readiness checkbox, and a failure reads `service unreachable` or `service degraded`. `/docs` stays: every screen is also an API, and on AWS it is behind the tunnel. What production would change is a row in the security table of [ARCHITECTURE.md](ARCHITECTURE.md).
+- **Result:** in headless Chromium, no Deploy button or menu on any page, and the developer override brings both back. The architecture doc lost its "planned unless marked" legend: everything in it is built.

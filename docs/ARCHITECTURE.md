@@ -1,6 +1,6 @@
 # Architecture
 
-Growing document. Sections are marked **implemented** or **planned** and get rewritten as the build moves.
+How the system is built and why. Everything described here is built and tested; where production would need more, the section says what and why.
 
 ## The one rule
 
@@ -10,7 +10,7 @@ The model is allowed to: propose which source field means which target field and
 
 The model is never allowed to: count rows, do arithmetic, detect duplicates, validate against the schema, execute generated code, compute reconciliation numbers, decide that an invalid record is valid, write to the target platform, or approve a low-confidence mapping on its own.
 
-## Components (planned unless marked)
+## Components
 
 ```
 customer sources (csv, json, legacy billing api)
@@ -46,24 +46,24 @@ customer sources (csv, json, legacy billing api)
   readiness report ----------------------------> READY / READY WITH CONDITIONS / BLOCKED
 ```
 
-- **api service (implemented):** one FastAPI process serving the onboarding API under `/api/v1`, the mock target platform under `/target/v1`, and the mock legacy billing source under `/mock/billing/v1`. Mounting these in the same process keeps the reviewer experience to one `docker compose up`; the loaders and the migration layer still talk to them over HTTP so the seam is real.
-- **mock billing source (implemented):** `/mock/billing/v1/subscriptions`, the customer's LegacyBill 4.2 api: bearer token from `BILLING_API_TOKEN`, `page` and `page_size`, `has_more`, records served from the same `subscriptions.json` the generator writes. The profiler has to authenticate and page like it would against the real thing. A wrong token is a 401 in the standard envelope; a feed failure surfaces as a 502 `source_unavailable` on the profile call and leaves the project's stage alone.
-- **source profiler (implemented):** `app/services/profiling`. Loaders, value-level type inference, per-column stats, dataset quality issues, cross-dataset key checks. Details under "Source profiling".
-- **schema comparison (implemented):** `app/services/comparison.py`. Deterministic classification of every source field against the target catalog. Details under "Schema comparison".
-- **ai mapping service (implemented):** `app/ai` holds the provider interface (Anthropic default, OpenAI behind the same interface, `none` is manual mode), the answer schema, and the prompt builder; `app/services/mapping.py` asks per dataset, checks the answer against the catalog, sends problems back a bounded number of times, caches by input hash, and writes one `field_mappings` row per column. Details under "AI boundaries".
-- **human review + customer clarification (implemented):** `app/services/mapping.py` (decisions) and `app/services/clarifications.py` (questions). Approve, reject, ignore, edit, ask the customer, reopen; bulk approval at or above the configured threshold only; the customer's answer can resolve the mapping on the spot. Details under "Human review".
-- **transformation engine (implemented):** `app/services/transform`. Pure converters chosen from the target field's own type, the customer's value maps and rule settings from `sample_customer/transformation_config.yaml`, record rules and cross-dataset rules as named functions citing the customer's rule numbers, and a plan derived from the approved mappings before any row runs. Details under "Transformation".
-- **validation engine (implemented):** `app/services/validation.py`. The target's pydantic contract, the platform's cross-record invariants, and the customer's own cross-checks, over every transformed record. Errors block a record; warnings travel with it. Details under "Validation".
-- **migration runner (implemented, dry run):** `app/services/migration.py`. One http request per record against the target api, parents before children, into a staging namespace of the run's own; retries that are safe because writes are idempotent; every refusal stored with the status, the target's message and the request id. Details under "Dry run against the target".
-- **reconciliation (implemented):** `app/services/reconciliation.py`. A pure comparison of what a dry run knew (counts per stage, exclusions by first error, accepted identifiers) against what the target holds in the run's namespace, read back over the target's own api. Called by the runner as it finishes, before any purge, and again on a re-check. Details under "Reconciliation".
-- **readiness report (implemented):** `app/services/readiness.py`, with the summary prompt in `app/ai/report_prompt.py`. Facts read from storage, gates that decide the status by stated rules, work grouped by owner, a summary the model may draft and the code checks, Markdown and JSON. Details under "Readiness report".
-- **mock target platform (implemented):** `app/api/target.py` and `app/services/target_store.py`, Meridian's write api: bearer token, the pydantic models as the field contract, the cross-record rules a real platform owns (organization before its children, ids unique per entity, identical re-send is a no-op and a changed one a 409, one primary contact and one address per organization, no live subscription under a dormant account), namespaces, and injectable faults. Details under "Dry run against the target".
-- **database (implemented):** one PostgreSQL with two schemas. `onboarding` holds this tool's state. `target` holds the fictional platform's tables and is only ever written through the target API.
-- **workbench ui (implemented: overview, source assessment, mapping review, dry run, readiness):** Streamlit, talks to the API over HTTP only. `ui/streamlit_app.py` holds the navigation and the project selector, `ui/views/` one module per screen.
-- **cli (implemented: `check`, `migrate`, `generate-data`, `profile`, `suggest`, `eval-mapping`, `eval-summary`, `transformation-plan`, `validate`, `dry-run`, `reconcile`, `readiness-report`):** Typer. Log lines go to stderr, so stdout is only the command's answer and a json report can be piped to a file. `profile` runs the profiler and, with `--compare`, the schema comparison on one file or feed without the API or the database. `suggest` asks the configured model for one file the same way. `eval-mapping` scores the model against the golden set. `transformation-plan`, `validate`, `dry-run`, `reconcile` and `readiness-report` run the later stages on a project from the terminal and print the same counts the workbench shows; `readiness-report --out` writes the Markdown or JSON export to a file.
-- **orchestration (implemented):** `app/services/workflow.py`. The project's lifecycle as two tables; nothing else assigns a stage. Details under "Orchestration".
-- **schema migrations (implemented):** Alembic, revisions in `app/migrations/versions`, applied by the api at startup under an advisory lock or by `enterprise-onboarding migrate` as a release step. Details under "Database".
-- **logging (implemented):** structlog, JSON in containers, a request id on every line and in every error body, a stage timer around every pipeline step. Details under "Observability".
+- **api service:** one FastAPI process serving the onboarding API under `/api/v1`, the mock target platform under `/target/v1`, and the mock legacy billing source under `/mock/billing/v1`. Mounting these in the same process keeps the reviewer experience to one `docker compose up`; the loaders and the migration layer still talk to them over HTTP so the seam is real.
+- **mock billing source:** `/mock/billing/v1/subscriptions`, the customer's LegacyBill 4.2 api: bearer token from `BILLING_API_TOKEN`, `page` and `page_size`, `has_more`, records served from the same `subscriptions.json` the generator writes. The profiler has to authenticate and page like it would against the real thing. A wrong token is a 401 in the standard envelope; a feed failure surfaces as a 502 `source_unavailable` on the profile call and leaves the project's stage alone.
+- **source profiler:** `app/services/profiling`. Loaders, value-level type inference, per-column stats, dataset quality issues, cross-dataset key checks. Details under "Source profiling".
+- **schema comparison:** `app/services/comparison.py`. Deterministic classification of every source field against the target catalog. Details under "Schema comparison".
+- **ai mapping service:** `app/ai` holds the provider interface (Anthropic default, OpenAI behind the same interface, `none` is manual mode), the answer schema, and the prompt builder; `app/services/mapping.py` asks per dataset, checks the answer against the catalog, sends problems back a bounded number of times, caches by input hash, and writes one `field_mappings` row per column. Details under "AI boundaries".
+- **human review + customer clarification:** `app/services/mapping.py` (decisions) and `app/services/clarifications.py` (questions). Approve, reject, ignore, edit, ask the customer, reopen; bulk approval at or above the configured threshold only; the customer's answer can resolve the mapping on the spot. Details under "Human review".
+- **transformation engine:** `app/services/transform`. Pure converters chosen from the target field's own type, the customer's value maps and rule settings from `sample_customer/transformation_config.yaml`, record rules and cross-dataset rules as named functions citing the customer's rule numbers, and a plan derived from the approved mappings before any row runs. Details under "Transformation".
+- **validation engine:** `app/services/validation.py`. The target's pydantic contract, the platform's cross-record invariants, and the customer's own cross-checks, over every transformed record. Errors block a record; warnings travel with it. Details under "Validation".
+- **migration runner (dry runs):** `app/services/migration.py`. One http request per record against the target api, parents before children, into a staging namespace of the run's own; retries that are safe because writes are idempotent; every refusal stored with the status, the target's message and the request id. Details under "Dry run against the target".
+- **reconciliation:** `app/services/reconciliation.py`. A pure comparison of what a dry run knew (counts per stage, exclusions by first error, accepted identifiers) against what the target holds in the run's namespace, read back over the target's own api. Called by the runner as it finishes, before any purge, and again on a re-check. Details under "Reconciliation".
+- **readiness report:** `app/services/readiness/`, with the summary prompt in `app/ai/report_prompt.py`. Facts read from storage, gates that decide the status by stated rules, work grouped by owner, a summary the model may draft and the code checks, Markdown and JSON. Details under "Readiness report".
+- **mock target platform:** `app/api/target.py` and `app/services/target_store.py`, Meridian's write api: bearer token, the pydantic models as the field contract, the cross-record rules a real platform owns (organization before its children, ids unique per entity, identical re-send is a no-op and a changed one a 409, one primary contact and one address per organization, no live subscription under a dormant account), namespaces, and injectable faults. Details under "Dry run against the target".
+- **database:** one PostgreSQL with two schemas. `onboarding` holds this tool's state. `target` holds the fictional platform's tables and is only ever written through the target API.
+- **workbench ui (overview, source assessment, mapping review, dry run, readiness):** Streamlit, talks to the API over HTTP only. `ui/streamlit_app.py` holds the navigation and the project selector, `ui/views/` one module per screen.
+- **cli (`check`, `migrate`, `generate-data`, `profile`, `suggest`, `eval-mapping`, `eval-summary`, `transformation-plan`, `validate`, `dry-run`, `reconcile`, `readiness-report`):** Typer. Log lines go to stderr, so stdout is only the command's answer and a json report can be piped to a file. `profile` runs the profiler and, with `--compare`, the schema comparison on one file or feed without the API or the database. `suggest` asks the configured model for one file the same way. `eval-mapping` scores the model against the golden set. `transformation-plan`, `validate`, `dry-run`, `reconcile` and `readiness-report` run the later stages on a project from the terminal and print the same counts the workbench shows; `readiness-report --out` writes the Markdown or JSON export to a file.
+- **orchestration:** `app/services/workflow.py`. The project's lifecycle as two tables; nothing else assigns a stage. Details under "Orchestration".
+- **schema migrations:** Alembic, revisions in `app/migrations/versions`, applied by the api at startup under an advisory lock or by `enterprise-onboarding migrate` as a release step. Details under "Database".
+- **logging:** structlog, JSON in containers, a request id on every line and in every error body, a stage timer around every pipeline step. Details under "Observability".
 
 ## Data flow
 
@@ -90,7 +90,7 @@ Implemented end to end.
 
 The profiler never trusts a dtype. It reads raw values and counts. That choice is what makes the numbers in the workbench and in this documentation defensible: every "4.7% of emails are malformed" is a count of cells that failed a stated rule, with examples, not a statistic pandas produced on the way in. The unit tests pin the profiler to the synthetic generator's own defect manifest: where a defect maps one to one onto a measurement (missing ids, duplicated ids, missing seat counts) the counts must agree exactly; where duplication copies defective rows the profiler must find at least as many.
 
-Samples stored per column are capped at five values of at most 60 characters. What the mapping prompt gets to see on Day 3 is a further sanitized subset; raw rows never leave the database.
+Samples stored per column are capped at five values of at most 60 characters. What the mapping prompt gets to see is a further sanitized subset (see "AI boundaries"); raw rows never leave the database.
 
 ## Schema comparison
 
@@ -103,7 +103,7 @@ Deterministic, and honest about what it cannot know. It sees three things: the c
 
 ## Database
 
-Schema `onboarding` (implemented so far):
+Schema `onboarding`:
 
 | table | what it holds |
 |---|---|
@@ -293,7 +293,7 @@ Implemented. `app/services/reconciliation.py`. Arithmetic over one dry run, and 
 
 ## Readiness report
 
-Implemented. `app/services/readiness.py`. One question: do we have enough evidence to proceed with production onboarding?
+Implemented. `app/services/readiness/`, one module each for facts, gates, work items, the summary and rendering. One question: do we have enough evidence to proceed with production onboarding?
 
 **Facts.** `collect_facts` reads what is stored and nothing else: per dataset rows, columns and issue counts by severity; mapping counts by status and approved mappings by origin, approved mappings below the high-confidence threshold, required target fields with no approved mapping (minus the ones the plan fills through a converter, such as `contact.last_name` from the name split); the open customer questions; the latest completed dry run with its options, its counts, whether it was partial, and whether its stored plan still equals the plan the approved mappings and the configuration would produce today; the latest reconciliation of that run; and the run's issues grouped by entity, severity and type, counted in records.
 
@@ -409,6 +409,7 @@ The data is synthetic; the defaults are not. What is implemented, and what a pro
 | audit logging | every mapping decision with who, when and why; every model call as an `llm_calls` row with tokens and the provider's request id; runs, reconciliations and reports are rows that are never updated; a request id on every log line and every stored refusal | real identities behind `decided_by` (today free text), an append-only audit stream shipped to central storage |
 | access control | none: a single-tenant tool bound to localhost | SSO (OIDC), roles (implementation engineer, reviewer, the customer answering questions), per-project permissions, approval of the readiness report by a named role |
 | api authentication | the mock target and the mock billing feed require bearer tokens; the onboarding api itself has none | OIDC tokens on every route, service tokens for the cli and for automation |
+| developer surfaces | the workbench hides Streamlit's deploy button and developer menu (`client.toolbarMode = "minimal"`) and its status line names only the live model; `/docs` and `/health` (database, version, provider) answer anyone who can reach the api, which is localhost or the SSH tunnel | `/docs` behind the same login as the api, the health detail on an admin page with a bare liveness probe for the load balancer, `client.showErrorDetails = "none"` so a viewer never sees a traceback |
 | idempotent migrations | writes carry the customer's identifier; an identical re-send is a no-op and a changed one a 409 naming the fields; retries are safe because of it, and tested | the same contract for the live load, plus a batch id on every write |
 | rollback | rehearsals write into a namespace of their own and one call purges it; the live namespace refuses to be purged; the tool never writes live data | for the cutover: the per-write request ids and content hashes already stored become the rollback ledger, a compensating delete per batch on the target, and point-in-time restore on the target as the last resort |
 | rate limiting | outbound: `Retry-After` honoured by the target client and the feed loader, a breaker for a target that is down; the mock target and feed simulate 429s | inbound limits at the gateway; per-customer write concurrency agreed with the target's owners |

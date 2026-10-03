@@ -101,8 +101,26 @@ def error_text(body: Any) -> str:
 
 @st.cache_data(ttl=5)
 def api_health() -> dict:
+    # a 503 still carries the health body (status degraded); a network failure carries an error
     ok, body = api_json("GET", "/health")
-    return body if isinstance(body, dict) else {"status": "unreachable"}
+    return body if isinstance(body, dict) and "status" in body else {"status": "unreachable"}
+
+
+def model_label(health: dict) -> str:
+    """the configured model as people say it: claude-opus-5 is Claude Opus 5, gpt-5 is GPT-5."""
+    if health.get("llm_provider") in (None, "none"):
+        return "off, manual review"
+    words: list[str] = []
+    for part in (health.get("llm_model") or health["llm_provider"]).split("-"):
+        if part.isdigit() and len(part) == 8:
+            continue  # a release date
+        if part.isdigit() and words and words[-1][-1].isdigit():
+            words[-1] += f".{part}"  # claude-sonnet-4-5 is 4.5
+        else:
+            words.append(part)
+    if words[0] == "gpt" and len(words) > 1:
+        words[:2] = [f"GPT-{words[1]}"]
+    return " ".join(w if w.startswith("GPT") else w.capitalize() for w in words)
 
 
 def load_projects() -> list[dict]:

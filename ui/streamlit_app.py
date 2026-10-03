@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from common import api_health, inject_css, load_projects
+from common import api_health, inject_css, load_projects, model_label
 from views import dry_run, mapping_review, overview, readiness, source_assessment
 
 st.set_page_config(page_title="Enterprise Onboarding", page_icon="🧭", layout="wide")
@@ -17,11 +17,8 @@ with st.sidebar:
     health = api_health()
     ok = health.get("status") == "ok"
     dot = f'<span style="color:{"#16A34A" if ok else "#DC2626"}">●</span>'
-    st.markdown(
-        f"{dot} api **{health.get('status')}** · db **{health.get('database', '-')}** · "
-        f"llm **{health.get('llm_provider', '-')}**",
-        unsafe_allow_html=True,
-    )
+    line = f"AI: **{model_label(health)}**" if ok else f"service **{health.get('status')}**"
+    st.markdown(f"{dot} {line}", unsafe_allow_html=True)
     st.divider()
     projects = load_projects()
     labels = {p["id"]: f"{p['customer_name']} · {p['project_name']}" for p in projects}

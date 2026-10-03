@@ -15,6 +15,7 @@ from common import (
     error_text,
     esc,
     load_project,
+    model_label,
     n,
     stage_line,
     table,
@@ -65,7 +66,7 @@ def _controls(project_id: str) -> None:
         )
         c1, c2 = st.columns([1, 3])
         use_model = c2.checkbox(
-            f"let {health.get('llm_model') or 'the model'} draft the summary",
+            f"let {model_label(health) if has_model else 'the model'} draft the summary",
             value=has_model,
             disabled=not has_model,
             help=None if has_model else "no model is configured; the summary is written by code",
