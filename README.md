@@ -2,6 +2,8 @@
 
 A customer implementation system for mapping, validating, and migrating enterprise data into a SaaS platform: source profiling, deterministic schema comparison, AI-assisted semantic mapping with human review, deterministic transformation and validation, dry-run migration through the target API, reconciliation, and an implementation readiness report.
 
+**[Case study (PDF)](https://anwanantofon.com/enterprise-onboarding-case-study.pdf)**: the problem, how the system works, and the measured results in 18 slides.
+
 The scenario: a B2B SaaS company signed a new enterprise customer. That customer's data lives in a legacy CRM export, a billing system behind a REST API, and a business-rules document nobody has read in a year. Before go-live, all of it has to land in the platform's schema, and somebody has to answer *can this customer safely migrate, what has to change first, and what still needs the customer's input?*
 
 This tool is what an implementation or forward-deployed engineer would use to answer that.
