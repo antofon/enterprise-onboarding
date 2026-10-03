@@ -262,15 +262,23 @@ def _decide(project_id: str, dataset: str, mappings: list[dict]) -> None:
         )
         if m["reason"]:
             st.markdown(f"**Why:** {esc(m['reason'])}")
-    with right:
-        with st.form(f"{key}-form", border=True):
-            action = st.radio(
-                "Decision",
-                ACTIONS,
-                format_func=lambda a: ACTION_LABEL[a],
-                horizontal=True,
-                key=f"{key}-action",
-            )
+    # inputs are keyed by the mapping, so picking another field starts a clean form instead of
+    # carrying the last field's decision and note over to it; the target and the rule also by
+    # the mapping's last change, so they always open on what is stored (a customer answer may
+    # have changed them since)
+    field_key = f"{key}-{m['id']}"
+    stored_key = f"{field_key}-{m['updated_at']}"
+    with right, st.container(border=True):
+        # outside the form: a widget inside one reports its value only on submit, so the button
+        # below would still name the previous decision and swallow the first click
+        action = st.radio(
+            "Decision",
+            ACTIONS,
+            format_func=lambda a: ACTION_LABEL[a],
+            horizontal=True,
+            key=f"{field_key}-action",
+        )
+        with st.form(f"{key}-form", border=False):
             paths = _catalog_paths()
             current = paths.index(m["target_path"]) if m["target_path"] in paths else None
             target = st.selectbox(
@@ -279,20 +287,28 @@ def _decide(project_id: str, dataset: str, mappings: list[dict]) -> None:
                 index=current,
                 placeholder="none",
                 help="approve and edit may change it; required to approve",
+                key=f"{stored_key}-target",
             )
             transformation = st.text_area(
                 "Deterministic rule (plain English)",
                 value=m["transformation"] or "",
                 height=80,
+                key=f"{stored_key}-rule",
             )
             question = st.text_area(
                 "Question for the customer (ask the customer only)",
                 height=80,
                 placeholder="We found … with values … Which does it represent?",
+                key=f"{field_key}-question",
             )
-            note = st.text_input("Note", placeholder="why")
-            reviewer = st.text_input("Reviewer", value="implementation engineer")
-            if st.form_submit_button(ACTION_LABEL[action], type="primary"):
+            note = st.text_input("Note", placeholder="why", key=f"{field_key}-note")
+            # the one input that should follow the person from field to field
+            reviewer = st.text_input(
+                "Reviewer", value="implementation engineer", key=f"{key}-reviewer"
+            )
+            if st.form_submit_button(
+                ACTION_LABEL[action], type="primary", key=f"{field_key}-submit"
+            ):
                 payload: dict = {
                     "action": action,
                     "reviewer": reviewer or "implementation engineer",
